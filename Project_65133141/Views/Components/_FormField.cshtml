@@ -1,0 +1,107 @@
+@* Component: FormField - Input field với label và validation *@
+@{
+    var fieldName = ViewBag.FieldName as string ?? "";
+    var fieldLabel = ViewBag.FieldLabel as string ?? "";
+    var fieldValue = ViewBag.FieldValue as string ?? "";
+    var fieldType = ViewBag.FieldType as string ?? "text";
+    var isRequired = ViewBag.IsRequired as bool? ?? false;
+    var placeholder = ViewBag.Placeholder as string ?? "";
+    var helpText = ViewBag.HelpText as string ?? "";
+    var errorMessage = ViewBag.ErrorMessage as string ?? "";
+    var fieldId = ViewBag.FieldId as string ?? fieldName;
+}
+
+<div class="mb-4">
+    @if (!string.IsNullOrEmpty(fieldLabel))
+    {
+        <label for="@fieldId" class="block text-sm font-medium text-gray-700 mb-1">
+            @fieldLabel
+            @if (isRequired)
+            {
+                <span class="text-red-500">*</span>
+            }
+        </label>
+    }
+
+    <input type="@fieldType" 
+           id="@fieldId" 
+           name="@fieldName" 
+           value="@fieldValue" 
+           placeholder="@placeholder"
+           @(isRequired ? "required" : "")
+           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition @(!string.IsNullOrEmpty(errorMessage) ? "border-red-500" : "")" />
+
+    @if (!string.IsNullOrEmpty(helpText))
+    {
+        <p class="mt-1 text-sm text-gray-500">@helpText</p>
+    }
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="mt-1 text-sm text-red-600">@errorMessage</p>
+    }
+</div>
+
+@{
+    var fieldName = ViewBag.FieldName as string ?? "";
+    var fieldLabel = ViewBag.FieldLabel as string ?? "";
+    var fieldValue = ViewBag.FieldValue as string ?? "";
+    var fieldType = ViewBag.FieldType as string ?? "text";
+    var isRequired = ViewBag.IsRequired as bool? ?? false;
+    var placeholder = ViewBag.Placeholder as string ?? "";
+    var helpText = ViewBag.HelpText as string ?? "";
+    var errorMessage = ViewBag.ErrorMessage as string ?? "";
+    var fieldId = ViewBag.FieldId as string ?? fieldName;
+}
+
+<div class="mb-4">
+    @if (!string.IsNullOrEmpty(fieldLabel))
+    {
+        <label for="@fieldId" class="block text-sm font-medium text-gray-700 mb-1">
+            @fieldLabel
+            @if (isRequired)
+            {
+                <span class="text-red-500">*</span>
+            }
+        </label>
+    }
+
+    <input type="@fieldType" 
+           id="@fieldId" 
+           name="@fieldName" 
+           value="@fieldValue" 
+           placeholder="@placeholder"
+           @(isRequired ? "required" : "")
+           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition @(!string.IsNullOrEmpty(errorMessage) ? "border-red-500" : "")" />
+
+    @if (!string.IsNullOrEmpty(helpText))
+    {
+        <p class="mt-1 text-sm text-gray-500">@helpText</p>
+    }
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="mt-1 text-sm text-red-600">@errorMessage</p>
+    }
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

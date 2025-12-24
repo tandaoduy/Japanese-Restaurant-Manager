@@ -1,0 +1,230 @@
+@* Product Details Modal Component *@
+
+<!-- Product Details Modal -->
+<div id="productDetailsModal" class="auth-modal-overlay" style="display: none;">
+    <div class="auth-modal-container auth-modal-large" style="max-width: 800px; padding: 0;">
+        <!-- Clean Modal Layout without standard header -->
+        <button type="button" class="auth-close-btn" onclick="closeProductDetailsModal()" style="top: 15px; right: 15px; background: white; border-radius: 50%; width: 32px; height: 32px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">&times;</button>
+        
+        <div class="flex flex-col md:flex-row h-full">
+            <!-- Left: Large Image -->
+            <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6" style="min-height: 400px;">
+                <img id="detailProductImage" src="" alt="Product Image" class="w-full h-auto rounded-xl shadow-lg transform transition-transform hover:scale-105 duration-300 object-cover" style="max-height: 350px;">
+            </div>
+
+            <!-- Right: Details -->
+            <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
+                <div>
+                   <!-- Header -> Title & Badges -->
+                   <div class="flex items-start justify-between mb-4">
+                       <div>
+                           <h2 class="text-2xl font-bold text-gray-900 mb-2 leading-tight" id="detailProductName">Sushi Cá Hồi</h2>
+                            <div class="flex gap-2">
+                                <span id="detailProductStatus" class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-wide">HOẠT ĐỘNG</span>
+                                <span id="detailProductFeaturedBadge" class="hidden px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold uppercase tracking-wide">NỔI BẬT</span>
+                            </div>
+                       </div>
+                   </div>
+
+                   <!-- Price Section -->
+                   <div class="mb-8">
+                       <div class="flex items-baseline gap-3">
+                           <span class="text-4xl font-extrabold text-red-600" id="detailProductPriceDisplay">300.000đ</span>
+                       </div>
+                       <div class="flex items-center gap-4 mt-2" id="detailDiscountContainer">
+                            <div class="flex flex-col">
+                                <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Giá gốc</span>
+                                <span class="line-through text-gray-500 font-medium" id="detailProductOriginalPrice">500.000đ</span>
+                            </div>
+                            <span class="px-3 py-1 bg-rose-100 text-rose-600 text-sm font-bold rounded-lg" id="detailDiscountBadge">Giảm 40%</span>
+                            <div class="flex flex-col">
+                                <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Tiết kiệm</span>
+                                <span class="text-rose-600 font-bold" id="detailSavings">200.000đ</span>
+                            </div>
+                       </div>
+                   </div>
+
+                   <!-- Details Grid -->
+                   <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Danh mục</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailProductCategory">TRÁNG MIỆNG</span>
+                       </div>
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Đơn vị tính</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailProductUnit">Phần</span>
+                       </div>
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Ngày tạo</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailProductCreatedDate">21/12/2025</span>
+                       </div>
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Mã món</span>
+                           <span class="block text-sm font-semibold text-gray-800 font-mono" id="detailProductId">#000005</span>
+                       </div>
+                   </div>
+                   
+                   <!-- Description (Optional, if space permits, hidden in mockup but good to have) -->
+                   <div class="mb-6 hidden" id="detailDescriptionContainer">
+                       <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Mô tả</span>
+                       <p class="text-sm text-gray-600 leading-relaxed" id="detailProductDescription"></p>
+                   </div>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="flex items-center gap-3 mt-auto">
+                    <button type="button" onclick="openEditFromDetails()" class="flex-1 px-4 py-2.5 bg-[#f97316] hover:bg-[#ea580c] text-white rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg transform active:scale-95 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        Sửa món ăn
+                    </button>
+                    <button type="button" onclick="closeProductDetailsModal()" class="px-6 py-2.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-100 transition-all active:scale-95">
+                        Hủy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentDetailProductId = 0;
+
+    function openProductDetailsModal(productId) {
+        currentDetailProductId = productId;
+        const modal = document.getElementById('productDetailsModal');
+        const modalContent = modal.querySelector('.auth-modal-container');
+        
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Reset and Load
+        document.getElementById('detailProductName').textContent = 'Đang tải...';
+        
+        fetch(`/Admin_65133141/Product/GetProductDetails/${productId}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    populateNewProductDetails(data.data);
+                } else {
+                    alert(data.message);
+                    closeProductDetailsModal();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Lỗi kết nối');
+            });
+    }
+
+    function populateNewProductDetails(p) {
+        // ID Formatting (#000005)
+        document.getElementById('detailProductId').textContent = '#' + p.MonAnID.toString().padStart(6, '0');
+        
+        document.getElementById('detailProductName').textContent = p.TenMon;
+        document.getElementById('detailProductCategory').textContent = p.TenDanhMuc || 'Không xác định';
+        document.getElementById('detailProductUnit').textContent = p.DonViTinh || 'Phần';
+        
+        // Date Formatting (dd/MM/yyyy)
+        let dateStr = p.NgayTao; 
+        if(dateStr) {
+            if(dateStr.includes('/Date')) { 
+                 const ts = parseInt(dateStr.replace(/\/Date\((-?\d+)\)\//, '$1'));
+                 dateStr = new Date(ts).toLocaleDateString('vi-VN');
+            } else {
+                 const d = new Date(dateStr);
+                 if(!isNaN(d.getTime())) dateStr = d.toLocaleDateString('vi-VN');
+            }
+        }
+        document.getElementById('detailProductCreatedDate').textContent = dateStr || '-';
+
+        // Status Logic
+        const statusEl = document.getElementById('detailProductStatus');
+        let statusText = p.TrangThai;
+        
+        // Map "Hoạt động" to "Đang phục vụ" if necessary
+        if (statusText === 'Hoạt động') statusText = 'Đang phục vụ';
+        
+        statusEl.textContent = statusText;
+        
+        // Default classes
+        let statusClasses = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ';
+        
+        if (statusText === 'Đang phục vụ') {
+            // Green
+            statusEl.className = statusClasses + 'bg-green-100 text-green-700';
+        } else if (statusText === 'Tạm hết') {
+            // Gray
+            statusEl.className = statusClasses + 'bg-gray-100 text-gray-600';
+        } else {
+            // "Ngừng bán" -> Red
+            statusEl.className = statusClasses + 'bg-red-100 text-red-700';
+        }
+
+        // Featured Badge
+        const featuredEl = document.getElementById('detailProductFeaturedBadge');
+        if (p.IsNoiBat) featuredEl.classList.remove('hidden');
+        else featuredEl.classList.add('hidden');
+
+        // Image
+        const imgPath = p.HinhAnh ? `/Images/Products/${p.HinhAnh}` : '/Images/default.jpg';
+        document.getElementById('detailProductImage').src = imgPath;
+
+        // Price Logic
+        const priceDisplay = document.getElementById('detailProductPriceDisplay');
+        const originalPriceDisplay = document.getElementById('detailProductOriginalPrice');
+        const discountContainer = document.getElementById('detailDiscountContainer');
+        const discountBadge = document.getElementById('detailDiscountBadge');
+        const savingsText = document.getElementById('detailSavings');
+
+        const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+
+        if (p.GiaGiam && p.GiaGiam > 0 && p.GiaGiam < p.GiaGoc) {
+             priceDisplay.textContent = formatter.format(p.GiaGiam);
+             originalPriceDisplay.textContent = formatter.format(p.GiaGoc);
+             
+             const percent = Math.round(((p.GiaGoc - p.GiaGiam) / p.GiaGoc) * 100);
+             discountBadge.textContent = `Giảm ${percent}%`;
+             
+             // Format savings value
+             const savingsValue = formatter.format(p.GiaGoc - p.GiaGiam);
+             savingsText.textContent = savingsValue;
+             
+             discountContainer.classList.remove('hidden');
+             discountContainer.classList.add('flex');
+             priceDisplay.classList.add('text-red-600');
+             priceDisplay.classList.remove('text-gray-900');
+        } else {
+             priceDisplay.textContent = formatter.format(p.GiaGoc);
+             discountContainer.classList.add('hidden');
+             discountContainer.classList.remove('flex');
+             priceDisplay.classList.add('text-gray-900');
+             priceDisplay.classList.remove('text-red-600');
+        }
+    }
+
+    function openEditFromDetails() {
+        closeProductDetailsModal();
+        setTimeout(() => {
+            if (typeof openEditProductModal === 'function') {
+                openEditProductModal(currentDetailProductId);
+            }
+        }, 100);
+    }
+
+    function closeProductDetailsModal() {
+        document.getElementById('productDetailsModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Close on ESC
+    document.addEventListener('keydown', e => {
+        if(e.key === 'Escape') {
+             if(document.getElementById('productDetailsModal').style.display === 'flex') closeProductDetailsModal();
+        }
+    });
+
+    document.addEventListener('click', e => {
+        const m = document.getElementById('productDetailsModal');
+        if(e.target === m) closeProductDetailsModal();
+    });
+</script>

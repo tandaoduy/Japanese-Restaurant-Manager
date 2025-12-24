@@ -1,0 +1,783 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Admin Panel</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
+    <link rel="shortcut icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
+    <!-- Google Fonts - Noto Sans Vietnamese for perfect Vietnamese support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    
+    <style>
+        /* Circular Light Spot Animation for Header */
+        /* Sleek Shimmer Animation for Header */
+        @@keyframes shimmer-flow {
+            0% {
+                transform: translateX(-100%) skewX(-15deg);
+            }
+            100% {
+                transform: translateX(200%) skewX(-15deg);
+            }
+        }
+
+        .shimmer-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shimmer-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.1) 30%,
+                rgba(255, 255, 255, 0.25) 50%,
+                rgba(255, 255, 255, 0.1) 70%,
+                transparent 100%
+            );
+            transform: translateX(-100%) skewX(-15deg);
+            animation: shimmer-flow 3.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Smooth transitions for interactive elements */
+        a, button {
+            transition: all 0.3s ease;
+        }
+
+        /* Table row hover effect */
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f3f4f6; /* nhẹ hơn, không phóng to hàng */
+        }
+
+        /* Breadcrumb Styles */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 0;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            color: #6b7280;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb-item:hover {
+            color: #dc2626;
+        }
+
+        .breadcrumb-item.active {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .breadcrumb-separator {
+            color: #d1d5db;
+            margin: 0 0.5rem;
+        }
+
+        /* Sidebar Menu Styles */
+        .sidebar-menu {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+            padding: 2rem 0;
+            z-index: 40;
+        }
+
+        .sidebar-menu-item {
+            position: relative;
+            display: block;
+            padding: 1rem 2rem;
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.3s ease;
+            overflow: hidden;
+        }
+
+        .sidebar-menu-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+        }
+
+        /* Hover: White text + Underline */
+        .sidebar-menu-item:hover {
+            color: #ffffff !important;
+        }
+
+        .sidebar-menu-item:hover::after {
+            transform: translateX(0);
+        }
+
+        /* Active: Red text + Underline */
+        .sidebar-menu-item.active {
+            color: #ef4444 !important;
+            background: transparent !important;
+        }
+
+        .sidebar-menu-item.active::after {
+            transform: translateX(0);
+        }
+
+        /* Adjust main content for sidebar */
+        .main-content-with-sidebar {
+            margin-left: 250px;
+        }
+
+        /* Hamburger Menu Button */
+        .hamburger-btn {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            z-index: 60;
+        }
+
+        .hamburger-btn span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn:hover span {
+            background: #fecaca;
+        }
+
+        /* Mobile Overlay */
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 45;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+        }
+
+        /* Responsive Styles for Mobile and Tablet */
+        @@media (max-width: 1023px) {
+            /* Show hamburger button */
+            .hamburger-btn {
+                display: flex;
+            }
+
+            /* Sidebar hidden by default on mobile */
+            .sidebar-menu {
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 50;
+            }
+
+            /* Show sidebar when active */
+            .sidebar-menu.active {
+                transform: translateX(0);
+            }
+
+            /* Show overlay on mobile when needed */
+            .mobile-menu-overlay {
+                display: block;
+            }
+
+            /* Remove left margin from main content */
+            .main-content-with-sidebar {
+                margin-left: 0;
+            }
+
+            /* Adjust header padding for mobile */
+            header .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            /* Smaller logo on mobile */
+            header .w-14 {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+
+            /* Smaller header height */
+            header .h-20 {
+                height: 4rem;
+            }
+
+            .pt-20 {
+                padding-top: 4rem;
+            }
+
+            /* Adjust sidebar top position */
+            .sidebar-menu {
+                top: 4rem;
+                height: calc(100vh - 4rem);
+            }
+        }
+
+        /* Font family - Force Vietnamese support */
+        html, body {
+            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+            font-feature-settings: "liga" 1, "kern" 1;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Force Vietnamese font for all elements */
+        *, *::before, *::after {
+            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+        }
+
+        /* Ensure Vietnamese characters render correctly */
+        input, textarea, select, button {
+            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+        }
+
+        /* Modal text */
+        #confirmModal, #confirmModal * {
+            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+        }
+
+        /* All text elements */
+        p, span, div, h1, h2, h3, h4, h5, h6, a, label, td, th, li {
+            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+        }
+    /* GLOBAL AUTH MODAL STYLES */
+    .auth-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+    }
+
+    .auth-modal-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+        animation: authSlideIn 0.5s ease-out;
+        max-height: 90vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(128, 128, 128, 0.3) transparent;
+    }
+
+    /* Custom Scrollbar for Webkit browsers */
+    .auth-modal-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .auth-modal-container::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 10px;
+    }
+
+    .auth-modal-container::-webkit-scrollbar-thumb {
+        background: rgba(128, 128, 128, 0.3);
+        border-radius: 10px;
+        transition: background 0.3s ease;
+    }
+
+    .auth-modal-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(128, 128, 128, 0.5);
+    }
+
+    .auth-modal-large {
+        max-width: 700px;
+    }
+
+    @@keyframes authSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .auth-modal-header {
+        text-align: center;
+        padding: 30px 30px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .auth-logo {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 15px;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ef4444;
+    }
+
+    .auth-modal-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .auth-modal-subtitle {
+        font-size: 14px;
+        color: #888;
+    }
+
+    .auth-modal-body {
+        padding: 30px;
+        position: relative;
+    }
+
+    .auth-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    .auth-form-group {
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    .auth-form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 8px;
+    }
+
+    .auth-required {
+        color: #dc2626;
+        margin-left: 3px;
+    }
+
+    .auth-input-wrapper {
+        position: relative;
+    }
+
+    .auth-form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+        background: #f9fafb;
+    }
+
+    .auth-form-control:focus {
+        background: white;
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        outline: none;
+    }
+
+    .auth-btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .auth-btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        border: none;
+    }
+
+    .auth-btn-cancel {
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+
+    .auth-btn-cancel:hover {
+        background: #e5e7eb;
+    }
+
+    .auth-btn-submit {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+    }
+
+    .auth-btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(220, 38, 38, 0.4);
+    }
+
+    .auth-close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #999;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s;
+        z-index: 10;
+    }
+
+    .auth-close-btn:hover {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+        transform: scale(1.1);
+    }
+    
+    .auth-error-message {
+        display: none;
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    
+    .employee-detail-value {
+        color: #333;
+        font-weight: 600;
+        font-size: 15px;
+        padding: 10px 0;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    /* Loading state */
+    .auth-modal-body.loading {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .auth-modal-body.loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #10b981;
+        border-radius: 50%;
+        animation: authSpin 1s linear infinite;
+    }
+
+    @@keyframes authSpin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @@media (max-width: 600px) {
+        .auth-form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
+
+</head>
+<body class="bg-gray-50">
+    <!-- Fixed Admin Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-600 via-red-700 to-rose-600 shadow-md shimmer-effect">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo and Title -->
+                <div class="flex items-center space-x-4">
+                    <!-- Hamburger Menu Button -->
+                    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    
+                    <div class="w-14 h-14 rounded-full overflow-hidden border-3 border-white shadow-lg">
+                        <img src="@Url.Content("~/Images/logoNhaHang.png")" alt="SAKURA KAZOKU Logo" class="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Quản Trị Hệ Thống</h1>
+                        <p class="text-sm text-pink-100">SAKURA KAZOKU - Admin Dashboard</p>
+                    </div>
+                </div>
+
+                <!-- User Info -->
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-pink-100">Admin</p>
+                        <p class="text-white font-semibold">@(User.Identity.IsAuthenticated ? User.Identity.Name : "Guest")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- Vertical Sidebar Menu -->
+    <nav class="sidebar-menu">
+        <a href="@Url.Action("Index", "Home", new { area = "Admin_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            Trang chủ
+        </a>
+        
+        <a href="@Url.Action("Index", "Employee", new { area = "Admin_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" ? "active" : "")">
+            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            Quản lý nhân viên
+        </a>
+        
+        <a href="@Url.Action("Index", "Customer", new { area = "Admin_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Customer" ? "active" : "")">
+            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            Quản lý khách hàng
+        </a>
+        
+        <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "active" : "")">
+            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+            Quản lý thực đơn
+        </a>
+        
+        <a href="@Url.Action("Index", "DonHang", new { area = "Admin_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DonHang" ? "active" : "")">
+            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+            </svg>
+            Quản lý đơn hàng
+        </a>
+        
+        <a href="#" class="sidebar-menu-item">
+            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            Thống kê
+        </a>
+
+        <!-- Logout Button at Bottom -->
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a href="@Url.Action("Logout", "Account", new { area = "" })" 
+               class="sidebar-menu-item" style="position: absolute; bottom: 2rem; left: 0; right: 0;">
+                <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Đăng xuất
+            </a>
+        }
+    </nav>
+
+    <!-- Add padding to prevent content from being hidden under fixed header -->
+    <div class="pt-20 main-content-with-sidebar">
+        <!-- Breadcrumb Navigation -->
+        <div class="bg-white border-b border-gray-200 shadow-sm">
+            <div class="container mx-auto px-4">
+                <nav class="breadcrumb">
+                    <a href="@Url.Action("Index", "Home", new { area = "Admin_65133141" })" class="breadcrumb-item hover:text-red-600">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        Trang chủ
+                    </a>
+                    @{
+                        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+                        var action = ViewContext.RouteData.Values["action"]?.ToString();
+                        
+                        if (!string.IsNullOrEmpty(controller) && controller != "Home")
+                        {
+                            <span class="breadcrumb-separator">/</span>
+                            if (action == "Index")
+                            {
+                                <span class="breadcrumb-item active">
+                                    @(controller == "Account" ? "Quản lý tài khoản" : 
+                                      controller == "Employee" ? "Quản lý nhân viên" : 
+                                      controller == "Customer" ? "Quản lý khách hàng" : 
+                                      controller == "Product" ? "Quản lý thực đơn" : controller)
+                                </span>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Index", controller)" class="breadcrumb-item hover:text-red-600">
+                                    @(controller == "Account" ? "Quản lý tài khoản" : 
+                                      controller == "Employee" ? "Quản lý nhân viên" : 
+                                      controller == "Customer" ? "Quản lý khách hàng" : 
+                                      controller == "Product" ? "Quản lý thực đơn" : controller)
+                                </a>
+                                <span class="breadcrumb-separator">/</span>
+                                <span class="breadcrumb-item active">
+                                    @(action == "Create" ? "Thêm mới" : 
+                                      action == "Edit" ? "Chỉnh sửa" : 
+                                      action == "Details" ? "Chi tiết" : 
+                                      action == "Delete" ? "Xóa" : action)
+                                </span>
+                            }
+                        }
+                    }
+                </nav>
+            </div>
+        </div>
+        
+        @RenderBody()
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    
+    <script>
+        // Suppress browser extension errors that don't affect functionality
+        (function() {
+            const originalError = console.error;
+            console.error = function() {
+                const args = Array.from(arguments);
+                const errorMsg = args.join(' ');
+                
+                // Filter out known harmless extension errors
+                if (errorMsg.includes('runtime.lastError') || 
+                    errorMsg.includes('Could not establish connection') ||
+                    errorMsg.includes('Receiving end does not exist')) {
+                    return; // Suppress these errors
+                }
+                
+                // Log all other errors normally
+                originalError.apply(console, arguments);
+            };
+        })();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.querySelector('.sidebar-menu');
+            const overlay = document.getElementById('mobileMenuOverlay');
+
+            function toggleMenu() {
+                if (sidebar && overlay) {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                    
+                    // Prevent body scrolling when menu is open
+                    if (sidebar.classList.contains('active')) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                }
+            }
+
+            function closeMenu() {
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleMenu();
+                });
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', closeMenu);
+            }
+
+            // Close menu when clicking separate links in the sidebar
+            const sidebarLinks = document.querySelectorAll('.sidebar-menu-item');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', closeMenu);
+            });
+        });
+    </script>
+    
+    @* Include Confirm Modal Component *@
+    @Html.Partial("~/Views/Components/_ConfirmModal.cshtml")
+    
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,844 @@
+﻿@model IEnumerable<Project_65133141.Models.NhanVien>
+
+@{
+    ViewBag.Title = "Quản lý khách hàng";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+
+    // --- KHAI BÁO TẬP TRUNG (Sửa lỗi CS0136) ---
+    var viewType = ViewBag.ViewType ?? "table";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var pageSize = ViewBag.PageSize ?? 5;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var searchString = ViewBag.SearchString as string;
+    var statusFilter = ViewBag.StatusFilter as string;
+}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Quản lý tài khoản khách hàng</h1>
+    </div>
+
+    <div class="mb-4 text-gray-600">
+        <p>Tổng số: <span class="font-semibold text-gray-900">@ViewBag.TotalAccounts</span> khách hàng</p>
+    </div>
+
+    <div class="mb-6 flex justify-end">
+        @using (Html.BeginForm("Index", "Customer", FormMethod.Get, new { id = "customerFilterForm", @class = "flex flex-wrap items-end gap-3 justify-end" }))
+        {
+            var sortBy = ViewBag.SortBy as string ?? "code";
+            <input type="hidden" name="viewType" value="@viewType" />
+            <input type="hidden" id="statusFilterInput" name="statusFilter" value="@statusFilter" />
+            <input type="hidden" id="sortByInput" name="sortBy" value="@sortBy" />
+
+            <div class="flex items-end gap-2 mr-2">
+                <div class="relative">
+                    <button type="button" id="filterToggleBtn" onclick="toggleFilterPanel()" class="inline-flex items-center justify-center w-10 h-10 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all" title="Lọc">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                    </button>
+                    <div id="filterPanel" class="hidden absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-xl z-20">
+                        <div class="py-2">
+                            <p class="px-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Trạng thái</p>
+                            <button type="button" class="w-full text-left px-4 py-2 text-sm @(string.IsNullOrEmpty(statusFilter) ? "bg-gray-100 font-semibold" : "hover:bg-gray-50")" onclick="applyStatusFilter('')">Tất cả</button>
+                            <button type="button" class="w-full text-left px-4 py-2 text-sm @(statusFilter == "Hoạt động" ? "bg-gray-100 font-semibold" : "hover:bg-gray-50")" onclick="applyStatusFilter('Hoạt động')">Hoạt động</button>
+                            <button type="button" class="w-full text-left px-4 py-2 text-sm @(statusFilter == "Vô hiệu hóa" ? "bg-gray-100 font-semibold" : "hover:bg-gray-50")" onclick="applyStatusFilter('Vô hiệu hóa')">Vô hiệu hóa</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button type="button" id="sortToggleBtn" onclick="toggleSortPanel()" class="inline-flex items-center justify-center w-10 h-10 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all" title="Sắp xếp">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                        </svg>
+                    </button>
+                    <div id="sortPanel" class="hidden absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-xl z-20">
+                        <div class="py-2">
+                            <p class="px-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Sắp xếp theo</p>
+                            <button type="button" class="w-full text-left px-4 py-2 text-sm @(sortBy == "code" ? "bg-gray-100 font-semibold" : "hover:bg-gray-50")" onclick="applySort('code')">Mã khách hàng</button>
+                            <button type="button" class="w-full text-left px-4 py-2 text-sm @(sortBy == "name" ? "bg-gray-100 font-semibold" : "hover:bg-gray-50")" onclick="applySort('name')">Tên khách hàng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative">
+                <input type="text" name="searchString" value="@searchString"
+                       placeholder="Nhập tên, email hoặc SĐT..."
+                       class="w-64 pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-200 text-sm font-medium text-gray-700 placeholder-gray-400"
+                       onchange="this.form.submit()" />
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                
+                <!-- Autocomplete Suggestions Dropdown -->
+                <div class="absolute top-full left-0 w-full mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50 hidden">
+                    <!-- Suggestions will be dynamically inserted here if needed -->
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="flex justify-end mb-4">
+        <div class="flex bg-gray-100 rounded-lg p-1">
+            <a href="@Url.Action("Index", "Customer", new { area = "Admin_65133141", viewType = "table", searchString = searchString, statusFilter = statusFilter, sortBy = ViewBag.SortBy, page = 1 })"
+               class="px-4 py-2 rounded-md transition-all @(viewType == "table" ? "bg-white shadow-sm text-red-600" : "text-gray-600 hover:text-gray-900")"
+               title="Xem dạng bảng">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+            </a>
+            <a href="@Url.Action("Index", "Customer", new { area = "Admin_65133141", viewType = "card", searchString = searchString, statusFilter = statusFilter, sortBy = ViewBag.SortBy, page = 1 })"
+               class="px-4 py-2 rounded-md transition-all @(viewType == "card" ? "bg-white shadow-sm text-red-600" : "text-gray-600 hover:text-gray-900")"
+               title="Xem dạng thẻ">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    @if (viewType == "table")
+    {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="overflow-hidden">
+                <table class="w-full table-fixed divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 5%;">STT</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Mã KH</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 8%;">Avatar</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 15%;">Tên KH</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 13%;">SĐT</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 20%;">Email</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 14%;">Trạng thái</th>
+                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase" style="width: 15%;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @if (Model != null && Model.Any())
+                        {
+                            var rowIndex = 0;
+                            foreach (var item in Model)
+                            {
+                                rowIndex++;
+                                var stt = ((currentPage - 1) * pageSize) + rowIndex;
+                                var status = item.TrangThai ?? "Hoạt động";
+                                var statusClass = status == "Hoạt động" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+                                var customerCode = "KH" + item.NhanVienID.ToString("D5");
+                                var avatarLetter = !string.IsNullOrEmpty(item.HoTen) ? item.HoTen.Substring(0, 1).ToUpper() : "?";
+
+                                // Bảo vệ chuỗi JavaScript (Sửa lỗi TS1135)
+                                var safeName = HttpUtility.JavaScriptStringEncode(item.HoTen ?? item.Email ?? "khách hàng");
+
+                                <tr>
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-700">@stt</td>
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">@customerCode</td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                                            @avatarLetter
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-3 text-sm text-gray-900 truncate" title="@(item.HoTen ?? "-")">@(item.HoTen ?? "-")</td>
+                                    <td class="px-2 py-3 text-sm text-gray-600 truncate" title="@(item.SDT ?? "-")">@(item.SDT ?? "-")</td>
+                                    <td class="px-2 py-3 text-sm text-gray-600 truncate" title="@(item.Email ?? "-")">@(item.Email ?? "-")</td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <span class="px-2 py-1 rounded-full text-xs font-semibold @statusClass">@status</span>
+                                    </td>
+                                    <td class="px-2 py-3 whitespace-nowrap text-center text-sm">
+                                        <div class="inline-flex items-center gap-2">
+                                            <button type="button"
+                                                    onclick="openCustomerDetailsModal(@item.NhanVienID)"
+                                                    class="w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                                    title="Xem chi tiết">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            </button>
+
+                                            <button type="button"
+                                                    data-status="@status"
+                                                    onclick="toggleStatus(this, @item.NhanVienID, '@safeName')"
+                                                    class="status-toggle-btn w-8 h-8 @(status == "Hoạt động" ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700") text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                                    title="@(status == "Hoạt động" ? "Vô hiệu hóa" : "Kích hoạt")">
+                                                @if (status == "Hoạt động")
+                                                {
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.93 4.93l14.14 14.14"></path></svg>
+                                                }
+                                                else
+                                                {
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                }
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="8" class="px-6 py-10 text-center text-gray-500">Không có khách hàng nào.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @RenderPagination()
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    var status = item.TrangThai ?? "Hoạt động";
+                    var statusClass = status == "Hoạt động" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+                    var avatarLetter = !string.IsNullOrEmpty(item.HoTen) ? item.HoTen.Substring(0, 1).ToUpper() : "?";
+                    var safeName = HttpUtility.JavaScriptStringEncode(item.HoTen ?? item.Email ?? "khách hàng");
+
+                    // Chọn màu nền và hoạ tiết dựa trên ID (theo thiết kế mới)
+                    var cardIndex = Math.Abs(item.NhanVienID) % 20;
+                    string colorClass = "";
+                    string patternStyle = "";
+                    string patternColor = "";
+                    
+                    switch (cardIndex)
+                    {
+                        case 0: // Xanh lá - Triangle/Diamond pattern
+                            colorClass = "bg-green-500";
+                            patternColor = "rgba(255,255,255,0.15)";
+                            patternStyle = "background-image: linear-gradient(135deg, " + patternColor + " 25%, transparent 25%), linear-gradient(225deg, " + patternColor + " 25%, transparent 25%), linear-gradient(45deg, " + patternColor + " 25%, transparent 25%), linear-gradient(315deg, " + patternColor + " 25%, transparent 25%); background-size: 36px 36px; background-position: 0 0, 18px 0, 18px -18px, 0px 18px;";
+                            break;
+                        case 1: // Xanh lá - Triangle/Diamond pattern (variation)
+                            colorClass = "bg-green-500";
+                            patternColor = "rgba(255,255,255,0.12)";
+                            patternStyle = "background-image: linear-gradient(135deg, " + patternColor + " 25%, transparent 25%), linear-gradient(225deg, " + patternColor + " 25%, transparent 25%), linear-gradient(45deg, " + patternColor + " 25%, transparent 25%), linear-gradient(315deg, " + patternColor + " 25%, transparent 25%); background-size: 40px 40px; background-position: 0 0, 20px 0, 20px -20px, 0px 20px;";
+                            break;
+                        case 2: // Xanh dương - Dots pattern
+                            colorClass = "bg-blue-500";
+                            patternColor = "rgba(255,255,255,0.18)";
+                            patternStyle = "background-image: radial-gradient(circle, " + patternColor + " 2px, transparent 2px); background-size: 18px 18px;";
+                            break;
+                        case 3: // Tím oải hương - Solid (no pattern)
+                            colorClass = "bg-purple-300";
+                            patternStyle = "";
+                            break;
+                        case 4: // Tím - Low-poly triangles
+                            colorClass = "bg-purple-500";
+                            patternColor = "rgba(255,255,255,0.12)";
+                            patternStyle = "background-image: linear-gradient(60deg, " + patternColor + " 25%, transparent 25%), linear-gradient(120deg, " + patternColor + " 25%, transparent 25%), linear-gradient(240deg, " + patternColor + " 25%, transparent 25%), linear-gradient(300deg, " + patternColor + " 25%, transparent 25%); background-size: 30px 30px;";
+                            break;
+                        case 5: // Hồng - Grid squares
+                            colorClass = "bg-pink-500";
+                            patternColor = "rgba(255,255,255,0.16)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 20px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 20px); background-size: 20px 20px;";
+                            break;
+                        case 6: // Turquoise - Octagons
+                            colorClass = "bg-teal-400";
+                            patternColor = "rgba(255,255,255,0.14)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, transparent 0, transparent 24px, " + patternColor + " 24px, " + patternColor + " 25px), repeating-linear-gradient(90deg, transparent 0, transparent 24px, " + patternColor + " 24px, " + patternColor + " 25px); background-size: 25px 25px;";
+                            break;
+                        case 7: // Turquoise - Concentric circles
+                            colorClass = "bg-teal-400";
+                            patternColor = "rgba(255,255,255,0.2)";
+                            patternStyle = "background-image: radial-gradient(circle at 20% 30%, " + patternColor + " 8%, transparent 8%), radial-gradient(circle at 70% 50%, " + patternColor + " 10%, transparent 10%), radial-gradient(circle at 50% 80%, " + patternColor + " 7%, transparent 7%), radial-gradient(circle at 80% 20%, " + patternColor + " 9%, transparent 9%);";
+                            break;
+                        case 8: // Vàng - Overlapping circles
+                            colorClass = "bg-yellow-400";
+                            patternColor = "rgba(255,255,255,0.18)";
+                            patternStyle = "background-image: radial-gradient(circle at 25% 25%, " + patternColor + " 15%, transparent 15%), radial-gradient(circle at 75% 75%, " + patternColor + " 18%, transparent 18%), radial-gradient(circle at 50% 50%, " + patternColor + " 12%, transparent 12%);";
+                            break;
+                        case 9: // Xám - Checkerboard
+                            colorClass = "bg-gray-300";
+                            patternColor = "rgba(255,255,255,0.3)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 12px, transparent 12px, transparent 24px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 12px, transparent 12px, transparent 24px); background-size: 24px 24px;";
+                            break;
+                        case 10: // Hồng - Tessellating octagons
+                            colorClass = "bg-pink-500";
+                            patternColor = "rgba(255,255,255,0.15)";
+                            patternStyle = "background-image: repeating-linear-gradient(45deg, transparent 0, transparent 16px, " + patternColor + " 16px, " + patternColor + " 18px), repeating-linear-gradient(-45deg, transparent 0, transparent 16px, " + patternColor + " 16px, " + patternColor + " 18px); background-size: 32px 32px;";
+                            break;
+                        case 11: // Turquoise - Plaid
+                            colorClass = "bg-cyan-400";
+                            patternColor = "rgba(255,255,255,0.2)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 2px, transparent 2px, transparent 28px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 2px, transparent 2px, transparent 28px); background-size: 28px 28px;";
+                            break;
+                        case 12: // Xanh dương - Concentric circles
+                            colorClass = "bg-blue-500";
+                            patternColor = "rgba(255,255,255,0.22)";
+                            patternStyle = "background-image: radial-gradient(circle at 30% 40%, " + patternColor + " 12%, transparent 12%), radial-gradient(circle at 60% 70%, " + patternColor + " 15%, transparent 15%), radial-gradient(circle at 80% 30%, " + patternColor + " 10%, transparent 10%);";
+                            break;
+                        case 13: // Vàng - Circles and dots
+                            colorClass = "bg-yellow-400";
+                            patternColor = "rgba(255,255,255,0.2)";
+                            patternStyle = "background-image: radial-gradient(circle at 15% 25%, " + patternColor + " 6%, transparent 6%), radial-gradient(circle at 85% 75%, " + patternColor + " 8%, transparent 8%), radial-gradient(circle at 50% 50%, " + patternColor + " 5%, transparent 5%), radial-gradient(circle, " + patternColor + " 1.5px, transparent 1.5px); background-size: 20px 20px, 25px 25px, 30px 30px, 15px 15px;";
+                            break;
+                        case 14: // Tím - Plaid
+                            colorClass = "bg-purple-400";
+                            patternColor = "rgba(255,255,255,0.18)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 1.5px, transparent 1.5px, transparent 22px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 1.5px, transparent 1.5px, transparent 22px); background-size: 22px 22px;";
+                            break;
+                        case 15: // Xanh dương - Low-poly geometric
+                            colorClass = "bg-blue-600";
+                            patternColor = "rgba(255,255,255,0.14)";
+                            patternStyle = "background-image: linear-gradient(135deg, " + patternColor + " 25%, transparent 25%), linear-gradient(225deg, " + patternColor + " 25%, transparent 25%), linear-gradient(45deg, " + patternColor + " 25%, transparent 25%), linear-gradient(315deg, " + patternColor + " 25%, transparent 25%); background-size: 28px 28px; background-position: 0 0, 14px 0, 14px -14px, 0px 14px;";
+                            break;
+                        case 16: // Teal - Wave pattern
+                            colorClass = "bg-teal-500";
+                            patternColor = "rgba(255,255,255,0.16)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, transparent 0, transparent 8px, " + patternColor + " 8px, " + patternColor + " 10px), repeating-linear-gradient(0deg, transparent 4px, " + patternColor + " 4px, " + patternColor + " 6px, transparent 6px); background-size: 100% 20px;";
+                            break;
+                        case 17: // Hồng - Octagons scattered
+                            colorClass = "bg-pink-500";
+                            patternColor = "rgba(255,255,255,0.18)";
+                            patternStyle = "background-image: repeating-linear-gradient(45deg, transparent 0, transparent 20px, " + patternColor + " 20px, " + patternColor + " 22px), repeating-linear-gradient(-45deg, transparent 0, transparent 20px, " + patternColor + " 20px, " + patternColor + " 22px); background-size: 40px 40px;";
+                            break;
+                        case 18: // Xanh dương - Pixelated blocks
+                            colorClass = "bg-blue-600";
+                            patternColor = "rgba(255,255,255,0.12)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 8px, transparent 8px, transparent 16px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 8px, transparent 8px, transparent 16px); background-size: 16px 16px;";
+                            break;
+                        case 19: // Xám - Diamond pattern
+                            colorClass = "bg-gray-400";
+                            patternColor = "rgba(255,255,255,0.25)";
+                            patternStyle = "background-image: repeating-linear-gradient(45deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 14px), repeating-linear-gradient(-45deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 14px); background-size: 14px 14px;";
+                            break;
+                    }
+
+                    <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-shadow text-sm">
+                        <div class="h-20 @colorClass relative overflow-hidden">
+                            @if (!string.IsNullOrEmpty(patternStyle))
+                            {
+                                <div style="@patternStyle position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.85;"></div>
+                            }
+                        </div>
+                        <div class="relative px-4 pb-4">
+                            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
+                                <div class="w-14 h-14 md:w-16 md:h-16 rounded-full @colorClass flex items-center justify-center text-white font-bold text-xl md:text-2xl border-4 border-white shadow-lg">
+                                    @avatarLetter
+                                </div>
+                            </div>
+                            <div class="pt-10 text-center">
+                                <h3 class="text-base font-semibold text-gray-900 mb-0.5">@(item.HoTen ?? "-")</h3>
+                                <p class="text-xs text-gray-600 mb-2">@(item.Email ?? "-")</p>
+                                <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold @statusClass mb-3">@status</span>
+                                <div class="flex items-center justify-center gap-2 pt-3 border-t border-gray-100">
+                                    <button type="button"
+                                            onclick="openCustomerDetailsModal(@item.NhanVienID)"
+                                            class="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                            title="Xem chi tiết">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </button>
+
+                                    <button type="button"
+                                            data-status="@status"
+                                            onclick="toggleStatus(this, @item.NhanVienID, '@safeName')"
+                                            class="status-toggle-btn w-9 h-9 @(status == "Hoạt động" ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700") text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                            title="@(status == "Hoạt động" ? "Vô hiệu hóa" : "Kích hoạt")">
+                                        @if (status == "Hoạt động")
+                                        {
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.93 4.93l14.14 14.14"></path>
+                                            </svg>
+                                        }
+                                        else
+                                        {
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-span-full text-center py-10 text-gray-500">Không có khách hàng nào.</div>
+            }
+        </div>
+        @RenderPagination()
+    }
+</div>
+
+@* Include Customer Details Modal Component *@
+@Html.Partial("~/Areas/Admin_65133141/Views/Components/_CustomerDetailsModal.cshtml")
+
+@helper RenderPagination()
+{
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var viewType = ViewBag.ViewType ?? "table";
+    var searchString = ViewBag.SearchString as string;
+    var statusFilter = ViewBag.StatusFilter as string;
+    var sortBy = ViewBag.SortBy as string;
+
+    if (totalPages > 1)
+    {
+        <div class="px-6 py-4 border-t border-gray-200 bg-white rounded-b-lg">
+            <div class="flex items-center justify-center gap-2">
+                <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = 1 })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+                </a>
+
+                <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = currentPage - 1 })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </a>
+
+                @{
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+
+                    if (startPage > 1)
+                    {
+                        <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = 1 })"
+                           class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">1</a>
+                        if (startPage > 2)
+                        {
+                            <span class="px-2 text-gray-500">...</span>
+                        }
+                    }
+
+                    for (int i = startPage; i <= endPage; i++)
+                    {
+                        <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = i })"
+                           class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium @(i == currentPage ? "bg-red-600 text-white" : "border border-gray-300 hover:bg-gray-50")">@i</a>
+                    }
+
+                    if (endPage < totalPages)
+                    {
+                        if (endPage < totalPages - 1)
+                        {
+                            <span class="px-2 text-gray-500">...</span>
+                        }
+                        <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = totalPages })"
+                           class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">@totalPages</a>
+                    }
+                }
+
+                <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = currentPage + 1 })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </a>
+
+                <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, page = totalPages })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                </a>
+            </div>
+            <div class="text-center mt-3 text-sm text-gray-600">Trang @currentPage / @totalPages</div>
+        </div>
+    }
+}
+
+@Html.AntiForgeryToken()
+
+@* Modal xác nhận *@
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-[9999]" style="display: none;">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all" id="modalContent">
+        <div class="p-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div id="modalIconWrapper" class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                        <svg id="modalIconSvg" class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 id="modalTitle" class="text-lg font-bold text-gray-900">Thông báo</h3>
+                    <p id="modalMessage" class="mt-2 text-sm text-gray-600">Xác nhận thao tác?</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
+            <button type="button" id="cancelBtn" class="px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm border border-gray-300">Hủy</button>
+            <button type="button" id="confirmBtn" class="px-5 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold text-sm">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<div id="alertContainer" class="fixed top-4 right-4 z-[60] space-y-2"></div>
+
+<script>
+var currentCustomerId = null;
+var currentStatus = null;
+var currentButton = null;
+
+
+function toggleFilterPanel() {
+    var panel = document.getElementById('filterPanel');
+    if (!panel) return;
+    panel.classList.toggle('hidden');
+}
+
+document.addEventListener('click', function (e) {
+    var filterPanel = document.getElementById('filterPanel');
+    var filterToggleBtn = document.getElementById('filterToggleBtn');
+    var sortPanel = document.getElementById('sortPanel');
+    var sortToggleBtn = document.getElementById('sortToggleBtn');
+
+    // Đóng panel lọc nếu click ra ngoài
+    if (filterPanel && filterToggleBtn && !filterPanel.classList.contains('hidden')) {
+        if (!filterPanel.contains(e.target) && !filterToggleBtn.contains(e.target)) {
+            filterPanel.classList.add('hidden');
+        }
+    }
+
+    // Đóng panel sắp xếp nếu click ra ngoài
+    if (sortPanel && sortToggleBtn && !sortPanel.classList.contains('hidden')) {
+        if (!sortPanel.contains(e.target) && !sortToggleBtn.contains(e.target)) {
+            sortPanel.classList.add('hidden');
+        }
+    }
+});
+
+function toggleSortPanel() {
+    var panel = document.getElementById('sortPanel');
+    if (!panel) return;
+    panel.classList.toggle('hidden');
+}
+
+function applyStatusFilter(value) {
+    var form = document.getElementById('customerFilterForm');
+    var input = document.getElementById('statusFilterInput');
+    if (!form || !input) return;
+    input.value = value;
+    form.submit();
+}
+
+function applySort(value) {
+    var form = document.getElementById('customerFilterForm');
+    var input = document.getElementById('sortByInput');
+    if (!form || !input) return;
+    input.value = value;
+    form.submit();
+}
+
+function toggleStatus(button, customerId, customerName) {
+    var status = button.getAttribute('data-status') || 'Hoạt động';
+    var isActive = (status === 'Hoạt động');
+
+    currentCustomerId = customerId;
+    currentStatus = status;
+    currentButton = button;
+
+    var titleEl = document.getElementById('modalTitle');
+    var messageEl = document.getElementById('modalMessage');
+    var iconWrapper = document.getElementById('modalIconWrapper');
+    var iconSvg = document.getElementById('modalIconSvg');
+    var confirmBtn = document.getElementById('confirmBtn');
+
+    // Cập nhật tiêu đề & nội dung
+    titleEl.textContent = isActive ? 'Vô hiệu hóa tài khoản' : 'Kích hoạt tài khoản';
+    messageEl.textContent = 'Bạn có chắc muốn ' + (isActive ? 'vô hiệu hóa' : 'kích hoạt') + ' tài khoản của ' + customerName + '?';
+
+    if (isActive) {
+        // Vô hiệu hóa: nền vàng nhạt, icon cảnh báo giống thiết kế
+        iconWrapper.className = 'w-12 h-12 rounded-full flex items-center justify-center';
+        iconWrapper.style.background = '#FEF3C7'; // vàng nhạt
+        iconSvg.setAttribute('viewBox', '0 0 24 24');
+        iconSvg.setAttribute('fill', 'none');
+        iconSvg.removeAttribute('class');
+        iconSvg.setAttribute('stroke', '#FBBF24'); // vàng đậm cho icon
+        iconSvg.setAttribute('stroke-width', '2');
+        iconSvg.setAttribute('width', '20');
+        iconSvg.setAttribute('height', '20');
+        // Tam giác cảnh báo với dấu chấm than bên trong
+        iconSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01M10.29 4.21l-6.6 11.45A1 1 0 004.53 18h14.94a1 1 0 00.86-1.5l-6.6-11.45a1 1 0 00-1.74 0z" />';
+
+        confirmBtn.className = 'px-5 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold text-sm';
+    } else {
+        // Kích hoạt: nền xanh nhạt hơn một chút, icon tick trắng
+        iconWrapper.className = 'w-12 h-12 rounded-full flex items-center justify-center';
+        iconWrapper.style.background = '#A7F3D0'; // xanh lá nhạt hơn nhưng rõ hơn
+        iconSvg.setAttribute('viewBox', '0 0 24 24');
+        iconSvg.setAttribute('fill', 'none');
+        // Cưỡng chế stroke trắng, không phụ thuộc vào currentColor
+        iconSvg.removeAttribute('class');
+        iconSvg.setAttribute('stroke', '#FFFFFF');
+        iconSvg.setAttribute('stroke-width', '2');
+        iconSvg.setAttribute('width', '20');
+        iconSvg.setAttribute('height', '20');
+        iconSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />';
+
+        confirmBtn.className = 'px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold text-sm';
+    }
+
+    document.getElementById('confirmModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+}
+
+document.getElementById('cancelBtn').onclick = closeModal;
+document.getElementById('confirmModal').onclick = function(e) {
+    if (e.target === this) closeModal();
+};
+
+document.getElementById('confirmBtn').onclick = function () {
+    if (!currentCustomerId || !currentButton) {
+        closeModal();
+        return;
+    }
+
+    var btn = this;
+    btn.disabled = true;
+    var originalText = btn.textContent;
+    btn.textContent = 'Đang xử lý...';
+
+    var url = '/Admin_65133141/Customer/DisableUser/' + currentCustomerId;
+    var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+    var token = tokenInput ? tokenInput.value : '';
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: '__RequestVerificationToken=' + encodeURIComponent(token)
+    })
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            if (!data) {
+                throw new Error('Không nhận được phản hồi từ máy chủ');
+            }
+
+            if (data.success) {
+                closeModal();
+                updateStatusUI(currentButton, data.newStatus);
+                showAlert('success', data.message || 'Cập nhật trạng thái thành công');
+            } else {
+                showAlert('error', data.message || 'Không thể cập nhật trạng thái');
+            }
+        })
+        .catch(function (error) {
+            console.error('Lỗi khi gọi DisableUser:', error);
+            showAlert('error', 'Đã xảy ra lỗi khi cập nhật trạng thái. Vui lòng thử lại.');
+        })
+        .finally(function () {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        });
+};
+
+function updateStatusUI(button, newStatus) {
+    if (!button) return;
+
+    var isActive = (newStatus === 'Hoạt động');
+    button.setAttribute('data-status', newStatus);
+    button.title = isActive ? 'Vô hiệu hóa' : 'Kích hoạt';
+
+    // Cập nhật màu nút
+    button.classList.remove('bg-red-600', 'hover:bg-red-700', 'bg-green-600', 'hover:bg-green-700');
+    if (isActive) {
+        button.classList.add('bg-red-600', 'hover:bg-red-700');
+    } else {
+        button.classList.add('bg-green-600', 'hover:bg-green-700');
+    }
+
+    // Cập nhật icon trong nút
+    if (isActive) {
+        button.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.93 4.93l14.14 14.14"></path></svg>';
+    } else {
+        button.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+    }
+
+    // Tìm badge trạng thái gần nhất
+    var row = button.closest('tr');
+    if (row) {
+        var badge = row.querySelector('span.rounded-full');
+        if (badge) {
+            badge.textContent = newStatus;
+            badge.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+            if (isActive) {
+                badge.classList.add('bg-green-100', 'text-green-800');
+            } else {
+                badge.classList.add('bg-red-100', 'text-red-800');
+            }
+        }
+        return;
+    }
+
+    // Card view: tìm card bao quanh và badge bên trong
+    var card = button.closest('.bg-white.rounded-2xl.shadow-md');
+    if (card) {
+        var cardBadge = card.querySelector('span.rounded-full');
+        if (cardBadge) {
+            cardBadge.textContent = newStatus;
+            cardBadge.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+            if (isActive) {
+                cardBadge.classList.add('bg-green-100', 'text-green-800');
+            } else {
+                cardBadge.classList.add('bg-red-100', 'text-red-800');
+            }
+        }
+    }
+}
+
+function showAlert(type, message) {
+    var container = document.getElementById('alertContainer');
+    if (!container) return;
+
+    var alertId = 'alert-' + Date.now();
+
+    // Kiểu màu theo mẫu: success, error, warning, info
+    var config = {
+        success: {
+            bg: 'bg-green-100 border border-green-200 text-green-900',
+            iconBg: 'bg-green-500 text-white',
+            title: 'Thành công!',
+            icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+        },
+        error: {
+            bg: 'bg-red-100 border border-red-200 text-red-900',
+            iconBg: 'bg-red-500 text-white',
+            title: 'Lỗi!',
+            icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14"></path><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+        },
+        warning: {
+            bg: 'bg-amber-100 border border-amber-200 text-amber-900',
+            iconBg: 'bg-amber-500 text-white',
+            title: 'Cảnh báo!',
+            icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01M10.29 4.21l-6.6 11.45A1 1 0 004.53 18h14.94a1 1 0 00.86-1.5l-6.6-11.45a1 1 0 00-1.74 0z"/></svg>'
+        },
+        info: {
+            bg: 'bg-sky-100 border border-sky-200 text-sky-900',
+            iconBg: 'bg-sky-500 text-white',
+            title: 'Thông tin',
+            icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01" /><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+        }
+    };
+
+    var cfg = config[type] || config.info;
+
+    var html = `
+    <div id="${alertId}" class="${cfg.bg} px-4 py-2.5 rounded-xl shadow-md flex items-center gap-3 min-w-[300px] max-w-md transition-all duration-300 translate-x-full bg-opacity-95 border border-white/60">
+        <div class="w-7 h-7 rounded-full ${cfg.iconBg} flex items-center justify-center flex-shrink-0">
+            ${cfg.icon}
+        </div>
+        <div class="flex-1">
+            <div class="font-semibold text-sm mb-0.5">${cfg.title}</div>
+            <div class="text-sm leading-snug">${message}</div>
+        </div>
+        <button type="button" class="ml-2 text-current/70 hover:text-current" aria-label="Đóng thông báo"
+                onclick="(function(){ var el = document.getElementById('${alertId}'); if(el){ el.classList.add('translate-x-full'); setTimeout(function(){ el.remove(); }, 250); } })()">
+            &#10005;
+        </button>
+    </div>`;
+
+    container.insertAdjacentHTML('beforeend', html);
+
+    // Hiệu ứng trượt vào
+    setTimeout(function () {
+        var el = document.getElementById(alertId);
+        if (el) el.classList.remove('translate-x-full');
+    }, 10);
+
+    // Tự ẩn sau 4 giây
+    setTimeout(function () {
+        var el = document.getElementById(alertId);
+        if (el) {
+            el.classList.add('translate-x-full');
+            setTimeout(function () { el.remove(); }, 250);
+        }
+    }, 4000);
+}
+
+// Autocomplete for Customer Search
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('customerFilterForm');
+    if (!form) return;
+    
+    const searchInput = form.querySelector('input[name="searchString"]');
+    const suggestionsBox = form.querySelector('.absolute.top-full');
+    
+    if (!searchInput || !suggestionsBox) return;
+
+    // Get all customers from current page
+    function getAllCustomers() {
+        const customers = [];
+        document.querySelectorAll('tbody tr, .grid > div').forEach(row => {
+            const nameEl = row.querySelector('[title]');
+            if (nameEl) {
+                const text = nameEl.textContent || nameEl.title || '';
+                if (text.trim() && text !== 'Không có khách hàng nào.') {
+                    customers.push(text.trim());
+                }
+            }
+        });
+        return [...new Set(customers)];
+    }
+
+    function showSuggestions(searchTerm) {
+        if (!searchTerm || searchTerm.length < 1) {
+            suggestionsBox.classList.add('hidden');
+            return;
+        }
+
+        const customers = getAllCustomers();
+        const filtered = customers
+            .filter(name => name.toLowerCase().includes(searchTerm.toLowerCase()))
+            .slice(0, 6);
+
+        if (filtered.length === 0) {
+            suggestionsBox.classList.add('hidden');
+            return;
+        }
+
+        suggestionsBox.innerHTML = filtered.map(name => {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            const highlighted = name.replace(regex, '<strong>$1</strong>');
+            return `
+                <div class="px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-sm text-gray-700"
+                     onclick="document.querySelector('input[name=\\'searchString\\']').value='${name.replace(/'/g, "\\'")}'; this.closest('form').submit();">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <span>${highlighted}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        suggestionsBox.classList.remove('hidden');
+    }
+
+    searchInput.addEventListener('input', function (e) {
+        showSuggestions(e.target.value.trim());
+    });
+
+    searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            suggestionsBox.classList.add('hidden');
+            searchInput.blur();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+            suggestionsBox.classList.add('hidden');
+        }
+    });
+});
+
+@if (TempData["SuccessMessage"] != null) { <text>showAlert('success', '@TempData["SuccessMessage"]');</text> }
+@if (TempData["ErrorMessage"] != null) { <text>showAlert('error', '@TempData["ErrorMessage"]');</text> }
+</script>

@@ -1,0 +1,177 @@
+@model Project_65133141.Areas.Admin_65133141.Data.Form.AccountForm
+
+@{
+    ViewBag.Title = "Chi tiết nhân viên";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Chi tiết nhân viên</h1>
+        <p class="text-gray-600 mt-1">Thông tin chi tiết về nhân viên</p>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        ViewBag.AlertType = "success";
+        ViewBag.AlertTitle = "Thành công!";
+        ViewBag.IsDismissible = true;
+        ViewBag.AutoHide = true;
+        @Html.Partial("~/Views/Components/_Alert.cshtml", TempData["SuccessMessage"].ToString())
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        ViewBag.AlertType = "error";
+        ViewBag.AlertTitle = "Lỗi!";
+        ViewBag.IsDismissible = true;
+        ViewBag.AutoHide = true;
+        @Html.Partial("~/Views/Components/_Alert.cshtml", TempData["ErrorMessage"].ToString())
+    }
+
+    <!-- Details Card -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-green-500 to-green-600">
+            <h2 class="text-xl font-semibold text-white">Thông tin nhân viên</h2>
+        </div>
+        
+        <div class="px-6 py-6">
+            <div class="space-y-6">
+                <!-- Hàng 1: Mã NV và Họ tên -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mã nhân viên</label>
+                        <div class="text-gray-900 font-semibold text-lg">NV@(Model.Id.ToString("D5"))</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên</label>
+                        <div class="text-gray-900 font-semibold text-lg">@(Model.FullName ?? "-")</div>
+                    </div>
+                </div>
+
+                <!-- Hàng 2: Email và Số điện thoại -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <div class="text-gray-900 font-semibold text-lg">@(Model.Email ?? "-")</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                        <div class="text-gray-900 font-semibold text-lg">@(Model.PhoneNumber ?? "-")</div>
+                    </div>
+                </div>
+
+                <!-- Hàng 3: Ngày sinh và Địa chỉ -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
+                        <div class="text-gray-900 font-semibold text-lg">
+                            @(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("dd/MM/yyyy") : "-")
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+                        <div class="text-gray-900 font-semibold text-lg">@(ViewBag.Address ?? "-")</div>
+                    </div>
+                </div>
+
+                <!-- Hàng 4: Mật khẩu (hash SHA256) và Ngày vào làm -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu (hash SHA256)</label>
+                        <div class="flex items-center space-x-2 max-w-full">
+                            @if (!string.IsNullOrEmpty(Model.Password))
+                            {
+                                <span id="passwordDisplay" class="font-mono text-gray-900 font-semibold text-lg">••••••••</span>
+                                <button type="button" id="togglePassword" class="text-gray-500 hover:text-gray-700 focus:outline-none flex-shrink-0">
+                                    <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                <span id="passwordHash" class="hidden font-mono text-gray-600 text-sm break-all overflow-hidden" style="max-width: 300px;" title="@Model.Password">@Model.Password</span>
+                            }
+                            else
+                            {
+                                <span class="text-gray-500">-</span>
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ngày vào làm</label>
+                        <div class="text-gray-900 font-semibold text-lg">
+                            @(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("dd/MM/yyyy") : "-")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Toggle password visibility
+            document.addEventListener('DOMContentLoaded', function() {
+                var togglePassword = document.getElementById('togglePassword');
+                var passwordDisplay = document.getElementById('passwordDisplay');
+                var passwordHash = document.getElementById('passwordHash');
+                var eyeIcon = document.getElementById('eyeIcon');
+                
+                if (togglePassword && passwordDisplay && passwordHash && eyeIcon) {
+                    var isPasswordVisible = false;
+                    var fullPassword = passwordHash.textContent;
+                    var maxLength = 30;
+                    
+                    function truncatePassword(text) {
+                        if (text.length > maxLength) {
+                            return text.substring(0, maxLength) + '...';
+                        }
+                        return text;
+                    }
+                    
+                    passwordHash.textContent = truncatePassword(fullPassword);
+                    
+                    togglePassword.addEventListener('click', function() {
+                        isPasswordVisible = !isPasswordVisible;
+                        
+                        if (isPasswordVisible) {
+                            passwordDisplay.classList.add('hidden');
+                            passwordHash.classList.remove('hidden');
+                            passwordHash.textContent = fullPassword;
+                            eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+                        } else {
+                            passwordDisplay.classList.remove('hidden');
+                            passwordHash.classList.add('hidden');
+                            passwordHash.textContent = truncatePassword(fullPassword);
+                            eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+                        }
+                    });
+                }
+            });
+        </script>
+
+        <!-- Actions -->
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <div class="flex items-center justify-between">
+                <a href="@Url.Action("Index", "Employee", new { area = "Admin_65133141", viewType = ViewBag.ViewType ?? "table", page = ViewBag.Page ?? 1, searchString = ViewBag.SearchString, statusFilter = ViewBag.StatusFilter })" 
+                   class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Quay lại
+                </a>
+                
+                <div class="flex items-center space-x-3">
+                    <a href="@Url.Action("Edit", "Employee", new { area = "Admin_65133141", id = Model.Id })" 
+                       class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Sửa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

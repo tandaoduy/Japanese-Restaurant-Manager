@@ -1,0 +1,72 @@
+@* Component: Modal - Modal dialog component *@
+@{
+    var modalId = ViewBag.ModalId as string ?? "modal-" + Guid.NewGuid().ToString("N");
+    var modalTitle = ViewBag.ModalTitle as string ?? "Modal Title";
+    var modalSize = ViewBag.ModalSize as string ?? "md"; // sm, md, lg, xl
+    var showCloseButton = ViewBag.ShowCloseButton as bool? ?? true;
+    var modalContent = ViewBag.ModalContent as string ?? "";
+}
+
+<div id="@modalId" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal('@modalId')"></div>
+
+        <!-- Center modal -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle 
+                    @(modalSize == "sm" ? "sm:max-w-sm" : "") 
+                    @(modalSize == "md" ? "sm:max-w-md" : "") 
+                    @(modalSize == "lg" ? "sm:max-w-lg" : "") 
+                    @(modalSize == "xl" ? "sm:max-w-xl" : "") 
+                    w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900" id="modal-title">@modalTitle</h3>
+                    @if (showCloseButton)
+                    {
+                        <button type="button" 
+                                onclick="closeModal('@modalId')" 
+                                class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    }
+                </div>
+                <div class="modal-content">
+                    @if (!string.IsNullOrEmpty(modalContent))
+                    {
+                        @Html.Raw(modalContent)
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            var modals = document.querySelectorAll('[id^="modal-"]');
+            modals.forEach(function(modal) {
+                if (!modal.classList.contains('hidden')) {
+                    closeModal(modal.id);
+                }
+            });
+        }
+    });
+</script>

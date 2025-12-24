@@ -1,0 +1,238 @@
+<!-- Confirmation Modal Component -->
+<div id="confirmModal" class="fixed inset-0 hidden items-center justify-center z-[9999] transition-opacity duration-300 ease-out opacity-0" style="display: none; pointer-events: none; font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 ease-out scale-95 opacity-0" id="modalContent" style="font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important; will-change: transform, opacity;">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-100">
+            <div class="flex items-center space-x-4">
+                <div id="confirmIcon" class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                    <!-- Icon will be inserted here -->
+                </div>
+                <div>
+                    <h3 id="confirmTitle" class="text-xl font-bold text-gray-900 leading-tight">Xác nhận</h3>
+                    <p id="confirmSubtitle" class="text-sm text-gray-500 mt-0.5"></p>
+                </div>
+            </div>
+            <button type="button" onclick="closeConfirmModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 active:bg-gray-200 rounded-full p-2 transition-all duration-200 ease-in-out flex-shrink-0 transform hover:scale-110 active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6">
+            <p id="confirmMessage" class="text-gray-700 text-base leading-relaxed font-normal"></p>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-end space-x-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+            <button type="button" id="cancelButton" onclick="closeConfirmModal()" class="px-5 py-2.5 bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-700 rounded-lg font-semibold text-sm transition-all duration-200 ease-in-out border border-gray-300 shadow-sm hover:shadow-md active:shadow-sm transform hover:scale-105 active:scale-95">
+                Hủy
+            </button>
+            <button type="button" id="confirmButton" class="px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ease-in-out text-white shadow-md hover:shadow-lg active:shadow-md transform hover:scale-105 active:scale-95">
+                Xác nhận
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Prevent re-declaration if script is loaded multiple times
+    if (typeof window.confirmModalInitialized === 'undefined') {
+        window.confirmModalInitialized = true;
+        
+        // Use window object to avoid re-declaration errors
+        window.confirmModalCallback = null;
+
+        // Icon definitions for different types
+        window.modalIcons = {
+        danger: {
+            bg: 'bg-red-100',
+            icon: '<svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>',
+            button: 'bg-red-600 hover:bg-red-700 active:bg-red-800'
+        },
+        delete: {
+            bg: 'bg-red-100',
+            icon: '<svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>',
+            button: 'bg-red-600 hover:bg-red-700 active:bg-red-800'
+        },
+        warning: {
+            bg: 'bg-yellow-100',
+            // Vòng tròn vàng nhạt + dấu chấm than trắng, giống alert cảnh báo
+            icon: '<svg class="w-6 h-6" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4" /><circle cx="12" cy="16" r="1.2" fill="white" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5l8 14H4z" fill="none" /></svg>',
+            button: 'bg-yellow-600 hover:bg-yellow-700 active:bg-yellow-800'
+        },
+        info: {
+            bg: 'bg-blue-100',
+            icon: '<svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+            button: 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+        },
+        success: {
+            bg: 'bg-green-100',
+            // Vòng tròn xanh mint + dấu tick trắng đơn giản
+            icon: '<svg class="w-6 h-6" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M6 12.5l4 4 8-8" /></svg>',
+            button: 'bg-green-600 hover:bg-green-700 active:bg-green-800'
+        },
+        logout: {
+            bg: 'bg-orange-100',
+            icon: '<svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>',
+            button: 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800'
+        },
+        add: {
+            bg: 'bg-blue-100',
+            icon: '<svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>',
+            button: 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+        }
+        };
+
+        window.showConfirmModal = function(options) {
+        const modal = document.getElementById('confirmModal');
+        const modalContent = document.getElementById('modalContent');
+        const title = document.getElementById('confirmTitle');
+        const subtitle = document.getElementById('confirmSubtitle');
+        const message = document.getElementById('confirmMessage');
+        const icon = document.getElementById('confirmIcon');
+        const confirmBtn = document.getElementById('confirmButton');
+        const cancelBtn = document.getElementById('cancelButton');
+
+        // Force Vietnamese font
+        const vietnameseFont = "'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif";
+        if (modal) modal.style.fontFamily = vietnameseFont;
+        if (modalContent) modalContent.style.fontFamily = vietnameseFont;
+        if (title) title.style.fontFamily = vietnameseFont;
+        if (subtitle) subtitle.style.fontFamily = vietnameseFont;
+        if (message) message.style.fontFamily = vietnameseFont;
+        if (confirmBtn) confirmBtn.style.fontFamily = vietnameseFont;
+        if (cancelBtn) cancelBtn.style.fontFamily = vietnameseFont;
+
+        // Set content using textContent to preserve Vietnamese characters
+        title.textContent = options.title || 'Xác nhận';
+        subtitle.textContent = options.subtitle || '';
+        message.textContent = options.message || 'Bạn có chắc chắn muốn thực hiện hành động này?';
+        
+        // Set cancel button text
+        cancelBtn.textContent = options.cancelText || 'Hủy';
+        
+        // Set icon and colors based on type
+        const type = options.type || 'warning';
+        const iconConfig = window.modalIcons[type] || window.modalIcons.warning;
+        
+        icon.className = `w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${iconConfig.bg}`;
+        icon.innerHTML = iconConfig.icon;
+        
+        confirmBtn.className = `px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 text-white shadow-md hover:shadow-lg transform hover:scale-105 ${iconConfig.button}`;
+        confirmBtn.textContent = options.confirmText || 'Xác nhận';
+        
+        // Store callback
+        window.confirmModalCallback = options.onConfirm;
+
+        // Show modal with smooth animation using requestAnimationFrame
+        // IMPORTANT: enable pointer events only when modal is truly open
+        modal.style.pointerEvents = 'auto';
+        modal.style.display = 'flex';
+        requestAnimationFrame(() => {
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.style.opacity = '1';
+                requestAnimationFrame(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                });
+            });
+        });
+        };
+
+        window.closeConfirmModal = function() {
+        const modal = document.getElementById('confirmModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        if (!modal || !modalContent) return;
+
+        // IMPORTANT: immediately stop blocking clicks even if animation/timeout fails
+        modal.style.pointerEvents = 'none';
+        
+        // Animate out smoothly
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        
+        // Fade out backdrop
+        modal.style.opacity = '0';
+        
+        // Clean up after animation completes
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            modal.style.opacity = '0';
+            modal.style.pointerEvents = 'none';
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            window.confirmModalCallback = null;
+        }, 300);
+        };
+
+        window.confirmAction = function() {
+        const confirmBtn = document.getElementById('confirmButton');
+        let originalText = '';
+        
+        if (confirmBtn) {
+            // Add loading state
+            confirmBtn.disabled = true;
+            originalText = confirmBtn.textContent;
+            confirmBtn.textContent = 'Đang xử lý...';
+            confirmBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+        
+        // Execute callback
+        if (window.confirmModalCallback) {
+            try {
+                window.confirmModalCallback();
+            } catch (error) {
+                console.error('Error in confirm callback:', error);
+                // Reset button on error
+                if (confirmBtn && originalText) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = originalText;
+                    confirmBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                }
+                return;
+            }
+        }
+        
+        // Close modal after a brief delay to show feedback
+        setTimeout(() => {
+            closeConfirmModal();
+            // Reset button state
+            if (confirmBtn && originalText) {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = originalText;
+                confirmBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }, 100);
+        };
+
+        // Attach confirm action to button
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmBtn = document.getElementById('confirmButton');
+            if (confirmBtn && !confirmBtn.onclick) {
+                confirmBtn.onclick = window.confirmAction;
+            }
+        });
+
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                window.closeConfirmModal();
+            }
+        });
+
+        // Close on backdrop click
+        const modalElement = document.getElementById('confirmModal');
+        if (modalElement) {
+            modalElement.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    window.closeConfirmModal();
+                }
+            });
+        }
+    }
+</script>

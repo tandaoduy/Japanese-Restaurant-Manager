@@ -1,0 +1,107 @@
+@{
+    ViewBag.Title = "Chi tiết khách hàng";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Chi tiết khách hàng</h1>
+        <p class="text-gray-600 mt-1">Thông tin chi tiết về khách hàng</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700">
+            <h2 class="text-xl font-semibold text-white">Thông tin khách hàng</h2>
+        </div>
+
+        <div class="px-6 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mã khách hàng</label>
+                    <div class="text-gray-900 font-semibold text-lg">@ViewBag.CustomerCode</div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên</label>
+                    <div class="text-gray-900 font-semibold text-lg">@ViewBag.FullName</div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <div class="text-gray-900 font-semibold text-lg">@ViewBag.Email</div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                    <div class="text-gray-900 font-semibold text-lg">@ViewBag.PhoneNumber</div>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+                    <div class="text-gray-900 font-semibold text-lg">@ViewBag.Address</div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                    <div class="flex items-center gap-3">
+                        <span id="passwordMask" class="text-gray-900 font-semibold text-lg select-all">••••••••••••••••</span>
+                        <button type="button" id="togglePasswordBtn" class="inline-flex items-center px-2 py-1 text-sm text-gray-600 hover:text-gray-900">
+                            <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <span id="passwordFull" data-hash="@ViewBag.PasswordHash" class="hidden"></span>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                    @{
+                        var status = ViewBag.Status ?? "Hoạt động";
+                        var statusClass = status == "Hoạt động" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+                    }
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold @statusClass">@status</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <a href="@Url.Action("Index", "Customer", new { area = "Admin_65133141", viewType = ViewBag.ViewType ?? "table", page = ViewBag.Page ?? 1, searchString = ViewBag.SearchString, statusFilter = ViewBag.StatusFilter })"
+               class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors inline-flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Quay lại
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var maskSpan = document.getElementById('passwordMask');
+        var fullSpan = document.getElementById('passwordFull');
+        var btn = document.getElementById('togglePasswordBtn');
+        var eyeIcon = document.getElementById('eyeIcon');
+
+        if (!maskSpan || !fullSpan || !btn || !eyeIcon) return;
+
+        var fullHash = (fullSpan.getAttribute('data-hash') || '').trim();
+        var isShown = false;
+
+        function getDisplayHash(hash) {
+            if (!hash) return '(chưa có)';
+            if (hash.length > 36) {
+                return hash.substring(0, 36) + '...';
+            }
+            return hash;
+        }
+
+        btn.addEventListener('click', function () {
+            isShown = !isShown;
+            if (isShown) {
+                maskSpan.textContent = getDisplayHash(fullHash);
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.96 9.96 0 012.563-4.304m3.106-2.038A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.043 5.197M15 12a3 3 0 00-3-3m0 0a3 3 0 013 3m-3-3L4.5 4.5" />';
+            } else {
+                maskSpan.textContent = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+            }
+        });
+    })();
+</script>

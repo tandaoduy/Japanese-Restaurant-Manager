@@ -1,0 +1,683 @@
+@* Create Employee Modal Component *@
+
+<!-- Create Employee Modal -->
+<div id="createEmployeeModal" class="auth-modal-overlay" style="display: none;">
+    <div class="auth-modal-container auth-modal-large" style="max-width: 600px;">
+        <button type="button" class="auth-close-btn" onclick="closeCreateEmployeeModal()">&times;</button>
+        
+        <div class="auth-modal-header">
+            <div class="auth-logo">
+                <svg class="w-full h-full p-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+            </div>
+            <h2 class="auth-modal-title">Tạo nhân viên mới</h2>
+            <p class="auth-modal-subtitle">Điền thông tin để tạo nhân viên mới</p>
+        </div>
+
+        <div class="auth-modal-body">
+            <form id="createEmployeeForm" novalidate>
+                @Html.AntiForgeryToken()
+                
+                <!-- Row 1: Full name and Email -->
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Họ tên <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <input type="text" name="FullName" id="employeeFullName" class="auth-form-control" placeholder="Nguyễn Văn A" />
+                        </div>
+                        <span class="auth-error-message" id="error-FullName"></span>
+                    </div>
+
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Email <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                            </svg>
+                            <input type="email" name="Email" id="employeeEmail" class="auth-form-control" placeholder="email@example.com" autocomplete="username" />
+                        </div>
+                        <span class="auth-error-message" id="error-Email"></span>
+                    </div>
+                </div>
+
+                <!-- Row 2: Phone and Address -->
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Số điện thoại <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            <input type="tel" name="PhoneNumber" id="employeePhoneNumber" class="auth-form-control" placeholder="0123456789" autocomplete="tel" />
+                        </div>
+                        <span class="auth-error-message" id="error-PhoneNumber"></span>
+                    </div>
+
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">Địa chỉ</label>
+                        <div class="auth-input-wrapper">
+                            <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <input type="text" name="Address" id="employeeAddress" class="auth-form-control" placeholder="Nhập địa chỉ" autocomplete="street-address" />
+                        </div>
+                        <span class="auth-error-message" id="error-Address"></span>
+                    </div>
+                </div>
+
+                <!-- Row 3: Date of Birth and Start Date -->
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Ngày sinh <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <input type="date" name="DateOfBirth" id="employeeDateOfBirth" class="auth-form-control" style="padding-left: 45px;" min="1940-01-01" max="2010-12-31" />
+                        </div>
+                        <span class="auth-error-message" id="error-DateOfBirth"></span>
+                    </div>
+
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Ngày vào làm <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <input type="date" name="StartDate" id="employeeStartDate" class="auth-form-control" style="padding-left: 45px;" min="2000-01-01" max="2030-12-31" />
+                        </div>
+                        <span class="auth-error-message" id="error-StartDate"></span>
+                    </div>
+                </div>
+
+                <!-- Row 4: Password and Confirm Password -->
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Mật khẩu <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            <input type="password" name="Password" id="employeePassword" class="auth-form-control auth-password-input" placeholder="Vui lòng nhập mật khẩu" autocomplete="new-password" />
+                        </div>
+                        <span class="auth-error-message" id="error-Password"></span>
+                        
+                        <!-- Password Strength Indicator -->
+                        <div class="auth-password-strength-container" id="employeePasswordStrength" style="margin-top: 10px; display: none;">
+                            <div class="auth-password-strength-bar">
+                                <div class="auth-password-strength-fill" id="passwordStrengthFillEmployee"></div>
+                            </div>
+                            <div class="auth-password-strength-text">
+                                <span id="passwordStrengthTextEmployee">Yếu</span>
+                                <span style="float: right;">Mạnh</span>
+                            </div>
+                            <div class="auth-password-requirements" id="passwordRequirementsEmployee">
+                                <div class="auth-requirement-item" id="req-length-employee">
+                                    <span class="auth-req-icon"></span>
+                                    <span>Ít nhất 8 ký tự</span>
+                                </div>
+                                <div class="auth-requirement-item" id="req-upper-employee">
+                                    <span class="auth-req-icon"></span>
+                                    <span>Ít nhất 1 chữ in hoa</span>
+                                </div>
+                                <div class="auth-requirement-item" id="req-lower-employee">
+                                    <span class="auth-req-icon"></span>
+                                    <span>Ít nhất 1 chữ thường</span>
+                                </div>
+                                <div class="auth-requirement-item" id="req-number-employee">
+                                    <span class="auth-req-icon"></span>
+                                    <span>Ít nhất 1 chữ số</span>
+                                </div>
+                                <div class="auth-requirement-item" id="req-special-employee">
+                                    <span class="auth-req-icon"></span>
+                                    <span>Ít nhất 1 ký tự đặc biệt</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Xác nhận mật khẩu <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <input type="password" name="ConfirmPassword" id="employeeConfirmPassword" class="auth-form-control" placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
+                        </div>
+                        <span class="auth-error-message" id="error-ConfirmPassword"></span>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="auth-btn-group" style="margin-top: 25px;">
+                    <button type="button" class="auth-btn auth-btn-cancel" onclick="closeCreateEmployeeModal()">Hủy</button>
+                    <button type="submit" class="auth-btn auth-btn-submit" id="createEmployeeSubmitBtn">Tạo nhân viên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Additional styles specific to create employee modal */
+    .auth-btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    .auth-btn {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .auth-btn-cancel {
+        background: #f0f0f0;
+        color: #666;
+        border: 1px solid #ddd;
+    }
+
+    .auth-btn-cancel:hover {
+        background: #e0e0e0;
+    }
+
+    .auth-btn-submit {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .auth-btn-submit:hover {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+    }
+
+    .auth-btn-submit:active {
+        transform: scale(0.98);
+    }
+
+    .auth-btn-submit:disabled,
+    .auth-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.7 !important;
+    }
+
+    .auth-required {
+        color: #e74c3c;
+    }
+
+    .auth-input-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .auth-input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        width: 20px;
+        height: 20px;
+    }
+
+    .auth-form-control {
+        width: 100% !important;
+        max-width: 100%;
+        padding: 12px 15px 12px 45px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        background: white;
+        border-color: #ddd;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        box-sizing: border-box;
+    }
+
+    .auth-form-control:hover {
+        border-color: #bbb;
+    }
+
+    .auth-form-control:focus {
+        outline: none;
+        border-color: #dc2626;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .auth-error-message {
+        color: #e74c3c;
+        font-size: 12px;
+        margin-top: 5px;
+        display: block;
+        min-height: 18px;
+        font-weight: 500;
+    }
+
+    .auth-error-message:empty {
+        display: none;
+    }
+
+    /* Password Strength Styles */
+    .auth-password-strength-container {
+        margin-top: 10px;
+    }
+
+    .auth-password-strength-bar {
+        width: 100%;
+        height: 4px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .auth-password-strength-fill {
+        height: 100%;
+        background: linear-gradient(to right, #ff4444, #ffaa00, #88ff00);
+        width: 0%;
+        transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    .auth-password-strength-text {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .auth-password-requirements {
+        background: #fafafa;
+        border-radius: 8px;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .auth-requirement-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #666;
+        transition: color 0.3s ease;
+    }
+
+    .auth-requirement-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .auth-req-icon {
+        margin-right: 10px;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .auth-requirement-item.valid {
+        color: #22c55e;
+    }
+
+    .auth-requirement-item.valid .auth-req-icon {
+        display: inline-flex;
+        color: #22c55e;
+    }
+
+    .auth-requirement-item.valid .auth-req-icon::before {
+        content: "✓";
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .auth-requirement-item.invalid {
+        color: #999;
+    }
+
+    .auth-requirement-item.invalid .auth-req-icon {
+        display: none;
+    }
+</style>
+
+<script>
+    function openCreateEmployeeModal() {
+        const modal = document.getElementById('createEmployeeModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Reset form
+        document.getElementById('createEmployeeForm').reset();
+        
+        // Clear all error messages
+        document.querySelectorAll('.auth-error-message').forEach(function(el) {
+            el.textContent = '';
+        });
+        
+        // Hide password strength indicator
+        const strengthContainer = document.getElementById('employeePasswordStrength');
+        if (strengthContainer) {
+            strengthContainer.style.display = 'none';
+        }
+        
+        // Initialize password strength checker
+        initEmployeePasswordStrength();
+    }
+
+    function closeCreateEmployeeModal() {
+        document.getElementById('createEmployeeModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function initEmployeePasswordStrength() {
+        const passwordInput = document.getElementById('employeePassword');
+        if (!passwordInput) return;
+
+        const strengthContainer = document.getElementById('employeePasswordStrength');
+        const strengthFill = document.getElementById('passwordStrengthFillEmployee');
+        const strengthText = document.getElementById('passwordStrengthTextEmployee');
+        const requirements = {
+            length: document.getElementById('req-length-employee'),
+            upper: document.getElementById('req-upper-employee'),
+            lower: document.getElementById('req-lower-employee'),
+            number: document.getElementById('req-number-employee'),
+            special: document.getElementById('req-special-employee')
+        };
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            
+            if (password.length > 0 && strengthContainer) {
+                strengthContainer.style.display = 'block';
+            } else {
+                if (strengthContainer) strengthContainer.style.display = 'none';
+                return;
+            }
+
+            // Check requirements
+            const checks = {
+                length: password.length >= 8,
+                upper: /[A-Z]/.test(password),
+                lower: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[@@$!%*#?&]/.test(password)
+            };
+
+            // Update requirement indicators
+            Object.keys(requirements).forEach(key => {
+                if (requirements[key]) {
+                    if (checks[key]) {
+                        requirements[key].classList.remove('invalid');
+                        requirements[key].classList.add('valid');
+                    } else {
+                        requirements[key].classList.remove('valid');
+                        requirements[key].classList.add('invalid');
+                    }
+                }
+            });
+
+            // Calculate strength
+            const validCount = Object.values(checks).filter(v => v).length;
+            const strength = (validCount / 5) * 100;
+
+            if (strengthFill) {
+                strengthFill.style.width = strength + '%';
+            }
+
+            // Update strength text and color
+            if (strengthText) {
+                if (strength < 40) {
+                    strengthText.textContent = 'Yếu';
+                    if (strengthFill) strengthFill.style.background = '#ff4444';
+                } else if (strength < 80) {
+                    strengthText.textContent = 'Trung bình';
+                    if (strengthFill) strengthFill.style.background = '#ffaa00';
+                } else {
+                    strengthText.textContent = 'Mạnh';
+                    if (strengthFill) strengthFill.style.background = '#88ff00';
+                }
+            }
+        });
+    }
+
+    // Handle form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('createEmployeeForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('createEmployeeSubmitBtn');
+                if (!submitBtn) return;
+                
+                // Clear previous errors
+                document.querySelectorAll('.auth-error-message').forEach(function(el) {
+                    el.textContent = '';
+                });
+
+                // Client-side validation
+                let hasErrors = false;
+                const errors = {};
+
+                // Full Name validation
+                const fullName = document.getElementById('employeeFullName').value.trim();
+                if (!fullName) {
+                    errors['FullName'] = 'Vui lòng nhập họ tên';
+                    hasErrors = true;
+                }
+
+                // Email validation
+                const email = document.getElementById('employeeEmail').value.trim();
+                if (!email) {
+                    errors['Email'] = 'Vui lòng nhập email';
+                    hasErrors = true;
+                } else if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) {
+                    errors['Email'] = 'Email không hợp lệ';
+                    hasErrors = true;
+                }
+
+                // Phone validation
+                const phone = document.getElementById('employeePhoneNumber').value.trim();
+                if (!phone) {
+                    errors['PhoneNumber'] = 'Vui lòng nhập số điện thoại';
+                    hasErrors = true;
+                } else if (!/^[0-9]{10,11}$/.test(phone)) {
+                    errors['PhoneNumber'] = 'Số điện thoại phải có 10-11 chữ số';
+                    hasErrors = true;
+                }
+
+                // Date of Birth validation
+                const dob = document.getElementById('employeeDateOfBirth').value;
+                if (!dob) {
+                    errors['DateOfBirth'] = 'Vui lòng chọn ngày sinh';
+                    hasErrors = true;
+                } else {
+                    const dobDate = new Date(dob);
+                    const today = new Date();
+                    const minDate = new Date('1940-01-01');
+                    const maxDate = new Date();
+                    maxDate.setFullYear(maxDate.getFullYear() - 18); // At least 18 years old
+                    
+                    if (dobDate > today) {
+                        errors['DateOfBirth'] = 'Ngày sinh không thể trong tương lai';
+                        hasErrors = true;
+                    } else if (dobDate < minDate) {
+                        errors['DateOfBirth'] = 'Ngày sinh không hợp lệ';
+                        hasErrors = true;
+                    } else if (dobDate > maxDate) {
+                        errors['DateOfBirth'] = 'Nhân viên phải ít nhất 18 tuổi';
+                        hasErrors = true;
+                    }
+                }
+
+                // Start Date validation
+                const startDate = document.getElementById('employeeStartDate').value;
+                if (!startDate) {
+                    errors['StartDate'] = 'Vui lòng chọn ngày vào làm';
+                    hasErrors = true;
+                } else {
+                    const startDateObj = new Date(startDate);
+                    const minStartDate = new Date('2000-01-01');
+                    const maxStartDate = new Date();
+                    maxStartDate.setFullYear(maxStartDate.getFullYear() + 1); // Max 1 year in future
+                    
+                    if (startDateObj < minStartDate) {
+                        errors['StartDate'] = 'Ngày vào làm không hợp lệ';
+                        hasErrors = true;
+                    } else if (startDateObj > maxStartDate) {
+                        errors['StartDate'] = 'Ngày vào làm không thể quá xa trong tương lai';
+                        hasErrors = true;
+                    }
+                }
+
+                // Password validation
+                const password = document.getElementById('employeePassword').value;
+                if (!password) {
+                    errors['Password'] = 'Vui lòng nhập mật khẩu';
+                    hasErrors = true;
+                } else if (password.length < 8) {
+                    errors['Password'] = 'Mật khẩu phải có ít nhất 8 ký tự';
+                    hasErrors = true;
+                }
+
+                // Confirm Password validation
+                const confirmPassword = document.getElementById('employeeConfirmPassword').value;
+                if (!confirmPassword) {
+                    errors['ConfirmPassword'] = 'Vui lòng nhập xác nhận mật khẩu';
+                    hasErrors = true;
+                } else if (password !== confirmPassword) {
+                    errors['ConfirmPassword'] = 'Mật khẩu xác nhận không khớp';
+                    hasErrors = true;
+                }
+
+                // Display client-side errors
+                if (hasErrors) {
+                    Object.keys(errors).forEach(function(key) {
+                        const errorEl = document.getElementById('error-' + key);
+                        if (errorEl) {
+                            errorEl.textContent = errors[key];
+                            errorEl.style.display = 'block';
+                        }
+                    });
+                    return; // Stop submission
+                }
+                
+                submitBtn.disabled = true;
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Đang xử lý...';
+
+                const formData = new FormData(form);
+                const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenInput) {
+                    formData.append('__RequestVerificationToken', tokenInput.value);
+                }
+
+                fetch('/Admin_65133141/Employee/CreateEmployeeAjax', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        closeCreateEmployeeModal();
+                        if (typeof showAlert === 'function') {
+                            showAlert('success', data.message || 'Tạo nhân viên thành công!');
+                        } else {
+                            alert('Tạo nhân viên thành công!');
+                        }
+                        // Reload page to show new employee
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        // Display server-side validation errors
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(function(key) {
+                                const errorEl = document.getElementById('error-' + key);
+                                if (errorEl) {
+                                    errorEl.textContent = data.errors[key];
+                                    errorEl.style.display = 'block';
+                                }
+                            });
+                        }
+                        if (typeof showAlert === 'function') {
+                            showAlert('error', data.message || 'Vui lòng kiểm tra lại thông tin.');
+                        } else {
+                            alert(data.message || 'Vui lòng kiểm tra lại thông tin.');
+                        }
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                    const errorMsg = 'Đã xảy ra lỗi khi tạo nhân viên. Vui lòng thử lại.';
+                    if (typeof showAlert === 'function') {
+                        showAlert('error', errorMsg);
+                    } else {
+                        alert(errorMsg);
+                    }
+                })
+                .finally(function() {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                });
+            });
+        }
+    });
+
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('createEmployeeModal');
+            if (modal && modal.style.display === 'flex') {
+                closeCreateEmployeeModal();
+            }
+        }
+    });
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('createEmployeeModal');
+        if (e.target === modal) {
+            closeCreateEmployeeModal();
+        }
+    });
+</script>

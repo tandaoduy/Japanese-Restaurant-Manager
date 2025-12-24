@@ -1,0 +1,729 @@
+﻿@model IEnumerable<Project_65133141.Models.NhanVien>
+
+@{
+    ViewBag.Title = "Quản lý tài khoản nhân viên";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+
+    // Ép kiểu mạnh giống Customer để tránh lỗi dynamic (CS1973 với Html.Hidden)
+    string viewType = ViewBag.ViewType as string ?? "table";
+    int currentPage = ViewBag.CurrentPage as int? ?? 1;
+    int pageSize = ViewBag.PageSize as int? ?? 5;
+    int totalPages = ViewBag.TotalPages as int? ?? 1;
+    string searchString = ViewBag.SearchString as string;
+}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-3xl font-bold text-gray-900">Quản lý tài khoản nhân viên</h1>
+
+        <div class="flex items-center gap-3">
+            <button type="button" onclick="openCreateEmployeeModal()"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-sm transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Tạo tài khoản nhân viên</span>
+            </button>
+
+            <div id="alertContainer" class="fixed top-4 right-4 z-[60] space-y-2"></div>
+        </div>
+    </div>
+
+    <div class="mb-4 text-gray-600">
+        <p>Tổng số: <span class="font-semibold text-gray-900">@ViewBag.TotalAccounts</span> nhân viên</p>
+    </div>
+
+    @* Alert dạng toast giống Customer: dùng showAlert thay vì banner full-width *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        var msg = TempData["SuccessMessage"].ToString();
+        var msgJson = Newtonsoft.Json.JsonConvert.SerializeObject(msg);
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof showAlert === 'function') {
+                    // ts-ignore: Razor chèn biểu thức server-side, TS không phân tích được nhưng JS runtime vẫn hợp lệ
+                    var message = @Html.Raw(msgJson);
+                    showAlert('success', message);
+                }
+            });
+        </script>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        var msgError = TempData["ErrorMessage"].ToString();
+        var msgErrorJson = Newtonsoft.Json.JsonConvert.SerializeObject(msgError);
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof showAlert === 'function') {
+                    // ts-ignore: Razor chèn biểu thức server-side, TS không phân tích được nhưng JS runtime vẫn hợp lệ
+                    var message = @Html.Raw(msgErrorJson);
+                    showAlert('error', message);
+                }
+            });
+        </script>
+    }
+
+    <div class="mb-6 flex justify-end">
+        @using (Html.BeginForm("Index", "Employee", FormMethod.Get, new { id = "employeeFilterForm", @class = "flex flex-wrap items-end gap-3 justify-end" }))
+        {
+            var sortBy = ViewBag.SortBy as string ?? "code";
+            <input type="hidden" name="viewType" value="@viewType" />
+            <input type="hidden" id="sortByInput" name="sortBy" value="@sortBy" />
+
+            <div class="flex items-end gap-2 mr-2">
+                <div class="relative">
+                    <button type="button" id="sortToggleBtn" onclick="toggleEmployeeSortPanel()" class="inline-flex items-center justify-center w-10 h-10 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all" title="Sắp xếp">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                        </svg>
+                    </button>
+                    <div id="employeeSortPanel" class="hidden absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-xl z-20">
+                        <div class="py-2">
+                            <p class="px-4 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Sắp xếp theo</p>
+                            <button type="button" class="w-full text-left px-4 py-2 text-sm @(sortBy == "code" ? "bg-gray-100 font-semibold" : "hover:bg-gray-50")" onclick="applyEmployeeSort('code')">Mã nhân viên</button>
+                            <button type="button" class="w-full text-left px-4 py-2 text-sm @(sortBy == "name" ? "bg-gray-100 font-semibold" : "hover:bg-gray-50")" onclick="applyEmployeeSort('name')">Tên nhân viên</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative">
+                <input type="text" name="searchString" value="@searchString"
+                       placeholder="Nhập tên, email hoặc SĐT..."
+                       class="w-64 pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-200 text-sm font-medium text-gray-700 placeholder-gray-400"
+                       onchange="this.form.submit()" />
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                
+                <!-- Autocomplete Suggestions Dropdown -->
+                <div class="absolute top-full left-0 w-full mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50 hidden">
+                    <!-- Suggestions will be dynamically inserted here if needed -->
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="flex justify-end mb-4">
+        <div class="flex bg-gray-100 rounded-lg p-1">
+            <a href="@Url.Action("Index", "Employee", new { area = "Admin_65133141", viewType = "table", searchString = searchString, sortBy = ViewBag.SortBy, page = 1 })"
+               class="px-4 py-2 rounded-md transition-all @(viewType == "table" ? "bg-white shadow-sm text-red-600" : "text-gray-600 hover:text-gray-900")"
+               title="Xem dạng bảng">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+            </a>
+            <a href="@Url.Action("Index", "Employee", new { area = "Admin_65133141", viewType = "card", searchString = searchString, sortBy = ViewBag.SortBy, page = 1 })"
+               class="px-4 py-2 rounded-md transition-all @(viewType == "card" ? "bg-white shadow-sm text-red-600" : "text-gray-600 hover:text-gray-900")"
+               title="Xem dạng thẻ">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    @if (viewType == "table")
+    {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="overflow-hidden">
+                <table class="w-full table-fixed divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 5%;">STT</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Mã NV</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 8%;">Avatar</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 15%;">Tên nhân viên</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 13%;">SĐT</th>
+                            <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 20%;">Email</th>
+                            <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase" style="width: 15%;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @if (Model != null && Model.Any())
+                        {
+                            var rowIndex = 0;
+                            foreach (var item in Model)
+                            {
+                                rowIndex++;
+                                var stt = ((currentPage - 1) * pageSize) + rowIndex;
+                                var employeeCode = "NV" + item.NhanVienID.ToString("D5");
+                                var avatarLetter = !string.IsNullOrEmpty(item.HoTen) ? item.HoTen.Substring(0, 1).ToUpper() : "?";
+
+                                <tr>
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-700">@stt</td>
+                                    <td class="px-2 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">@employeeCode</td>
+                                    <td class="px-2 py-3 whitespace-nowrap">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                                            @avatarLetter
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-3 text-sm text-gray-900 truncate" title="@(item.HoTen ?? "-")">@(item.HoTen ?? "-")</td>
+                                    <td class="px-2 py-3 text-sm text-gray-600 truncate" title="@(item.SDT ?? "-")">@(item.SDT ?? "-")</td>
+                                    <td class="px-2 py-3 text-sm text-gray-600 truncate" title="@(item.Email ?? "-")">@(item.Email ?? "-")</td>
+                                    <td class="px-2 py-3 whitespace-nowrap text-center text-sm">
+                                        <div class="inline-flex items-center gap-2">
+                                            <button type="button"
+                                                    onclick="openEmployeeDetailsModal(@item.NhanVienID)"
+                                                    class="w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                                    title="Xem chi tiết">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </button>
+
+                                            @using (Html.BeginForm("Delete", "Employee", FormMethod.Post, new { area = "Admin_65133141", @class = "inline delete-form" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                @Html.Hidden("id", (long)item.NhanVienID)
+                                                @Html.Hidden("viewType", (string)viewType)
+                                                @Html.Hidden("page", (int)currentPage)
+                                                @Html.Hidden("searchString", (string)searchString)
+                                                <button type="button"
+                                                        class="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white inline-flex items-center justify-center transition-colors"
+                                                        title="Xóa"
+                                                        onclick="openDeleteModal(this, '@(item.HoTen ?? employeeCode)')">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="7" class="px-6 py-10 text-center text-gray-500">Không có nhân viên nào.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @RenderPagination()
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    var avatarLetter = !string.IsNullOrEmpty(item.HoTen) ? item.HoTen.Substring(0, 1).ToUpper() : "?";
+
+                    var cardIndex = Math.Abs(item.NhanVienID) % 20;
+                    string colorClass = "";
+                    string patternStyle = "";
+                    string patternColor = "";
+
+                    switch (cardIndex)
+                    {
+                        case 0:
+                            colorClass = "bg-green-500";
+                            patternColor = "rgba(255,255,255,0.15)";
+                            patternStyle = "background-image: linear-gradient(135deg, " + patternColor + " 25%, transparent 25%), linear-gradient(225deg, " + patternColor + " 25%, transparent 25%), linear-gradient(45deg, " + patternColor + " 25%, transparent 25%), linear-gradient(315deg, " + patternColor + " 25%, transparent 25%); background-size: 36px 36px; background-position: 0 0, 18px 0, 18px -18px, 0px 18px;";
+                            break;
+                        case 1:
+                            colorClass = "bg-green-500";
+                            patternColor = "rgba(255,255,255,0.12)";
+                            patternStyle = "background-image: linear-gradient(135deg, " + patternColor + " 25%, transparent 25%), linear-gradient(225deg, " + patternColor + " 25%, transparent 25%), linear-gradient(45deg, " + patternColor + " 25%, transparent 25%), linear-gradient(315deg, " + patternColor + " 25%, transparent 25%); background-size: 40px 40px; background-position: 0 0, 20px 0, 20px -20px, 0px 20px;";
+                            break;
+                        case 2:
+                            colorClass = "bg-blue-500";
+                            patternColor = "rgba(255,255,255,0.18)";
+                            patternStyle = "background-image: radial-gradient(circle, " + patternColor + " 2px, transparent 2px); background-size: 18px 18px;";
+                            break;
+                        case 3:
+                            colorClass = "bg-purple-300";
+                            patternStyle = "";
+                            break;
+                        case 4:
+                            colorClass = "bg-purple-500";
+                            patternColor = "rgba(255,255,255,0.12)";
+                            patternStyle = "background-image: linear-gradient(60deg, " + patternColor + " 25%, transparent 25%), linear-gradient(120deg, " + patternColor + " 25%, transparent 25%), linear-gradient(240deg, " + patternColor + " 25%, transparent 25%), linear-gradient(300deg, " + patternColor + " 25%, transparent 25%); background-size: 30px 30px;";
+                            break;
+                        case 5:
+                            colorClass = "bg-pink-500";
+                            patternColor = "rgba(255,255,255,0.16)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 20px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 20px); background-size: 20px 20px;";
+                            break;
+                        case 6:
+                            colorClass = "bg-teal-400";
+                            patternColor = "rgba(255,255,255,0.14)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, transparent 0, transparent 24px, " + patternColor + " 24px, " + patternColor + " 25px), repeating-linear-gradient(90deg, transparent 0, transparent 24px, " + patternColor + " 24px, " + patternColor + " 25px); background-size: 25px 25px;";
+                            break;
+                        case 7:
+                            colorClass = "bg-teal-400";
+                            patternColor = "rgba(255,255,255,0.2)";
+                            patternStyle = "background-image: radial-gradient(circle at 20% 30%, " + patternColor + " 8%, transparent 8%), radial-gradient(circle at 70% 50%, " + patternColor + " 10%, transparent 10%), radial-gradient(circle at 50% 80%, " + patternColor + " 7%, transparent 7%), radial-gradient(circle at 80% 20%, " + patternColor + " 9%, transparent 9%);";
+                            break;
+                        case 8:
+                            colorClass = "bg-yellow-400";
+                            patternColor = "rgba(255,255,255,0.18)";
+                            patternStyle = "background-image: radial-gradient(circle at 25% 25%, " + patternColor + " 15%, transparent 15%), radial-gradient(circle at 75% 75%, " + patternColor + " 18%, transparent 18%), radial-gradient(circle at 50% 50%, " + patternColor + " 12%, transparent 12%);";
+                            break;
+                        case 9:
+                            colorClass = "bg-gray-300";
+                            patternColor = "rgba(255,255,255,0.3)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 12px, transparent 12px, transparent 24px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 12px, transparent 12px, transparent 24px); background-size: 24px 24px;";
+                            break;
+                        case 10:
+                            colorClass = "bg-pink-500";
+                            patternColor = "rgba(255,255,255,0.15)";
+                            patternStyle = "background-image: repeating-linear-gradient(45deg, transparent 0, transparent 16px, " + patternColor + " 16px, " + patternColor + " 18px), repeating-linear-gradient(-45deg, transparent 0, transparent 16px, " + patternColor + " 16px, " + patternColor + " 18px); background-size: 32px 32px;";
+                            break;
+                        case 11:
+                            colorClass = "bg-cyan-400";
+                            patternColor = "rgba(255,255,255,0.2)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 2px, transparent 2px, transparent 28px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 2px, transparent 2px, transparent 28px); background-size: 28px 28px;";
+                            break;
+                        case 12:
+                            colorClass = "bg-blue-500";
+                            patternColor = "rgba(255,255,255,0.22)";
+                            patternStyle = "background-image: radial-gradient(circle at 30% 40%, " + patternColor + " 12%, transparent 12%), radial-gradient(circle at 60% 70%, " + patternColor + " 15%, transparent 15%), radial-gradient(circle at 80% 30%, " + patternColor + " 10%, transparent 10%);";
+                            break;
+                        case 13:
+                            colorClass = "bg-yellow-400";
+                            patternColor = "rgba(255,255,255,0.2)";
+                            patternStyle = "background-image: radial-gradient(circle at 15% 25%, " + patternColor + " 6%, transparent 6%), radial-gradient(circle at 85% 75%, " + patternColor + " 8%, transparent 8%), radial-gradient(circle at 50% 50%, " + patternColor + " 5%, transparent 5%), radial-gradient(circle, " + patternColor + " 1.5px, transparent 1.5px); background-size: 20px 20px, 25px 25px, 30px 30px, 15px 15px;";
+                            break;
+                        case 14:
+                            colorClass = "bg-purple-400";
+                            patternColor = "rgba(255,255,255,0.18)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 1.5px, transparent 1.5px, transparent 22px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 1.5px, transparent 1.5px, transparent 22px); background-size: 22px 22px;";
+                            break;
+                        case 15:
+                            colorClass = "bg-blue-600";
+                            patternColor = "rgba(255,255,255,0.14)";
+                            patternStyle = "background-image: linear-gradient(135deg, " + patternColor + " 25%, transparent 25%), linear-gradient(225deg, " + patternColor + " 25%, transparent 25%), linear-gradient(45deg, " + patternColor + " 25%, transparent 25%), linear-gradient(315deg, " + patternColor + " 25%, transparent 25%); background-size: 28px 28px; background-position: 0 0, 14px 0, 14px -14px, 0px 14px;";
+                            break;
+                        case 16:
+                            colorClass = "bg-teal-500";
+                            patternColor = "rgba(255,255,255,0.16)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, transparent 0, transparent 8px, " + patternColor + " 8px, " + patternColor + " 10px), repeating-linear-gradient(0deg, transparent 4px, " + patternColor + " 4px, " + patternColor + " 6px, transparent 6px); background-size: 100% 20px;";
+                            break;
+                        case 17:
+                            colorClass = "bg-pink-500";
+                            patternColor = "rgba(255,255,255,0.18)";
+                            patternStyle = "background-image: repeating-linear-gradient(45deg, transparent 0, transparent 20px, " + patternColor + " 20px, " + patternColor + " 22px), repeating-linear-gradient(-45deg, transparent 0, transparent 20px, " + patternColor + " 20px, " + patternColor + " 22px); background-size: 40px 40px;";
+                            break;
+                        case 18:
+                            colorClass = "bg-blue-600";
+                            patternColor = "rgba(255,255,255,0.12)";
+                            patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 8px, transparent 8px, transparent 16px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 8px, transparent 8px, transparent 16px); background-size: 16px 16px;";
+                            break;
+                        case 19:
+                            colorClass = "bg-gray-400";
+                            patternColor = "rgba(255,255,255,0.25)";
+                            patternStyle = "background-image: repeating-linear-gradient(45deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 14px), repeating-linear-gradient(-45deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 14px); background-size: 14px 14px;";
+                            break;
+                    }
+
+                    <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-shadow text-sm">
+                        <div class="h-20 @colorClass relative overflow-hidden">
+                            @if (!string.IsNullOrEmpty(patternStyle))
+                            {
+                                <div style="@patternStyle position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.85;"></div>
+                            }
+                        </div>
+                        <div class="relative px-4 pb-4">
+                            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
+                                <div class="w-14 h-14 md:w-16 md:h-16 rounded-full @colorClass flex items-center justify-center text-white font-bold text-xl md:text-2xl border-4 border-white shadow-lg">
+                                    @avatarLetter
+                                </div>
+                            </div>
+                            <div class="pt-10 text-center">
+                                <h3 class="text-base font-semibold text-gray-900 mb-0.5">@(item.HoTen ?? "-")</h3>
+                                <p class="text-xs text-gray-600">SĐT: @(item.SDT ?? "-")</p>
+                                <p class="text-xs text-gray-600 mb-3">Email: @(item.Email ?? "-")</p>
+                                <div class="flex items-center justify-center gap-2 pt-3 border-t border-gray-100">
+                                    <button type="button"
+                                            onclick="openEmployeeDetailsModal(@item.NhanVienID)"
+                                            class="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                            title="Xem chi tiết">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+
+                                    @using (Html.BeginForm("Delete", "Employee", FormMethod.Post, new { area = "Admin_65133141", @class = "inline delete-form" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        @Html.Hidden("id", (long)item.NhanVienID)
+                                        @Html.Hidden("viewType", (string)viewType)
+                                        @Html.Hidden("page", (int)currentPage)
+                                        @Html.Hidden("searchString", (string)searchString)
+                                        <button type="button"
+                                                class="w-9 h-9 rounded-full bg-red-500 hover:bg-red-600 text-white inline-flex items-center justify-center transition-colors"
+                                                title="Xóa"
+                                                onclick="openDeleteModal(this, '@(item.HoTen ?? "nhân viên")')">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-span-full text-center py-10 text-gray-500">Không có nhân viên nào.</div>
+            }
+        </div>
+        @RenderPagination()
+    }
+</div>
+
+@* Include Employee Modal Components *@
+@Html.Partial("~/Areas/Admin_65133141/Views/Components/_EmployeeDetailsModal.cshtml")
+@Html.Partial("~/Areas/Admin_65133141/Views/Components/_CreateEmployeeModal.cshtml")
+
+@* Modal xác nhận xoá nhân viên - thiết kế giống modal vô hiệu hóa khách hàng nhưng dùng icon thùng rác, tông đỏ *@
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-[9999]" style="display: none;">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all" id="modalContent">
+        <div class="p-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div id="modalIconWrapper" class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg id="modalIconSvg" class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 id="modalTitle" class="text-lg font-bold text-gray-900">Xóa nhân viên</h3>
+                    <p id="modalMessage" class="mt-2 text-sm text-gray-600">Bạn có chắc chắn muốn xóa nhân viên này không? Hành động này không thể hoàn tác.</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
+            <button type="button" id="cancelBtn" class="px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm border border-gray-300">Hủy</button>
+            <button type="button" id="confirmBtn" class="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-sm">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+@helper RenderPagination()
+{
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var viewType = ViewBag.ViewType ?? "table";
+    var searchString = ViewBag.SearchString as string;
+    var sortBy = ViewBag.SortBy as string;
+
+    if (totalPages > 1)
+    {
+        <div class="px-6 py-4 border-t border-gray-200 bg-white rounded-b-lg">
+            <div class="flex items-center justify-center gap-2">
+                <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = 1 })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
+                </a>
+
+                <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = currentPage - 1 })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </a>
+
+                @{
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+
+                    if (startPage > 1)
+                    {
+                        <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = 1 })"
+                           class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">1</a>
+                        if (startPage > 2)
+                        {
+                            <span class="px-2 text-gray-500">...</span>
+                        }
+                    }
+
+                    for (int i = startPage; i <= endPage; i++)
+                    {
+                        <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = i })"
+                           class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium @(i == currentPage ? "bg-red-600 text-white" : "border border-gray-300 hover:bg-gray-50")">@i</a>
+                    }
+
+                    if (endPage < totalPages)
+                    {
+                        if (endPage < totalPages - 1)
+                        {
+                            <span class="px-2 text-gray-500">...</span>
+                        }
+                        <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = totalPages })"
+                           class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">@totalPages</a>
+                    }
+                }
+
+                <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = currentPage + 1 })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </a>
+
+                <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = totalPages })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                </a>
+            </div>
+            <div class="text-center mt-3 text-sm text-gray-600">Trang @currentPage / @totalPages</div>
+        </div>
+    }
+}
+
+<script>
+    var currentDeleteForm = null;
+
+    function toggleEmployeeSortPanel() {
+        var panel = document.getElementById('employeeSortPanel');
+        if (!panel) return;
+        panel.classList.toggle('hidden');
+    }
+
+    function applyEmployeeSort(value) {
+        var form = document.getElementById('employeeFilterForm');
+        var input = document.getElementById('sortByInput');
+        if (!form || !input) return;
+        input.value = value;
+        form.submit();
+    }
+
+    document.addEventListener('click', function (e) {
+        var sortPanel = document.getElementById('employeeSortPanel');
+        var sortToggleBtn = document.getElementById('sortToggleBtn');
+
+        if (sortPanel && sortToggleBtn && !sortPanel.classList.contains('hidden')) {
+            if (!sortPanel.contains(e.target) && !sortToggleBtn.contains(e.target)) {
+                sortPanel.classList.add('hidden');
+            }
+        }
+    });
+
+    function openDeleteModal(button, employeeName) {
+        var form = button.closest('form');
+        currentDeleteForm = form;
+
+        var titleEl = document.getElementById('modalTitle');
+        var messageEl = document.getElementById('modalMessage');
+        var iconWrapper = document.getElementById('modalIconWrapper');
+        var iconSvg = document.getElementById('modalIconSvg');
+        var confirmBtn = document.getElementById('confirmBtn');
+        var modal = document.getElementById('confirmModal');
+
+        if (!form || !titleEl || !messageEl || !iconWrapper || !iconSvg || !confirmBtn || !modal) {
+            // Nếu vì lý do nào đó modal không sẵn sàng, fallback về confirm mặc định
+            if (confirm('Bạn có chắc chắn muốn xóa nhân viên này không? Hành động này không thể hoàn tác.')) {
+                if (form) form.submit();
+            }
+            return;
+        }
+
+        titleEl.textContent = 'Xóa nhân viên';
+        var name = (employeeName || '').trim();
+        if (!name) {
+            name = 'nhân viên này';
+        }
+        messageEl.textContent = 'Bạn có chắc muốn xóa ' + name + '? Hành động này không thể hoàn tác.';
+
+        // Thiết lập icon thùng rác màu đỏ cho hành động xoá
+        iconWrapper.className = 'w-12 h-12 rounded-full flex items-center justify-center';
+        iconWrapper.style.background = '#FEE2E2';
+        iconSvg.setAttribute('viewBox', '0 0 24 24');
+        iconSvg.setAttribute('fill', 'none');
+        iconSvg.removeAttribute('class');
+        iconSvg.setAttribute('stroke', '#DC2626');
+        iconSvg.setAttribute('stroke-width', '2');
+        iconSvg.setAttribute('width', '20');
+        iconSvg.setAttribute('height', '20');
+        // Icon thùng rác giống nút delete
+        iconSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />';
+
+        confirmBtn.className = 'px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-sm';
+        confirmBtn.textContent = 'Xóa';
+
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        var modal = document.getElementById('confirmModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        currentDeleteForm = null;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var cancelBtn = document.getElementById('cancelBtn');
+        if (cancelBtn) {
+            cancelBtn.onclick = closeModal;
+        }
+
+        var modal = document.getElementById('confirmModal');
+        if (modal) {
+            modal.onclick = function (e) {
+                if (e.target === this) closeModal();
+            };
+        }
+
+        var confirmBtn = document.getElementById('confirmBtn');
+        if (confirmBtn) {
+            confirmBtn.onclick = function () {
+                if (currentDeleteForm) {
+                    currentDeleteForm.submit();
+                }
+                closeModal();
+            };
+        }
+    });
+
+    // Toast alert giống Customer (dùng cho thông báo xoá / seed demo)
+    function showAlert(type, message) {
+        var container = document.getElementById('alertContainer');
+        if (!container) return;
+
+        var alertId = 'alert-' + Date.now();
+
+        var config = {
+            success: {
+                bg: 'bg-green-100 border border-green-200 text-green-900',
+                iconBg: 'bg-green-500 text-white',
+                title: 'Thành công!',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+            },
+            error: {
+                bg: 'bg-red-100 border border-red-200 text-red-900',
+                iconBg: 'bg-red-500 text-white',
+                title: 'Lỗi!',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14"></path><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+            },
+            warning: {
+                bg: 'bg-yellow-100 border border-yellow-200 text-yellow-900',
+                iconBg: 'bg-yellow-500 text-white',
+                title: 'Cảnh báo!',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01M10.29 4.21l-6.6 11.45A1 1 0 004.53 18h14.94a1 1 0 00.86-1.5l-6.6-11.45a1 1 0 00-1.74 0z"></path></svg>'
+            },
+            info: {
+                bg: 'bg-blue-100 border border-blue-200 text-blue-900',
+                iconBg: 'bg-blue-500 text-white',
+                title: 'Thông báo',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01"></path><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+            }
+        };
+
+        var cfg = config[type] || config.info;
+
+        var wrapper = document.createElement('div');
+        wrapper.id = alertId;
+        wrapper.className = 'max-w-md w-full shadow-lg rounded-xl overflow-hidden ' + cfg.bg;
+
+        wrapper.innerHTML =
+            '<div class="px-4 py-3 flex items-start gap-3">' +
+                '<div class="' + cfg.iconBg + ' w-8 h-8 rounded-full flex items-center justify-center">' + cfg.icon + '</div>' +
+                '<div class="flex-1">' +
+                    '<h3 class="text-sm font-semibold">' + cfg.title + '</h3>' +
+                    '<p class="text-sm mt-0.5">' + message + '</p>' +
+                '</div>' +
+                '<button type="button" class="ml-2 text-sm opacity-70 hover:opacity-100" onclick="document.getElementById(\'' + alertId + '\').remove()">×</button>' +
+            '</div>';
+
+        container.appendChild(wrapper);
+
+        setTimeout(function () {
+            if (wrapper && wrapper.parentNode) {
+                wrapper.style.transition = 'opacity 0.4s';
+                wrapper.style.opacity = '0';
+                setTimeout(function () {
+                    if (wrapper && wrapper.parentNode) {
+                        wrapper.parentNode.removeChild(wrapper);
+                    }
+                }, 400);
+            }
+        }, 4000);
+    }
+
+// Autocomplete for Employee Search
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('employeeFilterForm');
+    if (!form) return;
+    
+    const searchInput = form.querySelector('input[name="searchString"]');
+    const suggestionsBox = form.querySelector('.absolute.top-full');
+    
+    if (!searchInput || !suggestionsBox) return;
+
+    // Get all employees from current page
+    function getAllEmployees() {
+        const employees = [];
+        document.querySelectorAll('tbody tr, .grid > div').forEach(row => {
+            const nameEl = row.querySelector('[title]');
+            if (nameEl) {
+                const text = nameEl.textContent || nameEl.title || '';
+                if (text.trim() && text !== 'Không có nhân viên nào.') {
+                    employees.push(text.trim());
+                }
+            }
+        });
+        return [...new Set(employees)];
+    }
+
+    function showSuggestions(searchTerm) {
+        if (!searchTerm || searchTerm.length < 1) {
+            suggestionsBox.classList.add('hidden');
+            return;
+        }
+
+        const employees = getAllEmployees();
+        const filtered = employees
+            .filter(name => name.toLowerCase().includes(searchTerm.toLowerCase()))
+            .slice(0, 6);
+
+        if (filtered.length === 0) {
+            suggestionsBox.classList.add('hidden');
+            return;
+        }
+
+        suggestionsBox.innerHTML = filtered.map(name => {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            const highlighted = name.replace(regex, '<strong>$1</strong>');
+            return `
+                <div class="px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors text-sm text-gray-700"
+                     onclick="document.querySelector('input[name=\\'searchString\\']').value='${name.replace(/'/g, "\\'")}'; this.closest('form').submit();">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <span>${highlighted}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        suggestionsBox.classList.remove('hidden');
+    }
+
+    searchInput.addEventListener('input', function (e) {
+        showSuggestions(e.target.value.trim());
+    });
+
+    searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            suggestionsBox.classList.add('hidden');
+            searchInput.blur();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+            suggestionsBox.classList.add('hidden');
+        }
+    });
+});
+</script>

@@ -1,0 +1,139 @@
+﻿@model Project_65133141.Models.MonAn
+
+@{
+    ViewBag.Title = "Chi tiết món ăn";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+    var tenDanhMuc = ViewBag.TenDanhMuc as string ?? "N/A";
+    
+    // Tính toán phần trăm giảm giá
+    var hasDiscount = Model.GiaGiam.HasValue && Model.GiaGiam.Value > 0 && Model.GiaGiam.Value < Model.GiaGoc;
+    decimal currentPrice = hasDiscount ? Model.GiaGiam.Value : Model.Gia;
+    int discountPercent = 0;
+    if (hasDiscount)
+    {
+        discountPercent = (int)Math.Round(((double)(Model.GiaGoc - Model.GiaGiam.Value) / (double)Model.GiaGoc) * 100);
+    }
+}
+
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Chi tiết món ăn</h1>
+                <p class="text-gray-600 mt-1">Thông tin chi tiết về món ăn trong thực đơn</p>
+            </div>
+            <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141" })" 
+               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                ← Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Product Details Card -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+            <!-- Left: Image -->
+            <div class="flex items-center justify-center">
+                <div class="w-full max-w-md">
+                    <img src="@Url.Content(string.IsNullOrEmpty(Model.HinhAnh) ? "~/Images/default.jpg" : "~/Images/Products/" + Model.HinhAnh)"
+                         alt="@Model.TenMon" 
+                         class="w-full h-auto rounded-lg shadow-lg object-cover" />
+                </div>
+            </div>
+
+            <!-- Right: Information -->
+            <div class="space-y-6">
+                <!-- Title and Status -->
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <h2 class="text-3xl font-bold text-gray-900">@Model.TenMon</h2>
+                        @if (Model.IsNoiBat)
+                        {
+                            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-yellow-100 text-yellow-800">
+                                Nổi bật
+                            </span>
+                        }
+                    </div>
+                    <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold uppercase 
+                                  @(Model.TrangThai == "Hoạt động" ? "bg-green-100 text-green-800" : 
+                                     Model.TrangThai == "Tạm ngưng" ? "bg-yellow-100 text-yellow-800" : 
+                                     "bg-red-100 text-red-800")">
+                        @Model.TrangThai
+                    </span>
+                </div>
+
+                <!-- Price Section -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="space-y-2">
+                        <div class="text-red-600 font-extrabold text-3xl">
+                            @currentPrice.ToString("N0")đ
+                        </div>
+                        <div class="text-gray-400 line-through text-lg">
+                            Giá gốc: @Model.GiaGoc.ToString("N0")đ
+                        </div>
+                        @if (hasDiscount)
+                        {
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded-full font-bold">
+                                    Giảm @discountPercent%
+                                </span>
+                                <span class="text-sm text-gray-600">
+                                    Tiết kiệm: @((Model.GiaGoc - Model.GiaGiam.Value).ToString("N0"))đ
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Details Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-sm font-medium text-gray-500 mb-1">Danh mục</div>
+                        <div class="text-base font-semibold text-gray-900">@tenDanhMuc</div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-500 mb-1">Đơn vị tính</div>
+                        <div class="text-base font-semibold text-gray-900">@Model.DonViTinh</div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-500 mb-1">Ngày tạo</div>
+                        <div class="text-base font-semibold text-gray-900">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-500 mb-1">Mã món</div>
+                        <div class="text-base font-semibold text-gray-900">#@Model.MonAnID.ToString("D6")</div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                @if (!string.IsNullOrEmpty(Model.MoTa))
+                {
+                    <div>
+                        <div class="text-sm font-medium text-gray-500 mb-2">Mô tả</div>
+                        <div class="text-base text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-4">
+                            @Html.Raw(Model.MoTa.Replace("\n", "<br />"))
+                        </div>
+                    </div>
+                }
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-4 border-t">
+                    <a href="@Url.Action("Edit", "Product", new { area = "Admin_65133141", id = Model.MonAnID })" 
+                       class="flex-1 px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium text-center transition-colors shadow-md hover:shadow-lg">
+                        <span class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Sửa món ăn
+                        </span>
+                    </a>
+                    <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141" })" 
+                       class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        Hủy
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

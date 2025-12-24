@@ -1,0 +1,149 @@
+@* Component: Table - Hiển thị dữ liệu dạng bảng với DisplayName *@
+@model IEnumerable<object>
+
+@if (Model != null && Model.Any())
+{
+    var firstItem = Model.First();
+    var itemType = firstItem.GetType();
+    
+    // Get properties to display
+    var properties = itemType.GetProperties()
+        .Where(p => {
+            // Skip navigation properties and collections
+            if (p.PropertyType.IsClass && 
+                p.PropertyType != typeof(string) && 
+                !p.PropertyType.IsPrimitive && 
+                !p.PropertyType.IsValueType &&
+                p.PropertyType != typeof(DateTime) &&
+                p.PropertyType != typeof(DateTime?) &&
+                !p.PropertyType.IsEnum)
+            {
+                return false;
+            }
+            
+            // Skip password fields
+            if (p.Name.ToLower().Contains("password") || p.Name.ToLower().Contains("mat_khau"))
+            {
+                return false;
+            }
+            
+            return true;
+        })
+        .ToList();
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
+            <thead class="bg-gray-50">
+                <tr>
+                    @foreach (var property in properties)
+                    {
+                        var displayName = property.Name;
+                        var displayAttribute = property.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                            .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+                        
+                        if (displayAttribute != null && !string.IsNullOrEmpty(displayAttribute.Name))
+                        {
+                            displayName = displayAttribute.Name;
+                        }
+                        else
+                        {
+                            // Format property name for display
+                            displayName = System.Text.RegularExpressions.Regex.Replace(displayName, "([A-Z])", " $1").Trim();
+                            displayName = displayName.Replace("_", " ");
+                        }
+
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                            @displayName
+                        </th>
+                    }
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                        Thao tác
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @foreach (var item in Model)
+                {
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        @foreach (var property in properties)
+                        {
+                            var value = property.GetValue(item);
+                            string displayValue = "";
+
+                            if (value == null)
+                            {
+                                displayValue = "-";
+                            }
+                            else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
+                            {
+                                displayValue = ((DateTime)value).ToString("dd/MM/yyyy");
+                            }
+                            else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+                            {
+                                displayValue = (bool)value ? "Có" : "Không";
+                            }
+                            else if (property.PropertyType == typeof(decimal) || property.PropertyType == typeof(double) || property.PropertyType == typeof(float))
+                            {
+                                displayValue = string.Format("{0:N0}", value);
+                            }
+                            else if (property.Name == "trang_thai" || property.Name == "Status")
+                            {
+                                // Special handling for status field
+                                var statusValue = value.ToString();
+                                displayValue = "<span class='px-2 py-1 rounded-full text-xs font-semibold " + 
+                                              (statusValue == "Hoạt động" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800") + 
+                                              "'>" + statusValue + "</span>";
+                            }
+                            else
+                            {
+                                displayValue = value.ToString();
+                            }
+
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                @Html.Raw(displayValue)
+                            </td>
+                        }
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button onclick="editItem(@(item.GetType().GetProperty("id")?.GetValue(item)))" 
+                                        class="text-blue-600 hover:text-blue-900 transition">
+                                    Sửa
+                                </button>
+                                <button onclick="deleteItem(@(item.GetType().GetProperty("id")?.GetValue(item)))" 
+                                        class="text-red-600 hover:text-red-900 transition">
+                                    Xóa
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="text-center py-8 text-gray-500">
+        <p>Không có dữ liệu để hiển thị</p>
+    </div>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1467 @@
+@{
+    ViewBag.Title = "Giới thiệu - SAKURA KAZOKU";
+}
+
+<style>
+    /* Reset and base styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Container */
+    .about-container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        overflow: hidden;
+    }
+
+    .hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        animation: fadeScaleIn 1.5s ease-out;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .hero-content .about-container {
+        margin-left: 0;
+        margin-right: auto;
+    }
+
+    .hero-text {
+        color: white;
+        max-width: 768px;
+        animation: fadeInUp 1s ease-out 0.3s both;
+        text-align: left;
+    }
+
+    .hero-title {
+        font-size: 3.75rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-shadow: 2px 4px 8px rgba(0,0,0,0.8);
+        letter-spacing: 0.05em;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        font-weight: 600;
+        padding-bottom: 0.75rem;
+        color: #ec4899;
+        position: relative;
+        display: inline-block;
+    }
+
+    .hero-subtitle::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #ec4899;
+        animation: expandWidth 1s ease-out 0.8s forwards;
+    }
+
+    /* Animations */
+    @@keyframes fadeScaleIn {
+        from {
+            opacity: 0;
+            transform: scale(1.1);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes expandWidth {
+        to {
+            width: 100%;
+        }
+    }
+
+    /* Section styling */
+    .section-white {
+        padding: 6rem 0;
+        background-color: white;
+        overflow: hidden;
+    }
+
+    .section-gray {
+        padding: 6rem 0;
+        background: linear-gradient(to bottom, #f9fafb, white);
+        overflow: hidden;
+    }
+
+    .section-black {
+        padding: 6rem 0;
+        background-color: #000;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .section-red {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, #7f1d1d, #991b1b, #000);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Cherry Blossom Decoration for Titles - Background Style */
+    .section-title-decorated {
+        position: relative;
+        padding-left: 0;
+    }
+
+    .section-title-decorated::before {
+        content: '';
+        position: absolute;
+        left: -600px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 700px;
+        height: 750px;
+        background-image: url('@Url.Content("~/Images/hoa_anh_dao.png")');
+        background-repeat: no-repeat;
+        background-position: right center;
+        background-size: contain;
+        opacity: 0.6;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    /* Separate style for "Câu chuyện" section - can adjust independently */
+    .section-title-story-decoration {
+        position: relative;
+        padding-left: 0;
+    }
+    
+    .section-title-story-decoration::before {
+        content: '';
+        position: absolute;
+        left: -600px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1150px;
+        height: 750px;
+        background-image: url('@Url.Content("~/Images/hoa_anh_dao.png")');
+        background-repeat: no-repeat;
+        background-position: right center;
+        background-size: contain;
+        opacity: 0.6;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    /* Responsive adjustments for cherry blossom decoration */
+    @@media (max-width: 1024px) {
+        .section-title-decorated::before {
+            left: -120px;
+            width: 400px;
+            height: 400px;
+            opacity: 0.4;
+        }
+    }
+    
+    @@media (max-width: 767px) {
+        .section-title-decorated::before {
+            left: -80px;
+            width: 250px;
+            height: 250px;
+            opacity: 0.3;
+        }
+    }
+
+    /* Animation for underlines */
+    @@keyframes slideInFromLeft {
+        from {
+            width: 0;
+        }
+        to {
+            width: 128px;
+        }
+    }
+
+    .animated-line {
+        animation: slideInFromLeft 1s ease-out 0.5s forwards;
+    }
+
+
+
+    /* Title styling */
+    .section-title {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #111827;
+        margin-bottom: 1.5rem;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    .section-title-white {
+        color: white;
+    }
+
+    .title-underline {
+        width: 0;
+        height: 6px;
+        background: linear-gradient(to right, #dc2626, #b91c1c);
+        margin: 0 auto 2rem;
+        border-radius: 9999px;
+        animation: slideInFromLeft 1s ease-out 0.5s forwards;
+    }
+
+    .title-underline-left {
+        margin: 0 0 2rem 0;
+    }
+
+    .title-underline-white {
+        background: white;
+    }
+
+    /* Grid layouts */
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 4rem;
+        align-items: center;
+        position: relative;
+    }
+
+    .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .grid-4 {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    @@media (min-width: 768px) {
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        .hero-title {
+            font-size: 3.75rem;
+        }
+    }
+
+    /* Image cards */
+    .image-card {
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transition: all 0.5s;
+    }
+
+    .image-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .image-card img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+
+    .image-card:hover img {
+        transform: scale(1.05);
+    }
+
+    /* Timeline images - landscape format */
+    .timeline-card ~ .image-card img,
+    .grid-2:has(.timeline-card) .image-card img {
+        height: 280px;
+    }
+
+    /* Text content */
+    .text-content {
+        color: #374151;
+        font-size: 1.125rem;
+        line-height: 1.75;
+        margin-bottom: 1.5rem;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-gray {
+        color: #4b5563;
+    }
+
+    /* Timeline container with center line */
+    .space-y-12 {
+        position: relative;
+    }
+
+    .space-y-12::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background-color: #dc2626;
+        transform: translateX(-50%);
+        z-index: 0;
+    }
+
+    /* Timeline cards */
+    .timeline-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Timeline dot - positioned at center line */
+    .grid-2:has(.timeline-card)::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        background-color: #dc2626;
+        border: 4px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px #dc2626;
+        z-index: 2;
+    }
+
+    .timeline-year {
+        color: #dc2626;
+        font-size: 3.75rem;
+        font-weight: bold;
+    }
+
+    .timeline-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #111827;
+        margin-top: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .timeline-text {
+        color: #4b5563;
+        line-height: 1.75;
+    }
+
+    /* Feature cards (3 điều section) */
+    .feature-card {
+        background: #111827;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px -12px rgba(127, 29, 29, 0.5);
+    }
+
+    .feature-image-wrapper {
+        position: relative;
+        height: 256px;
+        overflow: hidden;
+    }
+
+    .feature-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover .feature-image-wrapper img {
+        transform: scale(1.1);
+    }
+
+    .feature-number {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        width: 48px;
+        height: 48px;
+        background: #dc2626;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .feature-content {
+        padding: 2rem;
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .feature-text {
+        color: #9ca3af;
+        line-height: 1.75;
+    }
+
+    /* Chef cards */
+    .chef-card {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+    }
+
+    .chef-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .chef-image {
+        position: relative;
+        height: 320px;
+        overflow: hidden;
+    }
+
+    .chef-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        transition: transform 0.3s;
+    }
+
+    .chef-card:hover .chef-image img {
+        transform: scale(1.1);
+    }
+
+    .chef-info {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .chef-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #111827;
+        margin-bottom: 0.5rem;
+    }
+
+    .chef-role {
+        color: #dc2626;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .chef-bio {
+        color: #4b5563;
+        line-height: 1.75;
+        font-size: 0.875rem;
+    }
+
+    /* Gallery grid */
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        max-width: 1536px;
+        margin: 0 auto;
+    }
+
+    @@media (min-width: 768px) {
+        .gallery-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .gallery-item {
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s;
+    }
+
+    .gallery-item:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .gallery-large {
+        grid-column: span 2;
+        grid-row: span 2;
+    }
+
+    .gallery-wide {
+        grid-column: span 2;
+    }
+
+    /* Value cards */
+    .value-card {
+        text-align: center;
+    }
+
+    .value-icon {
+        width: 180px;
+        height: 180px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .value-card:hover .value-icon {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.15));
+    }
+
+    .value-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .value-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 0.75rem;
+    }
+
+    .value-text {
+        color: #fca5a5;
+        line-height: 1.75;
+    }
+
+    /* Final image */
+    .final-image-wrapper {
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        max-width: 1024px;
+        margin: 0 auto;
+    }
+
+    .final-image-wrapper img {
+        width: 100%;
+        height: 384px;
+        object-fit: cover;
+    }
+
+    /* Cherry pattern background for black section */
+    .cherry-pattern-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.05;
+    }
+
+    /* Blob backgrounds for red section */
+    .blob-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.1;
+    }
+
+    .blob-1 {
+        position: absolute;
+        top: 2.5rem;
+        right: 2.5rem;
+        width: 256px;
+        height: 256px;
+        background: white;
+        border-radius: 50%;
+        filter: blur(80px);
+    }
+
+    .blob-2 {
+        position: absolute;
+        bottom: 2.5rem;
+        left: 2.5rem;
+        width: 320px;
+        height: 320px;
+        background: white;
+        border-radius: 50%;
+        filter: blur(80px);
+    }
+
+    .relative-z {
+        position: relative;
+        z-index: 10;
+    }
+
+    .space-y-12 > * + * {
+        margin-top: 3rem;
+    }
+
+    .max-w-4xl {
+        max-width: 896px;
+        margin: 0 auto;
+    }
+
+    .max-w-6xl {
+        max-width: 1152px;
+        margin: 0 auto;
+    }
+
+    .max-w-7xl {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+
+    .mb-16 {
+        margin-bottom: 4rem;
+    }
+
+    .mt-16 {
+        margin-top: 4rem;
+    }
+
+    /* Responsive Media Queries */
+    /* Default: Laptop (≥1025px) - no media query needed */
+    
+    /* Tablet: iPad, Surface, etc. (768px - 1024px) */
+    @@media (min-width: 768px) and (max-width: 1024px) {
+        .hero-title {
+            font-size: 2.75rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.35rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+        }
+
+        .timeline-year {
+            font-size: 2.25rem;
+        }
+
+        .timeline-title {
+            font-size: 1.5rem;
+        }
+
+        .timeline-text {
+            font-size: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.35rem;
+        }
+
+        .chef-name {
+            font-size: 1.35rem;
+        }
+
+        .value-icon {
+            width: 150px;
+            height: 150px;
+        }
+
+        .value-title {
+            font-size: 1.15rem;
+        }
+
+        .about-container {
+            padding: 0 1.5rem;
+        }
+
+        .section-white,
+        .section-gray,
+        .section-black,
+        .section-red {
+            padding: 4.5rem 0;
+        }
+
+        .grid-2 {
+            gap: 2.5rem;
+        }
+
+        .grid-3 {
+            gap: 2.5rem;
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+        }
+    }
+
+    /* iPhone và Mobile (≤767px) */
+    @@media (max-width: 767px) {
+        .hero-section {
+            min-height: 400px;
+            height: 50vh;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+        }
+
+        .section-white,
+        .section-gray,
+        .section-black,
+        .section-red {
+            padding: 2.5rem 0;
+        }
+
+        .timeline-year {
+            font-size: 1.5rem;
+        }
+
+        .timeline-title {
+            font-size: 1.125rem;
+        }
+
+        .timeline-text {
+            font-size: 0.9rem;
+        }
+
+        .feature-title {
+            font-size: 1.125rem;
+        }
+
+        .feature-text {
+            font-size: 0.9rem;
+        }
+
+        .chef-name {
+            font-size: 1.25rem;
+        }
+
+        .chef-role {
+            font-size: 0.95rem;
+        }
+
+        .chef-bio {
+            font-size: 0.9rem;
+        }
+
+        .value-icon {
+            width: 110px;
+            height: 110px;
+        }
+
+        .value-title {
+            font-size: 1rem;
+        }
+
+        .value-text {
+            font-size: 0.9rem;
+        }
+
+        .text-content {
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .about-container {
+            padding: 0 1rem;
+        }
+
+        .mb-16 {
+            margin-bottom: 2.5rem;
+        }
+
+        /* Layout changes */
+        .grid-2 {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .grid-3 {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .grid-4 {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .gallery-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Image adjustments */
+        .image-card img {
+            height: 250px;
+        }
+
+        .timeline-card ~ .image-card img,
+        .grid-2:has(.timeline-card) .image-card img {
+            height: 220px;
+        }
+
+        .chef-image {
+            height: 280px;
+        }
+
+        /* Timeline adjustments */
+        .timeline-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <img src="@Url.Content("~/Images/intro_4.jpg")" alt="SAKURA KAZOKU Restaurant" class="hero-image">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="about-container">
+            <div class="hero-text">
+                <h1 class="hero-title">SAKURA KAZOKU</h1>
+                <p class="hero-subtitle">Giới thiệu</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Câu chuyện nhà hàng -->
+<section class="section-white">
+    <div class="about-container">
+        <div class="grid-2">
+            <div style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                <h2 class="section-title section-title-story-decoration">Câu chuyện của chúng tôi</h2>
+                <div class="title-underline title-underline-left"></div>
+                <p class="text-content" style="margin-bottom: 1.5rem;">
+                    SAKURA KAZOKU được thành lập với niềm đam mê mãnh liệt về ẩm thực Nhật Bản truyền thống. 
+                    Tên gọi "Sakura Kazoku" mang ý nghĩa "Gia đình Hoa Anh Đào" - nơi mọi thực khách đều được 
+                    đón tiếp như thành viên trong gia đình.
+                </p>
+                <p class="text-content" style="margin-bottom: 0;">
+                    Chúng tôi tin rằng mỗi món ăn không chỉ đơn thuần là thức ăn, mà là một tác phẩm nghệ thuật, 
+                    được tạo nên từ sự tận tâm, kỹ năng tinh xảo và tình yêu với ẩm thực.
+                </p>
+            </div>
+            <div class="image-card" style="max-width: 500px; margin-left: auto;">
+                <img src="@Url.Content("~/Images/intro_0.png")" alt="Chef chuẩn bị món ăn">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Lịch sử hình thành -->
+<section class="section-gray">
+    <div class="about-container">
+        <div class="text-center mb-16">
+            <h2 class="section-title section-title-decorated" style="display: inline-block;">Hành trình phát triển</h2>
+            <div class="title-underline"></div>
+        </div>
+        
+        <div class="max-w-4xl space-y-12">
+            <div class="grid-2">
+                <div>
+                    <div class="timeline-card">
+                        <span class="timeline-year">2018</span>
+                        <h3 class="timeline-title">Khởi đầu hành trình</h3>
+                        <p class="timeline-text">
+                            SAKURA KAZOKU chính thức khai trương tại trung tâm thành phố với một nhà hàng nhỏ, 
+                            mang theo ước mơ giới thiệu tinh hoa ẩm thực Nhật Bản đến Việt Nam.
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <div class="image-card">
+                        <img src="@Url.Content("~/Images/intro_3.jpg")" alt="2018">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="image-card">
+                    <img src="@Url.Content("~/Images/intro_18.jpg")" alt="2020">
+                </div>
+                <div>
+                    <div class="timeline-card">
+                        <span class="timeline-year">2020</span>
+                        <h3 class="timeline-title">Mở rộng quy mô</h3>
+                        <p class="timeline-text">
+                            Đầu tư mạnh mẽ vào đội ngũ đầu bếp và nâng cao chất lượng dịch vụ. 
+                            SAKURA KAZOKU không ngừng hoàn thiện để mang đến trải nghiệm ẩm thực tốt nhất.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="timeline-card">
+                        <span class="timeline-year">2024</span>
+                        <h3 class="timeline-title">Đẳng cấp mới</h3>
+                        <p class="timeline-text">
+                            Chất lượng và sự tận tâm của SAKURA KAZOKU được khách hàng ghi nhận. 
+                            Chúng tôi tự hào là điểm đến tin cậy cho những ai yêu thích ẩm thực Nhật Bản chính thống.
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <div class="image-card">
+                        <img src="@Url.Content("~/Images/intro_5.jpg")" alt="2024">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3 Điều làm nên SAKURA KAZOKU -->
+<section class="section-black">
+    <div class="cherry-pattern-bg">
+        <svg style="width: 100%; height: 100%;" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="cherry-pattern-about" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                    <g transform="translate(50, 50)">
+                        <circle cx="0" cy="0" r="3" fill="#dc2626"/>
+                        <g transform="rotate(0)"><ellipse cx="0" cy="-10" rx="5" ry="8" fill="#fca5a5"/></g>
+                        <g transform="rotate(72)"><ellipse cx="0" cy="-10" rx="5" ry="8" fill="#fca5a5"/></g>
+                        <g transform="rotate(144)"><ellipse cx="0" cy="-10" rx="5" ry="8" fill="#fca5a5"/></g>
+                        <g transform="rotate(216)"><ellipse cx="0" cy="-10" rx="5" ry="8" fill="#fca5a5"/></g>
+                        <g transform="rotate(288)"><ellipse cx="0" cy="-10" rx="5" ry="8" fill="#fca5a5"/></g>
+                    </g>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#cherry-pattern-about)"/>
+        </svg>
+    </div>
+    
+    <!-- Falling Cherry Blossoms -->
+    <div class="falling-petals">
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+        <div class="petal"></div>
+    </div>
+    
+    <style>
+        .falling-petals {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .petal {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(ellipse at center, #fca5a5 0%, #f87171 100%);
+            border-radius: 50% 0 50% 0;
+            opacity: 0.7;
+            animation: fall linear infinite;
+        }
+        
+        .petal:nth-child(1) { left: 10%; animation-duration: 12s; animation-delay: 0s; }
+        .petal:nth-child(2) { left: 20%; animation-duration: 10s; animation-delay: 2s; }
+        .petal:nth-child(3) { left: 30%; animation-duration: 14s; animation-delay: 4s; }
+        .petal:nth-child(4) { left: 40%; animation-duration: 11s; animation-delay: 1s; }
+        .petal:nth-child(5) { left: 50%; animation-duration: 13s; animation-delay: 3s; }
+        .petal:nth-child(6) { left: 60%; animation-duration: 12s; animation-delay: 5s; }
+        .petal:nth-child(7) { left: 70%; animation-duration: 10s; animation-delay: 2.5s; }
+        .petal:nth-child(8) { left: 80%; animation-duration: 14s; animation-delay: 1.5s; }
+        .petal:nth-child(9) { left: 90%; animation-duration: 11s; animation-delay: 4.5s; }
+        .petal:nth-child(10) { left: 15%; animation-duration: 13s; animation-delay: 3.5s; }
+        
+        @@keyframes fall {
+            0% {
+                top: -10%;
+                transform: translateX(0) rotate(0deg);
+            }
+            25% {
+                transform: translateX(10px) rotate(90deg);
+            }
+            50% {
+                transform: translateX(-10px) rotate(180deg);
+            }
+            75% {
+                transform: translateX(10px) rotate(270deg);
+            }
+            100% {
+                top: 110%;
+                transform: translateX(0) rotate(360deg);
+            }
+        }
+    </style>
+    
+    <div class="about-container relative-z">
+        <div class="text-center mb-16">
+            <h2 class="section-title section-title-white">
+                <span style="color: #dc2626; font-size: 3.75rem;">3</span> điều làm nên SAKURA KAZOKU
+            </h2>
+            <div class="title-underline title-underline-white"></div>
+        </div>
+
+        <div class="grid-3 max-w-6xl">
+            <!-- Điều 1 -->
+            <div class="feature-card">
+                <div class="feature-image-wrapper">
+                    <img src="@Url.Content("~/Images/intro_17.jpg")" alt="Sushi truyền thống">
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">Sushi truyền thống cùng nguyên vật liệu cao cấp</h3>
+                    <p class="feature-text">
+                        Chúng tôi sử dụng nguyên liệu nhập khẩu trực tiếp từ Nhật Bản, đảm bảo độ tươi ngon 
+                        và chất lượng cao nhất cho mỗi món ăn.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Điều 2 -->
+            <div class="feature-card">
+                <div class="feature-image-wrapper">
+                    <img src="@Url.Content("~/Images/intro_15.jpg")" alt="Thực phẩm an toàn">
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">Thực phẩm an toàn và bổ dưỡng</h3>
+                    <p class="feature-text">
+                        Mọi nguyên liệu đều được kiểm tra nghiêm ngặt về chất lượng và vệ sinh an toàn thực phẩm, 
+                        đảm bảo sức khỏe cho thực khách.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Điều 3 -->
+            <div class="feature-card">
+                <div class="feature-image-wrapper">
+                    <img src="@Url.Content("~/Images/intro_19.jpg")" alt="Trải nghiệm Nhật Bản">
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">Không đơn giản chỉ là thưởng thức, mà còn là "trải nghiệm chất lượng Nhật Bản"</h3>
+                    <p class="feature-text">
+                        Từ không gian, phong cách phục vụ đến từng chi tiết món ăn, tất cả đều mang đậm tinh thần Omotenashi - 
+                        sự hiếu khách đặc trưng của Nhật Bản.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Đội ngũ bếp trưởng -->
+<section class="section-white">
+    <div class="about-container">
+        <div class="text-center mb-16">
+            <h2 class="section-title section-title-decorated" style="display: inline-block;">Đội ngũ bếp trưởng</h2>
+            <div class="title-underline"></div>
+            <p class="text-content text-center" style="max-width: 768px; margin: 0 auto; margin-top: 1rem;">
+                Những bàn tay tài hoa tạo nên tinh hoa ẩm thực
+            </p>
+        </div>
+
+        <div class="grid-3 max-w-6xl">
+            <div class="chef-card">
+                <div class="chef-image">
+                    <img src="@Url.Content("~/Images/chef_3.png")" alt="Chef Tanaka">
+                </div>
+                <div class="chef-info">
+                    <h3 class="chef-name">Chef Tanaka Hiroshi</h3>
+                    <p class="chef-role">Bếp trưởng chính</p>
+                    <p class="chef-bio">
+                        20 năm kinh nghiệm tại Tokyo, chuyên gia về Edomae Sushi
+                    </p>
+                </div>
+            </div>
+
+            <div class="chef-card">
+                <div class="chef-image">
+                    <img src="@Url.Content("~/Images/chef_1.jpg")" alt="Chef Yamamoto">
+                </div>
+                <div class="chef-info">
+                    <h3 class="chef-name">Chef Yamamoto Kenji</h3>
+                    <p class="chef-role">Bếp phó</p>
+                    <p class="chef-bio">
+                        15 năm kinh nghiệm, chuyên sâu về Kaiseki và món nướng
+                    </p>
+                </div>
+            </div>
+
+            <div class="chef-card">
+                <div class="chef-image">
+                    <img src="@Url.Content("~/Images/chef_2.jpg")" alt="Chef Sato">
+                </div>
+                <div class="chef-info">
+                    <h3 class="chef-name">Chef Sato Yuki</h3>
+                    <p class="chef-role">Pastry Chef</p>
+                    <p class="chef-bio">
+                        10 năm kinh nghiệm, nghệ nhân tráng miệng Nhật Bản truyền thống
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Giá trị cốt lõi -->
+<section class="section-red">
+    <div class="blob-bg">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+    </div>
+    
+    <div class="about-container relative-z">
+        <div class="text-center mb-16">
+            <h2 class="section-title section-title-white" style="display: inline-block;">Giá trị cốt lõi</h2>
+            <div class="title-underline title-underline-white"></div>
+        </div>
+
+        <div class="grid-4 max-w-7xl">
+            <div class="value-card">
+                <div class="value-icon">
+                    <img src="@Url.Content("~/Images/intro_14.jpg")" alt="Chất lượng">
+                </div>
+                <h3 class="value-title">Chất lượng</h3>
+                <p class="value-text">
+                    Cam kết mang đến chất lượng tốt nhất trong mỗi món ăn
+                </p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">
+                    <img src="@Url.Content("~/Images/intro_16.jpg")" alt="Tâm huyết">
+                </div>
+                <h3 class="value-title">Tâm huyết</h3>
+                <p class="value-text">
+                    Đặt tình yêu và đam mê vào từng công đoạn chế biến
+                </p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">
+                    <img src="@Url.Content("~/Images/intro_19.jpg")" alt="Tận tâm">
+                </div>
+                <h3 class="value-title">Tận tâm</h3>
+                <p class="value-text">
+                    Phục vụ khách hàng với sự chuyên nghiệp và tận tình
+                </p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">
+                    <img src="@Url.Content("~/Images/intro_8.jpg")" alt="Truyền thống">
+                </div>
+                <h3 class="value-title">Truyền thống</h3>
+                <p class="value-text">
+                    Gìn giữ và phát huy tinh hoa ẩm thực Nhật Bản
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Không gian nhà hàng -->
+<section class="section-gray">
+    <div class="about-container">
+        <div class="text-center mb-16">
+            <h2 class="section-title section-title-decorated" style="display: inline-block;">Không gian nhà hàng</h2>
+            <div class="title-underline"></div>
+            <p class="text-content text-center" style="max-width: 768px; margin: 0 auto; margin-top: 1rem;">
+                Thiết kế tinh tế, kết hợp giữa truyền thống Nhật Bản và hiện đại
+            </p>
+        </div>
+
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <img src="@Url.Content("~/Images/intro_6.jpg")" alt="Restaurant space 1" style="height: 100%;">
+            </div>
+            <div class="gallery-item">
+                <img src="@Url.Content("~/Images/intro_7.jpg")" alt="Restaurant space 2" style="height: 100%;">
+            </div>
+            <div class="gallery-item">
+                <img src="@Url.Content("~/Images/intro_8.jpg")" alt="Restaurant space 3" style="height: 100%;">
+            </div>
+            <div class="gallery-item">
+                <img src="@Url.Content("~/Images/intro_9.jpg")" alt="Restaurant space 4" style="height: 100%;">
+            </div>
+            <div class="gallery-item">
+                <img src="@Url.Content("~/Images/intro_10.jpg")" alt="Restaurant space 5" style="height: 100%;">
+            </div>
+            <div class="gallery-item">
+                <img src="@Url.Content("~/Images/intro_11.jpg")" alt="Restaurant space 6" style="height: 100%;">
+            </div>
+            <div class="gallery-item">
+                <img src="@Url.Content("~/Images/intro_12.jpg")" alt="Restaurant space 7" style="height: 100%;">
+            </div>
+            <div class="gallery-item">
+                <img src="@Url.Content("~/Images/slide09.jpg")" alt="Restaurant space 8" style="height: 100%;">
+            </div>
+            <div class="gallery-item">
+                <img src="@Url.Content("~/Images/intro_20.jpg")" alt="Restaurant space 9" style="height: 100%;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Image Lightbox Modal -->
+<div id="imageLightbox" class="lightbox-modal" onclick="closeLightbox()">
+    <span class="lightbox-close">&times;</span>
+    <span class="lightbox-prev">&#10094;</span>
+    <span class="lightbox-next">&#10095;</span>
+    <img class="lightbox-content" id="lightboxImage">
+</div>
+
+<style>
+    /* Lightbox Modal */
+    .lightbox-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        padding: 50px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.95);
+        cursor: pointer;
+    }
+
+    .lightbox-content {
+        margin: auto;
+        display: block;
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        cursor: default;
+        animation: zoom 0.3s;
+    }
+
+    @@keyframes zoom {
+        from { transform: scale(0.8); }
+        to { transform: scale(1); }
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 40px;
+        color: #f1f1f1;
+        font-size: 50px;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+        z-index: 10000;
+    }
+
+    .lightbox-close:hover,
+    .lightbox-close:focus {
+        color: #dc2626;
+    }
+
+    .lightbox-prev,
+    .lightbox-next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: auto;
+        padding: 16px;
+        margin-top: -50px;
+        color: white;
+        font-weight: bold;
+        font-size: 40px;
+        transition: 0.3s;
+        border-radius: 0 3px 3px 0;
+        user-select: none;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .lightbox-next {
+        right: 0;
+        border-radius: 3px 0 0 3px;
+    }
+
+    .lightbox-prev {
+        left: 0;
+    }
+
+    .lightbox-prev:hover,
+    .lightbox-next:hover {
+        background-color: rgba(220, 38, 38, 0.8);
+    }
+
+    /* Make ONLY gallery images clickable */
+    .gallery-item img {
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    var allImages = [];
+    var currentImageIndex = 0;
+
+    // Collect all clickable images when page loads
+    window.addEventListener('DOMContentLoaded', function() {
+        // Select ONLY gallery images from restaurant space section
+        var galleryImages = document.querySelectorAll('.gallery-item img');
+        
+        // Store gallery images only
+        allImages = [...galleryImages];
+        
+        // Add click event to each gallery image
+        allImages.forEach(function(img, index) {
+            img.addEventListener('click', function() {
+                openLightbox(index);
+            });
+        });
+    });
+
+    function openLightbox(index) {
+        currentImageIndex = index;
+        var modal = document.getElementById('imageLightbox');
+        var modalImg = document.getElementById('lightboxImage');
+        
+        modal.style.display = 'block';
+        modalImg.src = allImages[index].src;
+        
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        document.getElementById('imageLightbox').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function navigateLightbox(direction) {
+        currentImageIndex += direction;
+        
+        // Loop around
+        if (currentImageIndex >= allImages.length) {
+            currentImageIndex = 0;
+        } else if (currentImageIndex < 0) {
+            currentImageIndex = allImages.length - 1;
+        }
+        
+        document.getElementById('lightboxImage').src = allImages[currentImageIndex].src;
+    }
+
+    // Bind lightbox navigation buttons
+    document.querySelector('.lightbox-prev').addEventListener('click', function(e) {
+        e.stopPropagation();
+        navigateLightbox(-1);
+    });
+
+    document.querySelector('.lightbox-next').addEventListener('click', function(e) {
+        e.stopPropagation();
+        navigateLightbox(1);
+    });
+
+    document.getElementById('lightboxImage').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeLightbox();
+        } else if (event.key === 'ArrowLeft') {
+            navigateLightbox(-1);
+        } else if (event.key === 'ArrowRight') {
+            navigateLightbox(1);
+        }
+    });
+</script>
+
+
+@* Login and Register Modals Component *@
+@Html.Partial("_AuthModals")

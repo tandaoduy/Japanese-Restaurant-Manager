@@ -1,0 +1,225 @@
+@* Component: Card - Hiển thị thông tin trong card *@
+@model object
+
+@{
+    var cardTitle = ViewBag.CardTitle as string ?? "Thông tin";
+    var cardSubtitle = ViewBag.CardSubtitle as string ?? "";
+    var showFooter = ViewBag.ShowFooter as bool? ?? false;
+    var footerContent = ViewBag.FooterContent as string ?? "";
+}
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    @if (!string.IsNullOrEmpty(cardTitle) || !string.IsNullOrEmpty(cardSubtitle))
+    {
+        <div class="px-6 py-4 border-b border-gray-200">
+            @if (!string.IsNullOrEmpty(cardTitle))
+            {
+                <h3 class="text-lg font-semibold text-gray-900">@cardTitle</h3>
+            }
+            @if (!string.IsNullOrEmpty(cardSubtitle))
+            {
+                <p class="text-sm text-gray-600 mt-1">@cardSubtitle</p>
+            }
+        </div>
+    }
+
+    <div class="px-6 py-4">
+        @if (Model != null)
+        {
+            <dl class="space-y-3">
+                @foreach (var property in Model.GetType().GetProperties())
+                {
+                    // Skip navigation properties and collections
+                    if (property.PropertyType.IsClass && 
+                        property.PropertyType != typeof(string) && 
+                        !property.PropertyType.IsPrimitive && 
+                        !property.PropertyType.IsValueType &&
+                        property.PropertyType != typeof(DateTime) &&
+                        property.PropertyType != typeof(DateTime?))
+                    {
+                        continue;
+                    }
+
+                    var displayName = property.Name;
+                    var displayAttribute = property.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                        .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+                    
+                    if (displayAttribute != null && !string.IsNullOrEmpty(displayAttribute.Name))
+                    {
+                        displayName = displayAttribute.Name;
+                    }
+
+                    var value = property.GetValue(Model);
+                    
+                    // Skip password fields
+                    if (property.Name.ToLower().Contains("password") || property.Name.ToLower().Contains("mat_khau"))
+                    {
+                        continue;
+                    }
+
+                    // Format value based on type
+                    string displayValue = "";
+                    if (value == null)
+                    {
+                        displayValue = "-";
+                    }
+                    else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
+                    {
+                        displayValue = ((DateTime)value).ToString("dd/MM/yyyy");
+                    }
+                    else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+                    {
+                        displayValue = (bool)value ? "Có" : "Không";
+                    }
+                    else if (property.PropertyType == typeof(decimal) || property.PropertyType == typeof(double) || property.PropertyType == typeof(float))
+                    {
+                        displayValue = string.Format("{0:N0}", value);
+                    }
+                    else
+                    {
+                        displayValue = value.ToString();
+                    }
+
+                    <div class="flex justify-between items-start">
+                        <dt class="text-sm font-medium text-gray-500">@displayName</dt>
+                        <dd class="text-sm text-gray-900 text-right ml-4">@displayValue</dd>
+                    </div>
+                }
+            </dl>
+        }
+        else
+        {
+            <p class="text-gray-500 text-center py-4">Không có dữ liệu</p>
+        }
+    </div>
+
+    @if (showFooter && !string.IsNullOrEmpty(footerContent))
+    {
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            @Html.Raw(footerContent)
+        </div>
+    }
+</div>
+
+@model object
+
+@{
+    var cardTitle = ViewBag.CardTitle as string ?? "Thông tin";
+    var cardSubtitle = ViewBag.CardSubtitle as string ?? "";
+    var showFooter = ViewBag.ShowFooter as bool? ?? false;
+    var footerContent = ViewBag.FooterContent as string ?? "";
+}
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    @if (!string.IsNullOrEmpty(cardTitle) || !string.IsNullOrEmpty(cardSubtitle))
+    {
+        <div class="px-6 py-4 border-b border-gray-200">
+            @if (!string.IsNullOrEmpty(cardTitle))
+            {
+                <h3 class="text-lg font-semibold text-gray-900">@cardTitle</h3>
+            }
+            @if (!string.IsNullOrEmpty(cardSubtitle))
+            {
+                <p class="text-sm text-gray-600 mt-1">@cardSubtitle</p>
+            }
+        </div>
+    }
+
+    <div class="px-6 py-4">
+        @if (Model != null)
+        {
+            <dl class="space-y-3">
+                @foreach (var property in Model.GetType().GetProperties())
+                {
+                    // Skip navigation properties and collections
+                    if (property.PropertyType.IsClass && 
+                        property.PropertyType != typeof(string) && 
+                        !property.PropertyType.IsPrimitive && 
+                        !property.PropertyType.IsValueType &&
+                        property.PropertyType != typeof(DateTime) &&
+                        property.PropertyType != typeof(DateTime?))
+                    {
+                        continue;
+                    }
+
+                    var displayName = property.Name;
+                    var displayAttribute = property.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                        .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+                    
+                    if (displayAttribute != null && !string.IsNullOrEmpty(displayAttribute.Name))
+                    {
+                        displayName = displayAttribute.Name;
+                    }
+
+                    var value = property.GetValue(Model);
+                    
+                    // Skip password fields
+                    if (property.Name.ToLower().Contains("password") || property.Name.ToLower().Contains("mat_khau"))
+                    {
+                        continue;
+                    }
+
+                    // Format value based on type
+                    string displayValue = "";
+                    if (value == null)
+                    {
+                        displayValue = "-";
+                    }
+                    else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
+                    {
+                        displayValue = ((DateTime)value).ToString("dd/MM/yyyy");
+                    }
+                    else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+                    {
+                        displayValue = (bool)value ? "Có" : "Không";
+                    }
+                    else if (property.PropertyType == typeof(decimal) || property.PropertyType == typeof(double) || property.PropertyType == typeof(float))
+                    {
+                        displayValue = string.Format("{0:N0}", value);
+                    }
+                    else
+                    {
+                        displayValue = value.ToString();
+                    }
+
+                    <div class="flex justify-between items-start">
+                        <dt class="text-sm font-medium text-gray-500">@displayName</dt>
+                        <dd class="text-sm text-gray-900 text-right ml-4">@displayValue</dd>
+                    </div>
+                }
+            </dl>
+        }
+        else
+        {
+            <p class="text-gray-500 text-center py-4">Không có dữ liệu</p>
+        }
+    </div>
+
+    @if (showFooter && !string.IsNullOrEmpty(footerContent))
+    {
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            @Html.Raw(footerContent)
+        </div>
+    }
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

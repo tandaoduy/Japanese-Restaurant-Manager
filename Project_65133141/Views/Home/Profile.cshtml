@@ -1,0 +1,157 @@
+@model Project_65133141.Models.Form.RegisterForm
+
+@{
+    ViewBag.Title = "Thông tin cá nhân";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">Thông tin cá nhân</h1>
+        
+        @* Sử dụng DisplayFor để tự động sử dụng DisplayName *@
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <dt class="text-sm font-semibold text-gray-600 mb-2">
+                        @Html.DisplayNameFor(m => m.FullName)
+                    </dt>
+                    <dd class="text-base text-gray-900">
+                        @Html.DisplayFor(m => m.FullName)
+                    </dd>
+                </div>
+
+                <div class="border-b border-gray-200 pb-4">
+                    <dt class="text-sm font-semibold text-gray-600 mb-2">
+                        @Html.DisplayNameFor(m => m.Email)
+                    </dt>
+                    <dd class="text-base text-gray-900">
+                        @Html.DisplayFor(m => m.Email)
+                    </dd>
+                </div>
+
+                <div class="border-b border-gray-200 pb-4">
+                    <dt class="text-sm font-semibold text-gray-600 mb-2">
+                        @Html.DisplayNameFor(m => m.PhoneNumber)
+                    </dt>
+                    <dd class="text-base text-gray-900">
+                        @Html.DisplayFor(m => m.PhoneNumber)
+                    </dd>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Address))
+                {
+                    <div class="border-b border-gray-200 pb-4">
+                        <dt class="text-sm font-semibold text-gray-600 mb-2">
+                            @Html.DisplayNameFor(m => m.Address)
+                        </dt>
+                        <dd class="text-base text-gray-900">
+                            @Html.DisplayFor(m => m.Address)
+                        </dd>
+                    </div>
+                }
+
+                <div class="border-b border-gray-200 pb-4">
+                    <dt class="text-sm font-semibold text-gray-600 mb-2">
+                        @Html.DisplayNameFor(m => m.RoleId)
+                    </dt>
+                    <dd class="text-base text-gray-900">
+                        @{
+                            var db = new Project_65133141.Models.QuanLyNhaHangNhat_65133141Entities4();
+                            var role = db.vai_tro.Find(Model.RoleId);
+                            @(role?.ten_vai_tro ?? "Chưa xác định")
+                        }
+                    </dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="mt-6">
+            <a href="@Url.Action("Index", "Home")" 
+               class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition">
+                Quay lại
+            </a>
+        </div>
+    </div>
+</div>
+
+
+@{
+    ViewBag.Title = "Thông tin cá nhân";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">Thông tin cá nhân</h1>
+        
+        @* Sử dụng DisplayFor để tự động sử dụng DisplayName *@
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <dt class="text-sm font-semibold text-gray-600 mb-2">
+                        @Html.DisplayNameFor(m => m.FullName)
+                    </dt>
+                    <dd class="text-base text-gray-900">
+                        @Html.DisplayFor(m => m.FullName)
+                    </dd>
+                </div>
+
+                <div class="border-b border-gray-200 pb-4">
+                    <dt class="text-sm font-semibold text-gray-600 mb-2">
+                        @Html.DisplayNameFor(m => m.Email)
+                    </dt>
+                    <dd class="text-base text-gray-900">
+                        @Html.DisplayFor(m => m.Email)
+                    </dd>
+                </div>
+
+                <div class="border-b border-gray-200 pb-4">
+                    <dt class="text-sm font-semibold text-gray-600 mb-2">
+                        @Html.DisplayNameFor(m => m.PhoneNumber)
+                    </dt>
+                    <dd class="text-base text-gray-900">
+                        @Html.DisplayFor(m => m.PhoneNumber)
+                    </dd>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Address))
+                {
+                    <div class="border-b border-gray-200 pb-4">
+                        <dt class="text-sm font-semibold text-gray-600 mb-2">
+                            @Html.DisplayNameFor(m => m.Address)
+                        </dt>
+                        <dd class="text-base text-gray-900">
+                            @Html.DisplayFor(m => m.Address)
+                        </dd>
+                    </div>
+                }
+
+                <div class="border-b border-gray-200 pb-4">
+                    <dt class="text-sm font-semibold text-gray-600 mb-2">
+                        @Html.DisplayNameFor(m => m.RoleId)
+                    </dt>
+                    <dd class="text-base text-gray-900">
+                        @{
+                            var db = new Project_65133141.Models.QuanLyNhaHangNhat_65133141Entities4();
+                            var role = db.vai_tro.Find(Model.RoleId);
+                            @(role?.ten_vai_tro ?? "Chưa xác định")
+                        }
+                    </dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="mt-6">
+            <a href="@Url.Action("Index", "Home")" 
+               class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition">
+                Quay lại
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+

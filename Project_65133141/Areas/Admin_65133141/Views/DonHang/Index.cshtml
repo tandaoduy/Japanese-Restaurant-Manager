@@ -1,0 +1,59 @@
+@model IEnumerable<Project_65133141.Models.DonHang>
+@{
+    ViewBag.Title = "Quản lý đơn hàng";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+}
+
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Quản lý đơn hàng</h1>
+            <p class="text-sm text-gray-500 mt-1">Danh sách đơn hàng mới nhất.</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã đơn</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bàn</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nhân viên</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày đặt</th>
+                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng tiền</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-2 text-sm text-gray-700">DH@item.DonHangID.ToString("D4")</td>
+                                <td class="px-4 py-2 text-sm text-gray-700">@item.BanAn?.TenBan</td>
+                                <td class="px-4 py-2 text-sm text-gray-700">@item.NhanVien?.HoTen</td>
+                                <td class="px-4 py-2 text-sm text-gray-700">@item.User?.HoTen</td>
+                                <td class="px-4 py-2 text-sm text-gray-700">@item.NgayDat?.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="px-4 py-2 text-sm text-gray-900 text-right">@item.TongTien.ToString("N0") đ</td>
+                                <td class="px-4 py-2 text-sm">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">@item.TrangThai</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-500">
+                                Chưa có đơn hàng nào.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

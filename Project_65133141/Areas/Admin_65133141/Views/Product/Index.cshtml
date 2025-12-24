@@ -1,0 +1,710 @@
+﻿@model IEnumerable<Project_65133141.Models.MonAn>
+@{
+    ViewBag.Title = "Quản lý thực đơn";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+
+    var categories = ViewBag.Categories as List<Project_65133141.Models.DanhMuc>;
+    long? selectedCategoryId = ViewBag.SelectedCategoryId as long?;
+    
+    // Pagination variables
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var pageSize = ViewBag.PageSize ?? 12;
+    var totalPages = ViewBag.TotalPages ?? 1;
+}
+
+<style>
+    /* --- CSS CHO ICON PHÂN LOẠI (APP STYLE) --- */
+    .category-scroll-container {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1rem 0.5rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+        .category-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+    .category-pill {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 80px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none !important;
+    }
+
+    .category-pill-icon {
+        width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        background: #f8fafc;
+        border-radius: 24px;
+        transition: all 0.3s ease;
+    }
+
+    .category-pill span {
+        font-size: 12px;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Trạng thái khi đang chọn (Active) - Sử dụng màu cam mới */
+    .category-pill-active .category-pill-icon {
+        background: #F59E0B; /* Màu cam từ icon mẫu */
+        color: white;
+        box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.4); /* Bóng màu cam */
+        transform: translateY(-5px);
+    }
+
+    .category-pill-active span {
+        color: #F59E0B; /* Chữ màu cam */
+    }
+
+    /* SVG Icon Color */
+    .category-pill-active .category-pill-icon svg path {
+        fill: white;
+    }
+
+    .category-pill:not(.category-pill-active) .category-pill-icon svg path {
+        fill: #64748b; /* Màu xám khi không chọn */
+    }
+
+    /* Hover nhẹ */
+    .category-pill:not(.category-pill-active):hover .category-pill-icon {
+        background: #f1f5f9;
+        transform: translateY(-3px);
+    }
+
+    /* --- CSS CHO CARD SẢN PHẨM --- */
+    .product-card {
+        border-radius: 1.75rem; /* bo cong ít lại */
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.04);
+        background: #fff;
+        padding-bottom: 0.5rem; /* card trông đầy hơn */
+    }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+        <div>
+            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Quản lý thực đơn</h1>
+            <p class="text-gray-500 font-medium mt-1">Hệ thống quản lý thực đơn nội bộ</p>
+        </div>
+        
+        <!-- Row with Button and Search -->
+        <div class="flex items-center gap-4">
+            <!-- Button Thêm Món -->
+            <button onclick="openCreateProductModal()"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer border-none">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>THÊM MÓN MỚI</span>
+            </button>
+            
+            <!-- Search Box with Autocomplete -->
+            <div class="relative">
+                <input type="text" 
+                       id="productSearchInput" 
+                       placeholder="Tìm kiếm món ăn..." 
+                       autocomplete="off"
+                       class="w-64 pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-200 text-sm font-medium text-gray-700 placeholder-gray-400">
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                
+                <!-- Autocomplete Suggestions Dropdown -->
+                <div id="searchSuggestions" 
+                     class="absolute top-full left-0 w-full mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50 hidden">
+                    <!-- Suggestions will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (categories != null && categories.Any())
+    {
+        <!-- Category Filter Pills -->
+        <div class="category-scroll-container mb-12 justify-center">
+            <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = (long?)null })"
+               class="category-pill @(selectedCategoryId == null ? "category-pill-active" : "")">
+                <div class="category-pill-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                    </svg>
+                </div>
+                <span>Tất cả</span>
+            </a>
+
+            @foreach (var cat in categories)
+            {
+                var isActive = selectedCategoryId.HasValue && selectedCategoryId.Value == cat.DanhMucID;
+                string icon = "🍽️"; // Default icon cho "Món khác" mới
+                var upperName = (cat.TenDanhMuc ?? "").ToUpperInvariant();
+
+                // Icon mapping theo thứ tự mới
+                if (upperName.Contains("SASHIMI")) { icon = "🥢"; }  // Sashimi - đũa/cá sống
+                else if (upperName.Contains("SUSHI") || upperName.Contains("SHUSHI")) { icon = "🍣"; } // Sushi
+                else if (upperName.Contains("CƠM") || upperName.Contains("MÌ")) { icon = "🍜"; } // Cơm/Mì
+                else if (upperName.Contains("TEISHOKU")) { icon = "🍱"; } // Teishoku - bento box
+                else if (upperName.Contains("UỐNG") || upperName.Contains("NƯỚC")) { icon = "🥤"; } // Đồ uống
+                else if (upperName.Contains("TRÁNG MIỆNG")) { icon = "🍰"; } // Tráng miệng
+                // else default: 🍽️ cho "Món khác"
+
+
+                <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = cat.DanhMucID })"
+                   class="category-pill @(isActive ? "category-pill-active" : "")">
+                    <div class="category-pill-icon">@icon</div>
+                    <span>@cat.TenDanhMuc</span>
+                </a>
+            }
+        </div>
+    }
+
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        @foreach (var item in Model)
+        {
+            var hasDiscount = item.GiaGiam.HasValue && item.GiaGiam.Value > 0 && item.GiaGiam.Value < item.GiaGoc;
+            decimal currentPrice = hasDiscount ? item.GiaGiam.Value : item.Gia;
+            int discountPercent = hasDiscount ? (int)Math.Round(((double)(item.GiaGoc - item.GiaGiam.Value) / (double)item.GiaGoc) * 100) : 0;
+            var safeName = System.Web.HttpUtility.JavaScriptStringEncode(item.TenMon ?? "món ăn này");
+
+            <div class="product-card flex flex-col overflow-hidden" id="product-card-@item.MonAnID">
+                <div class="relative h-56 bg-gray-50">
+
+                    <img src="@Url.Content(string.IsNullOrEmpty(item.HinhAnh) ? "~/Images/default.jpg" : "~/Images/Products/" + item.HinhAnh)"
+                         class="w-full h-full object-cover" alt="@item.TenMon" />
+
+                    @if (hasDiscount)
+                    {
+                        <div class="absolute top-3 right-3">
+                            <span class="bg-red-600 text-white text-xs font-black px-3 py-1 rounded-xl uppercase">
+                                -@discountPercent%
+                            </span>
+                        </div>
+                    }
+                </div>
+
+                <div class="px-4 pt-3 pb-3 flex-1 flex flex-col">
+                    <h3 class="text-sm font-semibold text-gray-800 leading-snug line-clamp-2 mb-2">
+                        @item.TenMon
+                    </h3>
+
+                    <div class="flex items-baseline gap-2 mb-4">
+                        <span class="text-[20px] font-black text-red-600 leading-tight">
+                            @currentPrice.ToString("N0")đ
+                        </span>
+                        <span class="text-sm text-gray-400 line-through font-semibold @(hasDiscount ? "" : "invisible")">
+                            @item.GiaGoc.ToString("N0")đ
+                        </span>
+                    </div>
+
+                    <div class="mt-auto flex justify-between items-center gap-3 pt-1">
+                        <!-- Nút Xem chi tiết (Modal) -->
+                        <button onclick="openProductDetailsModal(@item.MonAnID)"
+                           class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-all shadow-sm border-none cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+
+                        <!-- Nút Sửa (Modal) -->
+                        <button onclick="openEditProductModal(@item.MonAnID)"
+                           class="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center hover:bg-orange-600 transition-all shadow-sm border-none cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </button>
+
+                        <!-- Nút Xóa (Xác nhận + AJAX) -->
+                        <button type="button" 
+                                onclick="deleteProduct(@item.MonAnID, '@safeName')"
+                                class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-sm border-none cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="pointer-events: none;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    @* Pagination *@
+    @if (totalPages > 1)
+    {
+        <div class="mt-8 px-6 py-4 bg-white rounded-xl shadow-md">
+            <div class="flex items-center justify-center gap-2">
+                @Html.Raw(RenderPagination())
+            </div>
+            <div class="text-center mt-3 text-sm text-gray-600">Trang @currentPage / @totalPages</div>
+        </div>
+    }
+</div>
+
+<div id="alertContainer" class="fixed top-4 right-4 z-[10000] space-y-2"></div>
+@Html.AntiForgeryToken()
+
+<!-- Modal xác nhận xóa -->
+<div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-[9999]" style="display: none;">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all">
+        <div class="p-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 id="confirmDeleteTitle" class="text-lg font-bold text-gray-900">Xóa món ăn</h3>
+                    <p id="confirmDeleteMessage" class="mt-2 text-sm text-gray-600">Bạn có chắc chắn muốn xóa món ăn này không? Hành động này không thể hoàn tác.</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
+            <button type="button" id="cancelDeleteBtn" class="px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm border border-gray-300">Hủy</button>
+            <button type="button" id="confirmDeleteBtn" class="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-sm">Xóa</button>
+        </div>
+    </div>
+</div>
+
+<!-- Include Modal Components -->
+@Html.Partial("~/Areas/Admin_65133141/Views/Components/_CreateProductModal.cshtml")
+@Html.Partial("~/Areas/Admin_65133141/Views/Components/_EditProductModal.cshtml")
+@Html.Partial("~/Areas/Admin_65133141/Views/Components/_ProductDetailsModal.cshtml")
+
+<script>
+    function showAlert(type, message) {
+        var container = document.getElementById('alertContainer');
+        if (!container) return;
+
+        var alertId = 'alert-' + Date.now();
+
+        var config = {
+            success: {
+                bg: 'bg-green-100 border border-green-200 text-green-900',
+                iconBg: 'bg-green-500 text-white',
+                title: 'Thành công!',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+            },
+            error: {
+                bg: 'bg-red-100 border border-red-200 text-red-900',
+                iconBg: 'bg-red-500 text-white',
+                title: 'Lỗi!',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14"></path><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+            },
+            warning: {
+                bg: 'bg-amber-100 border border-amber-200 text-amber-900',
+                iconBg: 'bg-amber-500 text-white',
+                title: 'Cảnh báo!',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01M10.29 4.21l-6.6 11.45A1 1 0 004.53 18h14.94a1 1 0 00.86-1.5l-6.6-11.45a1 1 0 00-1.74 0z"/></svg>'
+            },
+            info: {
+                bg: 'bg-sky-100 border border-sky-200 text-sky-900',
+                iconBg: 'bg-sky-500 text-white',
+                title: 'Thông tin',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01" /><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+            }
+        };
+
+        var cfg = config[type] || config.info;
+
+        var html = `
+        <div id="${alertId}" class="${cfg.bg} px-4 py-2.5 rounded-xl shadow-md flex items-center gap-3 min-w-[300px] max-w-md transition-all duration-300 translate-x-full bg-opacity-95 border border-white/60">
+            <div class="w-7 h-7 rounded-full ${cfg.iconBg} flex items-center justify-center flex-shrink-0">
+                ${cfg.icon}
+            </div>
+            <div class="flex-1">
+                <div class="font-semibold text-sm mb-0.5">${cfg.title}</div>
+                <div class="text-sm leading-snug">${message}</div>
+            </div>
+            <button type="button" class="ml-2 text-current/70 hover:text-current" aria-label="Đóng thông báo"
+                    onclick="(function(){ var el = document.getElementById('${alertId}'); if(el){ el.classList.add('translate-x-full'); setTimeout(function(){ el.remove(); }, 250); } })()">
+                &#10005;
+            </button>
+        </div>`;
+
+        container.insertAdjacentHTML('beforeend', html);
+
+        setTimeout(function () {
+            var el = document.getElementById(alertId);
+            if (el) el.classList.remove('translate-x-full');
+        }, 10);
+
+        setTimeout(function () {
+            var el = document.getElementById(alertId);
+            if (el) {
+                el.classList.add('translate-x-full');
+                setTimeout(function () { el.remove(); }, 250);
+            }
+        }, 4000);
+    }
+</script>
+
+<script>
+    // Biến lưu trữ ID và tên món ăn cần xóa
+    var currentDeleteProductId = null;
+    var currentDeleteProductName = null;
+
+    // Hàm hiển thị modal xác nhận xóa
+    window.deleteProduct = function (id, name) {
+        if (!id) return;
+
+        currentDeleteProductId = id;
+        currentDeleteProductName = name && name.trim() ? name.trim() : 'món ăn này';
+
+        var modal = document.getElementById('confirmDeleteModal');
+        var titleEl = document.getElementById('confirmDeleteTitle');
+        var messageEl = document.getElementById('confirmDeleteMessage');
+
+        if (modal && titleEl && messageEl) {
+            titleEl.textContent = 'Xóa món ăn';
+            messageEl.textContent = 'Bạn có chắc chắn muốn xóa "' + currentDeleteProductName + '" không? Hành động này không thể hoàn tác.';
+            modal.style.display = 'flex';
+        } else {
+            // Fallback nếu modal không tồn tại
+            if (confirm('Bạn có chắc chắn muốn xoá ' + currentDeleteProductName + ' không? Hành động này không thể hoàn tác.')) {
+                window.performDeleteProduct(id, currentDeleteProductName);
+            }
+        }
+    }
+
+    // Hàm đóng modal xác nhận
+    function closeConfirmDeleteModal() {
+        var modal = document.getElementById('confirmDeleteModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        currentDeleteProductId = null;
+        currentDeleteProductName = null;
+    }
+
+    // Xử lý sự kiện khi trang load
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = document.getElementById('confirmDeleteModal');
+        var cancelBtn = document.getElementById('cancelDeleteBtn');
+        var confirmBtn = document.getElementById('confirmDeleteBtn');
+
+        // Đóng modal khi click nút Hủy
+        if (cancelBtn) {
+            cancelBtn.onclick = closeConfirmDeleteModal;
+        }
+
+        // Đóng modal khi click bên ngoài
+        if (modal) {
+            modal.onclick = function (e) {
+                if (e.target === modal) {
+                    closeConfirmDeleteModal();
+                }
+            };
+        }
+
+        // Xử lý khi click nút Xác nhận
+        if (confirmBtn) {
+            confirmBtn.onclick = function () {
+                if (currentDeleteProductId) {
+                    window.performDeleteProduct(currentDeleteProductId, currentDeleteProductName || 'món ăn này');
+                    closeConfirmDeleteModal();
+                }
+            };
+        }
+    });
+
+    window.performDeleteProduct = function (id, displayName) {
+        var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+        var token = tokenInput ? tokenInput.value : '';
+
+        fetch('/Admin_65133141/Product/Delete/' + id, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: '__RequestVerificationToken=' + encodeURIComponent(token)
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data && data.success) {
+                    var card = document.getElementById('product-card-' + id);
+                    if (card) {
+                        card.style.transition = 'all 0.4s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9)';
+                        setTimeout(function () {
+                            if (card && card.parentNode) {
+                                card.parentNode.removeChild(card);
+                            }
+                        }, 400);
+                    }
+
+                    if (typeof showAlert === 'function') {
+                        showAlert('success', data.message || ('Đã xoá ' + displayName + ' thành công.'));
+                    }
+                } else {
+                    if (typeof showAlert === 'function') {
+                        showAlert('error', (data && data.message) || 'Không thể xoá món ăn.');
+                    }
+                }
+            })
+            .catch(function (err) {
+                console.error('Delete product error:', err);
+                if (typeof showAlert === 'function') {
+                    showAlert('error', 'Lỗi kết nối server. Vui lòng thử lại.');
+                }
+            });
+    }
+
+    // --- PRODUCT SEARCH with AUTOCOMPLETE FUNCTIONALITY ---
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('productSearchInput');
+        const suggestionsBox = document.getElementById('searchSuggestions');
+        if (!searchInput || !suggestionsBox) return;
+
+        let allProducts = [];
+        
+        // Build product list from DOM
+        function buildProductList() {
+            const productCards = document.querySelectorAll('[id^="product-card-"]');
+            allProducts = [];
+            
+            productCards.forEach(function (card) {
+                const nameEl = card.querySelector('h3');
+                if (nameEl) {
+                    allProducts.push({
+                        id: card.id,
+                        name: nameEl.textContent.trim(),
+                        card: card
+                    });
+                }
+            });
+        }
+        
+        buildProductList();
+
+        // Show autocomplete suggestions
+        function showSuggestions(searchTerm) {
+            if (!searchTerm || searchTerm.length < 1) {
+                suggestionsBox.classList.add('hidden');
+                return;
+            }
+
+            const matches = allProducts.filter(function (product) {
+                return product.name.toLowerCase().includes(searchTerm.toLowerCase());
+            }).slice(0, 6); // Limit to 6 suggestions
+
+            if (matches.length === 0) {
+                suggestionsBox.classList.add('hidden');
+                return;
+            }
+
+            // Build suggestions HTML
+            let html = '';
+            matches.forEach(function (product) {
+                const highlightedName = highlightMatch(product.name, searchTerm);
+                html += `
+                    <div class="suggestion-item px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 flex items-center gap-3 transition-colors"
+                         data-product-id="${product.id}">
+                        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <span class="text-sm text-gray-700 flex-1">${highlightedName}</span>
+                    </div>
+                `;
+            });
+
+            suggestionsBox.innerHTML = html;
+            suggestionsBox.classList.remove('hidden');
+
+            // Add click handlers to suggestions
+            const suggestionItems = suggestionsBox.querySelectorAll('.suggestion-item');
+            suggestionItems.forEach(function (item) {
+                item.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-product-id');
+                    searchInput.value = this.textContent.trim();
+                    performSearch(searchInput.value);
+                    suggestionsBox.classList.add('hidden');
+                });
+            });
+        }
+
+        // Highlight matching text
+        function highlightMatch(text, searchTerm) {
+            if (!searchTerm) return text;
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<strong class="font-semibold text-gray-900">$1</strong>');
+        }
+
+        // Perform actual search
+        function performSearch(searchTerm) {
+            const term = searchTerm.toLowerCase().trim();
+            const productCards = document.querySelectorAll('[id^="product-card-"]');
+
+            productCards.forEach(function (card) {
+                const productName = card.querySelector('h3');
+                if (!productName) return;
+
+                const nameText = productName.textContent.toLowerCase();
+
+                if (term === '' || nameText.includes(term)) {
+                    card.style.display = '';
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                } else {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(function () {
+                        if (card.style.opacity === '0') {
+                            card.style.display = 'none';
+                        }
+                    }, 200);
+                }
+            });
+
+            // Show "No results" message if needed
+            const visibleCards = Array.from(productCards).filter(card => card.style.display !== 'none');
+            let noResultsMsg = document.getElementById('noProductsMessage');
+
+            if (visibleCards.length === 0 && term !== '') {
+                if (!noResultsMsg) {
+                    noResultsMsg = document.createElement('div');
+                    noResultsMsg.id = 'noProductsMessage';
+                    noResultsMsg.className = 'col-span-full text-center py-12';
+                    noResultsMsg.innerHTML = `
+                        <div class="flex flex-col items-center justify-center">
+                            <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-gray-500 text-lg font-semibold">Không tìm thấy món ăn nào</p>
+                            <p class="text-gray-400 text-sm mt-1">Vui lòng thử từ khóa khác</p>
+                        </div>
+                    `;
+                    document.querySelector('.grid').appendChild(noResultsMsg);
+                }
+                noResultsMsg.style.display = 'block';
+            } else {
+                if (noResultsMsg) {
+                    noResultsMsg.style.display = 'none';
+                }
+            }
+        }
+
+        // Input event - show suggestions
+        searchInput.addEventListener('input', function (e) {
+            const searchTerm = e.target.value.trim();
+            showSuggestions(searchTerm);
+        });
+
+        // Search button click
+        const searchButton = document.getElementById('searchButton');
+        if (searchButton) {
+            searchButton.addEventListener('click', function () {
+                performSearch(searchInput.value);
+                suggestionsBox.classList.add('hidden');
+            });
+        }
+
+        // Enter key to search
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                performSearch(searchInput.value);
+                suggestionsBox.classList.add('hidden');
+            } else if (e.key === 'Escape') {
+                searchInput.value = '';
+                performSearch('');
+                suggestionsBox.classList.add('hidden');
+                searchInput.blur();
+            }
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.classList.add('hidden');
+            }
+        });
+    });
+</script>
+
+@helper RenderPagination()
+{
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    long? categoryId = ViewBag.SelectedCategoryId as long?;
+
+    if (totalPages <= 1) { return; }
+
+    // First page button
+    <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = categoryId, page = 1 })"
+       class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+    </a>
+
+    // Previous page button
+    <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = categoryId, page = currentPage - 1 })"
+       class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    </a>
+
+    int startPage = Math.Max(1, currentPage - 2);
+    int endPage = Math.Min(totalPages, currentPage + 2);
+
+    if (startPage > 1)
+    {
+        <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = categoryId, page = 1 })"
+           class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">1</a>
+        if (startPage > 2)
+        {
+            <span class="px-2 text-gray-500">...</span>
+        }
+    }
+
+    for (int i = startPage; i <= endPage; i++)
+    {
+        <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = categoryId, page = i })"
+           class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium @(i == currentPage ? "bg-red-600 text-white" : "border border-gray-300 hover:bg-gray-50")">@i</a>
+    }
+
+    if (endPage < totalPages)
+    {
+        if (endPage < totalPages - 1)
+        {
+            <span class="px-2 text-gray-500">...</span>
+        }
+        <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = categoryId, page = totalPages })"
+           class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">@totalPages</a>
+    }
+
+    // Next page button
+    <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = categoryId, page = currentPage + 1 })"
+       class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </a>
+
+    // Last page button
+    <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = categoryId, page = totalPages })"
+       class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+    </a>
+}

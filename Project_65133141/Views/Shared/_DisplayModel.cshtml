@@ -1,0 +1,159 @@
+@* Partial View để hiển thị model data với DisplayName *@
+@model object
+
+@if (Model != null)
+{
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">Thông tin chi tiết</h3>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach (var property in Model.GetType().GetProperties())
+            {
+                // Skip navigation properties and collections
+                if (property.PropertyType.IsClass && 
+                    property.PropertyType != typeof(string) && 
+                    !property.PropertyType.IsPrimitive && 
+                    !property.PropertyType.IsValueType &&
+                    property.PropertyType != typeof(DateTime) &&
+                    property.PropertyType != typeof(DateTime?))
+                {
+                    continue;
+                }
+
+                var displayName = property.Name;
+                var displayAttribute = property.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                    .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+                
+                if (displayAttribute != null && !string.IsNullOrEmpty(displayAttribute.Name))
+                {
+                    displayName = displayAttribute.Name;
+                }
+
+                var value = property.GetValue(Model);
+                
+                // Skip password fields
+                if (property.Name.ToLower().Contains("password") || property.Name.ToLower().Contains("mat_khau"))
+                {
+                    continue;
+                }
+
+                // Format value based on type
+                string displayValue = "";
+                if (value == null)
+                {
+                    displayValue = "-";
+                }
+                else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
+                {
+                    displayValue = ((DateTime)value).ToString("dd/MM/yyyy");
+                }
+                else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+                {
+                    displayValue = (bool)value ? "Có" : "Không";
+                }
+                else if (property.PropertyType == typeof(decimal) || property.PropertyType == typeof(double) || property.PropertyType == typeof(float))
+                {
+                    displayValue = string.Format("{0:N0}", value);
+                }
+                else
+                {
+                    displayValue = value.ToString();
+                }
+
+                <div class="border-b border-gray-200 pb-3">
+                    <dt class="text-sm font-semibold text-gray-600 mb-1">@displayName</dt>
+                    <dd class="text-base text-gray-900">@displayValue</dd>
+                </div>
+            }
+        </dl>
+    </div>
+}
+
+@model object
+
+@if (Model != null)
+{
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">Thông tin chi tiết</h3>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach (var property in Model.GetType().GetProperties())
+            {
+                // Skip navigation properties and collections
+                if (property.PropertyType.IsClass && 
+                    property.PropertyType != typeof(string) && 
+                    !property.PropertyType.IsPrimitive && 
+                    !property.PropertyType.IsValueType &&
+                    property.PropertyType != typeof(DateTime) &&
+                    property.PropertyType != typeof(DateTime?))
+                {
+                    continue;
+                }
+
+                var displayName = property.Name;
+                var displayAttribute = property.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                    .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+                
+                if (displayAttribute != null && !string.IsNullOrEmpty(displayAttribute.Name))
+                {
+                    displayName = displayAttribute.Name;
+                }
+
+                var value = property.GetValue(Model);
+                
+                // Skip password fields
+                if (property.Name.ToLower().Contains("password") || property.Name.ToLower().Contains("mat_khau"))
+                {
+                    continue;
+                }
+
+                // Format value based on type
+                string displayValue = "";
+                if (value == null)
+                {
+                    displayValue = "-";
+                }
+                else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
+                {
+                    displayValue = ((DateTime)value).ToString("dd/MM/yyyy");
+                }
+                else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+                {
+                    displayValue = (bool)value ? "Có" : "Không";
+                }
+                else if (property.PropertyType == typeof(decimal) || property.PropertyType == typeof(double) || property.PropertyType == typeof(float))
+                {
+                    displayValue = string.Format("{0:N0}", value);
+                }
+                else
+                {
+                    displayValue = value.ToString();
+                }
+
+                <div class="border-b border-gray-200 pb-3">
+                    <dt class="text-sm font-semibold text-gray-600 mb-1">@displayName</dt>
+                    <dd class="text-base text-gray-900">@displayValue</dd>
+                </div>
+            }
+        </dl>
+    </div>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

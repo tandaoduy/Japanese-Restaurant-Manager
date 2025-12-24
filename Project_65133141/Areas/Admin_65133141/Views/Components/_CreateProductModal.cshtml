@@ -1,0 +1,277 @@
+@using Project_65133141.Models
+@{
+    var categories = ViewBag.Categories as List<DanhMuc>;
+}
+
+<!-- Create Product Modal -->
+<div id="createProductModal" class="auth-modal-overlay" style="display: none;">
+    <div class="auth-modal-container auth-modal-large" style="max-width: 700px;">
+        <button type="button" class="auth-close-btn" onclick="closeCreateProductModal()">&times;</button>
+        
+        <div class="auth-modal-header">
+            <div class="auth-logo">
+                <svg class="w-full h-full p-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+            </div>
+            <h2 class="auth-modal-title">Thêm món ăn mới</h2>
+            <p class="auth-modal-subtitle">Điền thông tin để thêm món vào thực đơn</p>
+        </div>
+
+        <div class="auth-modal-body">
+            <form id="createProductForm" enctype="multipart/form-data" novalidate>
+                @Html.AntiForgeryToken()
+                
+                <!-- Row 1: Name and Category -->
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Tên món ăn <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <input type="text" name="TenMon" id="productTenMon" class="auth-form-control" placeholder="Ví dụ: Sushi Cá Hồi" />
+                        </div>
+                        <span class="auth-error-message" id="error-TenMon"></span>
+                    </div>
+
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Danh mục <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <select name="DanhMucID" id="productDanhMucID" class="auth-form-control">
+                                <option value="">-- Chọn danh mục --</option>
+                                @if (categories != null) {
+                                    foreach (var cat in categories) {
+                                        <option value="@cat.DanhMucID">@cat.TenDanhMuc</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <span class="auth-error-message" id="error-DanhMucID"></span>
+                    </div>
+                </div>
+
+                <!-- Row 2: Price and Discount Price -->
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Giá gốc (VNĐ) <span class="auth-required">*</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <input type="number" name="Gia" id="productGia" class="auth-form-control" placeholder="Nhập giá gốc" min="0" step="1000" />
+                        </div>
+                        <span class="auth-error-message" id="error-Gia"></span>
+                    </div>
+
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Giá giảm (VNĐ)
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <input type="number" name="GiaGiam" id="productGiaGiam" class="auth-form-control" placeholder="Để trống nếu không giảm" min="0" step="1000" />
+                        </div>
+                        <span class="auth-error-message" id="error-GiaGiam"></span>
+                    </div>
+                </div>
+
+                <!-- Row 3: Unit and Status -->
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">
+                            Đơn vị tính
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <input type="text" name="DonViTinh" id="productDonViTinh" class="auth-form-control" placeholder="Mặc định: Phần" />
+                        </div>
+                    </div>
+
+                    <div class="auth-form-group">
+                         <label class="auth-form-label">Trạng thái</label>
+                         <div class="auth-input-wrapper">
+                             <select name="TrangThai" id="productTrangThai" class="auth-form-control">
+                                 <option value="Đang phục vụ">Đang phục vụ</option>
+                                 <option value="Tạm hết">Tạm hết</option>
+                                 <option value="Ngưng bán">Ngưng bán</option>
+                             </select>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Row 4: Image and Description -->
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">Hình ảnh</label>
+                        <div class="auth-input-wrapper">
+                            <input type="file" name="imageFile" id="productImageFile" class="auth-form-control" accept="image/*" />
+                        </div>
+                    </div>
+
+                    <div class="auth-form-group">
+                        <label class="auth-form-label">Mô tả</label>
+                        <div class="auth-input-wrapper">
+                            <textarea name="MoTa" id="productMoTa" class="auth-form-control" rows="3" placeholder="Mô tả chi tiết về món ăn..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 5: Featured Checkbox -->
+                <div class="auth-form-group">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" name="IsNoiBat" id="productIsNoiBat" value="true" class="w-5 h-5 text-red-600 rounded focus:ring-red-500 border-gray-300">
+                        <span class="text-gray-700 font-medium select-none">Đánh dấu món ăn nổi bật</span>
+                    </label>
+                    <input type="hidden" name="IsNoiBat" value="false" />
+                </div>
+
+                <!-- Buttons -->
+                <div class="auth-btn-group">
+                    <button type="button" class="auth-btn auth-btn-cancel" onclick="closeCreateProductModal()">Hủy</button>
+                    <button type="submit" class="auth-btn auth-btn-submit" id="createProductSubmitBtn">Thêm món ăn</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openCreateProductModal() {
+        const modal = document.getElementById('createProductModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Reset form
+        document.getElementById('createProductForm').reset();
+        
+        // Clear all error messages
+        document.querySelectorAll('.auth-error-message').forEach(el => el.textContent = '');
+    }
+
+    function closeCreateProductModal() {
+        document.getElementById('createProductModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Handle form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('createProductForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('createProductSubmitBtn');
+                if (!submitBtn) return;
+                
+                // Clear previous errors
+                document.querySelectorAll('.auth-error-message').forEach(el => el.textContent = '');
+
+                // Client-side validation
+                let hasErrors = false;
+                const errors = {};
+
+                const tenMon = document.getElementById('productTenMon').value.trim();
+                const gia = document.getElementById('productGia').value;
+                const danhMuc = document.getElementById('productDanhMucID').value;
+                const giaGiam = document.getElementById('productGiaGiam').value;
+
+                if (!tenMon) {
+                    errors['TenMon'] = 'Vui lòng nhập tên món ăn';
+                    hasErrors = true;
+                }
+                
+                if (!gia || gia <= 0) {
+                    errors['Gia'] = 'Vui lòng nhập giá bán hợp lệ';
+                    hasErrors = true;
+                }
+
+                if (!danhMuc) {
+                    errors['DanhMucID'] = 'Vui lòng chọn danh mục';
+                    hasErrors = true;
+                }
+
+                if (giaGiam && parseFloat(giaGiam) >= parseFloat(gia)) {
+                     errors['GiaGiam'] = 'Giá giảm phải nhỏ hơn giá gốc';
+                     hasErrors = true;
+                }
+
+                if (hasErrors) {
+                    Object.keys(errors).forEach(key => {
+                        const errorEl = document.getElementById('error-' + key);
+                        if (errorEl) {
+                            errorEl.textContent = errors[key];
+                            errorEl.style.display = 'block';
+                        }
+                    });
+                    return;
+                }
+                
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Đang xử lý...';
+
+                const formData = new FormData(form);
+                
+                fetch('/Admin_65133141/Product/CreateProductAjax', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeCreateProductModal();
+                        if (typeof showAlert === 'function') {
+                            showAlert('success', data.message || 'Thêm món ăn thành công!');
+                        } else {
+                            alert('Thêm món ăn thành công!');
+                        }
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(key => {
+                                const errorEl = document.getElementById('error-' + key);
+                                if (errorEl) {
+                                    errorEl.textContent = data.errors[key];
+                                    errorEl.style.display = 'block';
+                                }
+                            });
+                        }
+                        if (data.message) {
+                             if (typeof showAlert === 'function') {
+                                showAlert('error', data.message);
+                            } else {
+                                alert(data.message);
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const msg = 'Đã xảy ra lỗi khi kết nối server';
+                    if (typeof showAlert === 'function') showAlert('error', msg);
+                    else alert(msg);
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Thêm món ăn';
+                });
+            });
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('createProductModal');
+                if (modal && modal.style.display === 'flex') {
+                    closeCreateProductModal();
+                }
+            }
+        });
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('createProductModal');
+            if (e.target === modal) {
+                closeCreateProductModal();
+            }
+        });
+    });
+</script>

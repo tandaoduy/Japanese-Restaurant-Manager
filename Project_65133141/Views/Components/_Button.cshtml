@@ -1,0 +1,109 @@
+@* Component: Button - Button component có thể tái sử dụng *@
+@{
+    var buttonText = ViewBag.ButtonText as string ?? "Button";
+    var buttonType = ViewBag.ButtonType as string ?? "button"; // button, submit, reset
+    var buttonStyle = ViewBag.ButtonStyle as string ?? "primary"; // primary, secondary, success, danger, warning, info
+    var buttonSize = ViewBag.ButtonSize as string ?? "md"; // sm, md, lg
+    var buttonUrl = ViewBag.ButtonUrl as string ?? "";
+    var buttonOnClick = ViewBag.ButtonOnClick as string ?? "";
+    var isDisabled = ViewBag.IsDisabled as bool? ?? false;
+    var icon = ViewBag.Icon as string ?? "";
+    var iconPosition = ViewBag.IconPosition as string ?? "left"; // left, right
+}
+
+@{
+    var styleClasses = "";
+    switch (buttonStyle)
+    {
+        case "primary":
+            styleClasses = "bg-red-600 hover:bg-red-700 text-white";
+            break;
+        case "secondary":
+            styleClasses = "bg-gray-600 hover:bg-gray-700 text-white";
+            break;
+        case "success":
+            styleClasses = "bg-green-600 hover:bg-green-700 text-white";
+            break;
+        case "danger":
+            styleClasses = "bg-red-600 hover:bg-red-700 text-white";
+            break;
+        case "warning":
+            styleClasses = "bg-yellow-600 hover:bg-yellow-700 text-white";
+            break;
+        case "info":
+            styleClasses = "bg-blue-600 hover:bg-blue-700 text-white";
+            break;
+        default:
+            styleClasses = "bg-red-600 hover:bg-red-700 text-white";
+            break;
+    }
+
+    var sizeClasses = "";
+    switch (buttonSize)
+    {
+        case "sm":
+            sizeClasses = "px-3 py-1.5 text-sm";
+            break;
+        case "lg":
+            sizeClasses = "px-6 py-3 text-lg";
+            break;
+        default:
+            sizeClasses = "px-4 py-2 text-base";
+            break;
+    }
+}
+
+@if (!string.IsNullOrEmpty(buttonUrl))
+{
+    <a href="@buttonUrl" 
+       class="@styleClasses @sizeClasses rounded-lg font-semibold transition-all duration-200 inline-flex items-center space-x-2 @(isDisabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg")"
+       @(isDisabled ? "onclick='return false;'" : "")>
+        @if (!string.IsNullOrEmpty(icon) && iconPosition == "left")
+        {
+            <span>@Html.Raw(icon)</span>
+        }
+        <span>@buttonText</span>
+        @if (!string.IsNullOrEmpty(icon) && iconPosition == "right")
+        {
+            <span>@Html.Raw(icon)</span>
+        }
+    </a>
+}
+else
+{
+    <button type="@buttonType" 
+            @if (!string.IsNullOrEmpty(buttonOnClick)) { <text>onclick="@buttonOnClick"</text> }
+            class="@styleClasses @sizeClasses rounded-lg font-semibold transition-all duration-200 inline-flex items-center space-x-2 @(isDisabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg")"
+            @(isDisabled ? "disabled" : "")>
+        @if (!string.IsNullOrEmpty(icon) && iconPosition == "left")
+        {
+            <span>@Html.Raw(icon)</span>
+        }
+        <span>@buttonText</span>
+        @if (!string.IsNullOrEmpty(icon) && iconPosition == "right")
+        {
+            <span>@Html.Raw(icon)</span>
+        }
+    </button>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

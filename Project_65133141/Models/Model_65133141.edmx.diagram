@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="5c3b0160ae1a425ea39bf225d1e4ca85" Name="Diagram1" ZoomLevel="94">
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.BanAn" Width="1.5" PointX="0.75" PointY="5.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.ChiTietDatHangOnline" Width="1.5" PointX="5.25" PointY="18.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.ChiTietDonHang" Width="1.5" PointX="5.25" PointY="7.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.DanhGia" Width="1.5" PointX="3" PointY="12" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.DanhMuc" Width="1.5" PointX="5.75" PointY="1.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.DatBan" Width="1.5" PointX="6" PointY="11.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.DatHangOnline" Width="1.5" PointX="3" PointY="18.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.DonHang" Width="1.5" PointX="3" PointY="7.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.HoaDon" Width="1.5" PointX="8.25" PointY="7.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.MonAn" Width="1.5" PointX="3" PointY="2.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.NhanVien" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.ThanhToan" Width="1.5" PointX="5.25" PointY="22.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.ThongBao" Width="1.5" PointX="7.75" PointY="1.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.TinTuc" Width="1.5" PointX="3" PointY="26.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.User" Width="1.5" PointX="0.75" PointY="11.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="QuanLyNhaHangNhat_65133141Model.VaiTro" Width="1.5" PointX="1.5" PointY="23.75" IsExpanded="true" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__DatBan__BanID__656C112C" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__DonHang__BanID__6C190EBB" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__ChiTietDa__DonOn__06CD04F7" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__ChiTietDa__MonAn__07C12930" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__ChiTietDo__DonHa__71D1E811" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__ChiTietDo__MonAn__72C60C4A" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__DanhGia__MonAnID__1332DBDC" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__DanhGia__UserID__123EB7A3" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__DatBan__UserID__6477ECF3" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__DatHangOn__Khach__02FC7413" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__ThanhToan__DonOn__0D7A0286" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__DonHang__NhanVie__6D0D32F4" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__DonHang__UserID__6E01572D" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__HoaDon__DonHangI__7A672E12" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__HoaDon__NhanVien__7B5B524B" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__NhanVien__VaiTro__3E52440B" ManuallyRouted="false" />
+        <AssociationConnector Association="QuanLyNhaHangNhat_65133141Model.FK__TinTuc__NguoiDan__59063A47" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
