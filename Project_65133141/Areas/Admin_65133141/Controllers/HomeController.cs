@@ -68,8 +68,8 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 // Also check by role name directly to be safe
                 var roleName = x.VaiTro?.TenVaiTro?.ToLower().Trim() ?? "";
                 if (roleName == "admin" || roleName == "administrator" || roleName.Contains("admin")) return false;
-                // Check if NgayVaoLam is within last 7 days
-                return x.NgayVaoLam.HasValue && x.NgayVaoLam.Value.Date >= sevenDaysAgo;
+                // Check if NgayVaoLam is within last 7 days (so sánh trực tiếp DateTime, không dùng .Date để tránh lỗi LINQ to Entities)
+                return x.NgayVaoLam.HasValue && x.NgayVaoLam.Value >= sevenDaysAgo;
             });
             
             // Calculate total active dishes (mon an)
@@ -80,6 +80,16 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
             var newDishesCount = db.MonAns
                 .Count(m => m.NgayTao >= sevenDaysAgo);
             
+            // Calculate today's reservations
+            var todayStart = DateTime.Now.Date;
+            var todayEnd = todayStart.AddDays(1);
+            var todayReservations = db.DatBans
+                .Count(d => d.ThoiGianDen >= todayStart && d.ThoiGianDen < todayEnd);
+            
+            // Calculate pending reservations
+            var pendingReservations = db.DatBans
+                .Count(d => d.TrangThai == "Chờ xác nhận");
+            
             // Pass statistics to view
             ViewBag.TotalCustomers = totalCustomers;
             ViewBag.NewCustomers = newCustomers;
@@ -87,6 +97,8 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
             ViewBag.NewEmployees = newEmployees;
             ViewBag.TotalActiveDishes = totalActiveDishes;
             ViewBag.NewDishesCount = newDishesCount;
+            ViewBag.TodayReservations = todayReservations;
+            ViewBag.PendingReservations = pendingReservations;
             
             return View();
         }

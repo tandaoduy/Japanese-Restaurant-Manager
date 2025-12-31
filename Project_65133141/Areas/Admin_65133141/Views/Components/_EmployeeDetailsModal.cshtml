@@ -2,383 +2,309 @@
 
 <!-- Employee Details Modal -->
 <div id="employeeDetailsModal" class="auth-modal-overlay" style="display: none;">
-    <div class="auth-modal-container auth-modal-large">
-        <button type="button" class="auth-close-btn" onclick="closeEmployeeDetailsModal()">&times;</button>
+    <div class="auth-modal-container auth-modal-large" style="max-width: 800px; padding: 0;">
+        <button type="button" class="auth-close-btn" onclick="closeEmployeeDetailsModal()" style="top: 15px; right: 15px; background: white; border-radius: 50%; width: 32px; height: 32px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">&times;</button>
         
-        <div class="auth-modal-header">
-            <div class="auth-logo" id="employeeAvatar">
-                <div class="w-full h-full rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-white font-bold text-2xl">
-                    ?
-                </div>
-            </div>
-            <h2 class="auth-modal-title">Chi tiết nhân viên</h2>
-            <p class="auth-modal-subtitle">Thông tin chi tiết về nhân viên</p>
-        </div>
-
-        <div class="auth-modal-body">
-            <div class="auth-form-row">
-                <div class="auth-form-group">
-                    <label class="auth-form-label">Mã nhân viên</label>
-                    <div class="employee-detail-value" id="modalEmployeeCode">-</div>
-                </div>
-                <div class="auth-form-group">
-                    <label class="auth-form-label">Họ tên</label>
-                    <div class="employee-detail-value" id="modalFullName">-</div>
-                </div>
-            </div>
-
-            <div class="auth-form-row">
-                <div class="auth-form-group">
-                    <label class="auth-form-label">Email</label>
-                    <div class="employee-detail-value" id="modalEmail">-</div>
-                </div>
-                <div class="auth-form-group">
-                    <label class="auth-form-label">Số điện thoại</label>
-                    <div class="employee-detail-value" id="modalPhoneNumber">-</div>
+        <div class="flex flex-col md:flex-row h-full">
+            <!-- Left: Info Card -->
+            <div class="w-full md:w-1/2 bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-6" style="min-height: 400px;">
+                <div class="w-full max-w-sm">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="text-center mb-4">
+                            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <span id="detailEmployeeAvatar" class="text-3xl font-bold text-green-600">?</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900" id="detailEmployeeId">#000000</h3>
+                            <p class="text-sm text-gray-500 mt-1">Mã nhân viên</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Ngày sinh</span>
+                                <span class="text-sm font-semibold text-gray-800" id="detailEmployeeDateOfBirthLeft">-</span>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Ngày vào làm</span>
+                                <span class="text-sm font-semibold text-gray-800" id="detailEmployeeStartDate">-</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="auth-form-row">
-                <div class="auth-form-group">
-                    <label class="auth-form-label">Ngày sinh</label>
-                    <div class="employee-detail-value" id="modalDateOfBirth">-</div>
-                </div>
-                <div class="auth-form-group">
-                    <label class="auth-form-label">Ngày vào làm</label>
-                    <div class="employee-detail-value" id="modalStartDate">-</div>
-                </div>
-            </div>
+            <!-- Right: Details -->
+            <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
+                <div>
+                   <!-- Header -> Title & Badges -->
+                   <div class="flex items-start justify-between mb-4">
+                       <div>
+                           <h2 class="text-2xl font-bold text-gray-900 mb-2 leading-tight" id="detailEmployeeName">-</h2>
+                       </div>
+                   </div>
 
-            <div class="auth-form-group">
-                <label class="auth-form-label">Địa chỉ</label>
-                <div class="employee-detail-value" id="modalAddress">-</div>
-            </div>
+                   <!-- Details Grid -->
+                   <div class="grid grid-cols-1 gap-y-6 mb-8">
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Email</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailEmployeeEmail">-</span>
+                       </div>
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Số điện thoại</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailEmployeePhone">-</span>
+                       </div>
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Địa chỉ</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailEmployeeAddress">-</span>
+                       </div>
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Ngày sinh</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailEmployeeDateOfBirth">-</span>
+                       </div>
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Ngày vào làm</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailEmployeeStartDateRight">-</span>
+                       </div>
+                       <div id="detailEmployeePasswordContainer" class="hidden">
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Mật khẩu (hash SHA256)</span>
+                           <div class="flex items-center space-x-2">
+                               <span id="detailEmployeePasswordDisplay" class="font-mono text-gray-900 font-semibold text-sm">••••••••</span>
+                               <button type="button" id="toggleEmployeePassword" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                                   <svg id="employeeEyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                   </svg>
+                               </button>
+                               <span id="detailEmployeePasswordHash" class="hidden font-mono text-gray-600 text-xs break-all" style="max-width: 200px;"></span>
+                           </div>
+                       </div>
+                   </div>
+                </div>
 
-            <div class="auth-form-group">
-                <label class="auth-form-label">Mật khẩu</label>
-                <div class="flex items-center gap-3">
-                    <span id="modalPasswordMask" class="employee-detail-value flex-1">••••••••••••••••</span>
-                    <button type="button" id="modalTogglePasswordBtn" class="inline-flex items-center px-2 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                        <svg id="modalEyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
+                <!-- Footer Buttons -->
+                <div class="flex items-center gap-3 mt-auto">
+                    <button type="button" onclick="openEditFromEmployeeDetails()" class="flex-1 px-4 py-2.5 bg-[#f97316] hover:bg-[#ea580c] active:bg-[#c2410c] text-white rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg active:shadow-md transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        Sửa nhân viên
+                    </button>
+                    <button type="button" onclick="closeEmployeeDetailsModal()" class="px-6 py-2.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-100 transition-all active:scale-95">
+                        Đóng
                     </button>
                 </div>
-                <span id="modalPasswordFull" data-hash="" class="hidden"></span>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    /* Auth Modal Styles for Employee Details */
-    .auth-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        backdrop-filter: blur(4px);
-    }
-
-    .auth-modal-container {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        max-width: 500px;
-        width: 90%;
-        position: relative;
-        animation: authSlideIn 0.5s ease-out;
-        max-height: 90vh;
-        overflow-y: auto;
-        overflow-x: hidden;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(128, 128, 128, 0.3) transparent;
-    }
-
-    /* Custom Scrollbar for Webkit browsers */
-    .auth-modal-container::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .auth-modal-container::-webkit-scrollbar-track {
-        background: transparent;
-        border-radius: 10px;
-    }
-
-    .auth-modal-container::-webkit-scrollbar-thumb {
-        background: rgba(128, 128, 128, 0.3);
-        border-radius: 10px;
-        transition: background 0.3s ease;
-    }
-
-    .auth-modal-container::-webkit-scrollbar-thumb:hover {
-        background: rgba(128, 128, 128, 0.5);
-    }
-
-    .auth-modal-large {
-        max-width: 500px;
-    }
-
-    @@keyframes authSlideIn {
-        from {
-            transform: translateY(-50px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .auth-modal-header {
-        text-align: center;
-        padding: 30px 30px 20px;
-        border-bottom: 1px solid #f0f0f0;
-    }
-
-    .auth-logo {
-        width: 60px;
-        height: 60px;
-        margin: 0 auto 15px;
-        border-radius: 50%;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .auth-modal-title {
-        font-size: 24px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 5px;
-    }
-
-    .auth-modal-subtitle {
-        font-size: 14px;
-        color: #888;
-    }
-
-    .auth-modal-body {
-        padding: 30px;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        position: relative;
-    }
-
-    .auth-form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-bottom: 20px;
-        width: 100%;
-    }
-
-    .auth-form-group {
-        margin-bottom: 20px;
-        width: 100%;
-    }
-
-    .auth-form-label {
-        display: block;
-        font-size: 13px;
-        font-weight: 600;
-        color: #555;
-        margin-bottom: 8px;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    .auth-close-btn {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: none;
-        border: none;
-        font-size: 24px;
-        color: #999;
-        cursor: pointer;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: all 0.3s;
-        z-index: 10;
-    }
-
-    .auth-close-btn:hover {
-        background: rgba(220, 38, 38, 0.1);
-        color: #dc2626;
-        transform: scale(1.1);
-    }
-
-    /* Employee detail value styles */
-    .employee-detail-value {
-        color: #333;
-        font-weight: 600;
-        font-size: 15px;
-        padding: 10px 0;
-        min-height: 40px;
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid #f0f0f0;
-    }
-
-    /* Loading state */
-    #employeeDetailsModal .auth-modal-body.loading {
-        opacity: 0.5;
-        pointer-events: none;
-    }
-
-    #employeeDetailsModal .auth-modal-body.loading::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 40px;
-        height: 40px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #10b981;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    @@keyframes spin {
-        0% { transform: translate(-50%, -50%) rotate(0deg); }
-        100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    @@media (max-width: 600px) {
-        .auth-form-row {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
 <script>
-    var modalPasswordShown = false;
-    var modalPasswordHash = '';
+    let currentDetailEmployeeId = 0;
 
     function openEmployeeDetailsModal(employeeId) {
+        currentDetailEmployeeId = employeeId;
         const modal = document.getElementById('employeeDetailsModal');
-        const modalBody = modal.querySelector('.auth-modal-body');
         
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        modalBody.classList.add('loading');
-
-        // Reset password visibility
-        modalPasswordShown = false;
-        document.getElementById('modalPasswordMask').textContent = '••••••••••••••••';
-        document.getElementById('modalEyeIcon').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
-
-        // Fetch employee details via AJAX
-        fetch('/Admin_65133141/Employee/GetEmployeeDetails/' + employeeId)
-            .then(function(response) {
-                if (!response.ok) {
-                    throw new Error('Không thể tải thông tin nhân viên');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Reset and Load
+        document.getElementById('detailEmployeeName').textContent = 'Đang tải...';
+        
+        fetch(`@Url.Action("GetEmployeeDetails", "Employee", new { area = "Admin_65133141" })/${employeeId}`)
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        throw new Error('Server error: ' + res.status);
+                    });
                 }
-                return response.json();
-            })
-            .then(function(data) {
-                if (data.success) {
-                    populateEmployeeModal(data.employee);
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return res.json();
                 } else {
-                    alert(data.message || 'Không thể tải thông tin nhân viên');
+                    return res.text().then(text => {
+                        throw new Error('Invalid response format');
+                    });
+                }
+            })
+            .then(data => {
+                if(data.success) {
+                    populateEmployeeDetails(data.data);
+                } else {
+                    if (typeof showAlert === 'function') {
+                        showAlert('error', data.message || 'Không thể tải thông tin nhân viên');
+                    } else {
+                        alert(data.message || 'Không thể tải thông tin nhân viên');
+                    }
                     closeEmployeeDetailsModal();
                 }
             })
-            .catch(function(error) {
-                console.error('Error:', error);
-                alert('Đã xảy ra lỗi khi tải thông tin nhân viên');
+            .catch(err => {
+                console.error('Error loading employee details:', err);
+                if (typeof showAlert === 'function') {
+                    showAlert('error', 'Lỗi kết nối server. Vui lòng thử lại.');
+                } else {
+                    alert('Lỗi kết nối server');
+                }
                 closeEmployeeDetailsModal();
-            })
-            .finally(function() {
-                modalBody.classList.remove('loading');
             });
     }
 
-    function populateEmployeeModal(employee) {
-        // Employee code
-        document.getElementById('modalEmployeeCode').textContent = employee.employeeCode || '-';
+    function populateEmployeeDetails(e) {
+        // ID Formatting (#000000)
+        document.getElementById('detailEmployeeId').textContent = 'NV#' + (e.Id || 0).toString().padStart(5, '0');
         
-        // Full name
-        document.getElementById('modalFullName').textContent = employee.fullName || '-';
+        document.getElementById('detailEmployeeName').textContent = e.FullName || 'N/A';
+        document.getElementById('detailEmployeeEmail').textContent = e.Email || 'N/A';
+        document.getElementById('detailEmployeePhone').textContent = e.PhoneNumber || 'N/A';
+        document.getElementById('detailEmployeeAddress').textContent = e.Address || 'N/A';
         
-        // Email
-        document.getElementById('modalEmail').textContent = employee.email || '-';
+        // Avatar initial
+        const avatarEl = document.getElementById('detailEmployeeAvatar');
+        if (e.FullName && e.FullName.length > 0) {
+            avatarEl.textContent = e.FullName.substring(0, 1).toUpperCase();
+        } else {
+            avatarEl.textContent = '?';
+        }
         
-        // Phone number
-        document.getElementById('modalPhoneNumber').textContent = employee.phoneNumber || '-';
+        // Date formatting - Must display dates
+        // Helper function to parse ASP.NET JSON date format /Date(timestamp)/
+        function parseDate(dateValue) {
+            if (!dateValue) return null;
+            
+            try {
+                // Handle ASP.NET JSON date format: /Date(1234567890)/
+                if (typeof dateValue === 'string' && dateValue.startsWith('/Date(')) {
+                    const match = dateValue.match(/\/Date\((\d+)\)\//);
+                    if (match) {
+                        return new Date(parseInt(match[1]));
+                    }
+                }
+                
+                // Handle ISO string format
+                if (typeof dateValue === 'string') {
+                    if (dateValue.includes('T')) {
+                        return new Date(dateValue);
+                    } else if (dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                        // Format: yyyy-MM-dd
+                        return new Date(dateValue + 'T00:00:00');
+                    } else if (dateValue.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                        // Format: dd/MM/yyyy
+                        const parts = dateValue.split('/');
+                        return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                    } else {
+                        return new Date(dateValue);
+                    }
+                }
+                
+                // Handle Date object
+                if (dateValue instanceof Date) {
+                    return dateValue;
+                }
+            } catch (err) {
+                console.error('Error parsing date:', err, 'Value:', dateValue);
+            }
+            
+            return null;
+        }
         
-        // Date of birth
-        document.getElementById('modalDateOfBirth').textContent = employee.dateOfBirth || '-';
+        // Format date as dd/mm/yyyy
+        function formatDate(date) {
+            if (!date || isNaN(date.getTime())) {
+                return 'Chưa có thông tin';
+            }
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
         
-        // Start date
-        document.getElementById('modalStartDate').textContent = employee.startDate || '-';
+        // Parse and format DateOfBirth
+        const dateOfBirth = parseDate(e.DateOfBirth);
+        const dateOfBirthStr = formatDate(dateOfBirth);
+        document.getElementById('detailEmployeeDateOfBirth').textContent = dateOfBirthStr;
+        document.getElementById('detailEmployeeDateOfBirthLeft').textContent = dateOfBirthStr;
         
-        // Address
-        document.getElementById('modalAddress').textContent = employee.address || '-';
+        // Parse and format StartDate
+        const startDate = parseDate(e.StartDate);
+        const startDateStr = formatDate(startDate);
+        document.getElementById('detailEmployeeStartDate').textContent = startDateStr;
+        document.getElementById('detailEmployeeStartDateRight').textContent = startDateStr;
         
-        // Password hash
-        modalPasswordHash = employee.passwordHash || '';
-        document.getElementById('modalPasswordFull').setAttribute('data-hash', modalPasswordHash);
-        
-        // Avatar
-        const avatarLetter = employee.fullName ? employee.fullName.substring(0, 1).toUpperCase() : '?';
-        document.getElementById('employeeAvatar').innerHTML = 
-            '<div class="w-full h-full rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center text-white font-bold text-2xl">' + 
-            avatarLetter + 
-            '</div>';
+        // Password
+        const passwordContainer = document.getElementById('detailEmployeePasswordContainer');
+        if (e.Password && e.Password.trim()) {
+            document.getElementById('detailEmployeePasswordHash').textContent = e.Password;
+            passwordContainer.classList.remove('hidden');
+            
+            // Toggle password visibility
+            const toggleBtn = document.getElementById('toggleEmployeePassword');
+            const passwordDisplay = document.getElementById('detailEmployeePasswordDisplay');
+            const passwordHash = document.getElementById('detailEmployeePasswordHash');
+            const eyeIcon = document.getElementById('employeeEyeIcon');
+            
+            if (toggleBtn && passwordDisplay && passwordHash && eyeIcon) {
+                let isPasswordVisible = false;
+                const fullPassword = e.Password;
+                const maxLength = 30;
+                
+                function truncatePassword(text) {
+                    if (text.length > maxLength) {
+                        return text.substring(0, maxLength) + '...';
+                    }
+                    return text;
+                }
+                
+                passwordHash.textContent = truncatePassword(fullPassword);
+                
+                toggleBtn.onclick = function() {
+                    isPasswordVisible = !isPasswordVisible;
+                    if (isPasswordVisible) {
+                        passwordDisplay.classList.add('hidden');
+                        passwordHash.classList.remove('hidden');
+                        passwordHash.textContent = fullPassword;
+                        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+                    } else {
+                        passwordDisplay.classList.remove('hidden');
+                        passwordHash.classList.add('hidden');
+                        passwordHash.textContent = truncatePassword(fullPassword);
+                        eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+                    }
+                };
+            }
+        } else {
+            passwordContainer.classList.add('hidden');
+        }
+    }
+
+    function openEditFromEmployeeDetails() {
+        closeEmployeeDetailsModal();
+        setTimeout(() => {
+            if (typeof openEditEmployeeModal === 'function') {
+                openEditEmployeeModal(currentDetailEmployeeId);
+            }
+        }, 100);
     }
 
     function closeEmployeeDetailsModal() {
-        document.getElementById('employeeDetailsModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    // Toggle password visibility in modal
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleBtn = document.getElementById('modalTogglePasswordBtn');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', function() {
-                const maskSpan = document.getElementById('modalPasswordMask');
-                const eyeIcon = document.getElementById('modalEyeIcon');
-                
-                modalPasswordShown = !modalPasswordShown;
-                
-                if (modalPasswordShown) {
-                    const displayHash = modalPasswordHash.length > 36 ? modalPasswordHash.substring(0, 36) + '...' : modalPasswordHash;
-                    maskSpan.textContent = displayHash || '(chưa có)';
-                    eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.96 9.96 0 012.563-4.304m3.106-2.038A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.043 5.197M15 12a3 3 0 00-3-3m0 0a3 3 0 013 3m-3-3L4.5 4.5" />';
-                } else {
-                    maskSpan.textContent = '••••••••••••••••';
-                    eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
-                }
-            });
+        const modal = document.getElementById('employeeDetailsModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
-    });
-
-    // Close modal on ESC key
+    }
+    
+    // Close on ESC
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
+        if(e.key === 'Escape') {
             const modal = document.getElementById('employeeDetailsModal');
-            if (modal && modal.style.display === 'flex') {
+            if(modal && modal.style.display === 'flex') {
                 closeEmployeeDetailsModal();
             }
         }
     });
 
-    // Close modal when clicking outside
     document.addEventListener('click', function(e) {
         const modal = document.getElementById('employeeDetailsModal');
-        if (e.target === modal) {
+        if(modal && e.target === modal) {
             closeEmployeeDetailsModal();
         }
     });

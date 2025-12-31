@@ -1,0 +1,140 @@
+@{
+    ViewBag.Title = "Quản lý tài khoản";
+    Layout = "~/Areas/Employee_65133141/Views/Shared/_Layout.cshtml";
+    var userRole = Session["UserRole"] as string ?? "Nhân viên";
+}
+@model Project_65133141.Models.NhanVien
+
+<div class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-pink-100">
+                <div class="bg-gradient-to-r from-pink-500 to-rose-500 h-32 relative">
+                    <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2">
+                        <div class="w-24 h-24 rounded-full border-4 border-white bg-white shadow-lg flex items-center justify-center overflow-hidden">
+                            @if (!string.IsNullOrEmpty(Model.Avatar))
+                            {
+                                <img src="@Url.Content("~/Images/Employees/" + Model.Avatar)" alt="@Model.HoTen" class="w-full h-full object-cover">
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold">
+                                    @(string.IsNullOrEmpty(Model.HoTen) ? "N" : Model.HoTen.Substring(0, 1).ToUpper())
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-12 pb-8 px-6 text-center">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-1">@Model.HoTen</h2>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-pink-100 text-pink-600">
+                        @(Model.VaiTro != null ? Model.VaiTro.TenVaiTro : userRole)
+                    </span>
+
+                    <div class="mt-6 flex flex-col space-y-3 text-left">
+                        <div class="flex items-center text-gray-600 p-3 bg-gray-50 rounded-lg">
+                            <span class="w-8 flex justify-center text-pink-500">📧</span>
+                            <span class="text-sm">@Model.Email</span>
+                        </div>
+                        <div class="flex items-center text-gray-600 p-3 bg-gray-50 rounded-lg">
+                            <span class="w-8 flex justify-center text-pink-500">📱</span>
+                            <span class="text-sm">@(string.IsNullOrEmpty(Model.SDT) ? "Chưa cập nhật" : Model.SDT)</span>
+                        </div>
+                        <div class="flex items-center text-gray-600 p-3 bg-gray-50 rounded-lg">
+                            <span class="w-8 flex justify-center text-pink-500">📍</span>
+                            <span class="text-sm">@(string.IsNullOrEmpty(Model.DiaChi) ? "Chưa cập nhật" : Model.DiaChi)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-2xl shadow-xl p-8 border border-pink-100">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center border-b pb-4">
+                    <span class="bg-pink-100 p-2 rounded-lg text-pink-600 mr-3">🔒</span>
+                    Đổi Mật Khẩu
+                </h3>
+
+                <form id="changePasswordForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Mật khẩu hiện tại</label>
+                        <input type="password" name="oldPassword" required
+                               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-50 focus:bg-white"
+                               placeholder="Nhập mật khẩu hiện tại của bạn" />
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mật khẩu mới</label>
+                            <input type="password" name="newPassword" required
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-50 focus:bg-white"
+                                   placeholder="Nhập mật khẩu mới" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Xác nhận mật khẩu mới</label>
+                            <input type="password" name="confirmPassword" required
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors bg-gray-50 focus:bg-white"
+                                   placeholder="Nhập lại mật khẩu mới" />
+                        </div>
+                    </div>
+
+                    <div id="passwordMessage" class="hidden p-4 rounded-lg text-sm font-medium"></div>
+
+                    <div class="flex justify-end pt-4">
+                        <button type="submit"
+                                class="px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold rounded-xl hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                            Cập nhật mật khẩu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('changePasswordForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const form = this;
+        const msgDiv = document.getElementById('passwordMessage');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        msgDiv.classList.add('hidden');
+        msgDiv.className = 'hidden p-4 rounded-lg text-sm font-medium';
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="inline-block animate-spin mr-2">↻</span> Đang xử lý...';
+
+        const formData = new FormData(form);
+
+        fetch('@Url.Action("ChangePasswordAjax", "Account", new { area = "Employee_65133141" })', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                msgDiv.classList.remove('hidden');
+                if (data.success) {
+                    msgDiv.classList.add('bg-green-100', 'text-green-700');
+                    msgDiv.innerHTML = '✅ ' + data.message;
+                    form.reset();
+                } else {
+                    msgDiv.classList.add('bg-red-100', 'text-red-700');
+                    msgDiv.innerHTML = '⚠️ ' + data.message;
+                }
+            })
+            .catch(() => {
+                msgDiv.classList.remove('hidden');
+                msgDiv.classList.add('bg-red-100', 'text-red-700');
+                msgDiv.innerHTML = '⚠️ Đã xảy ra lỗi kết nối.';
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Cập nhật mật khẩu';
+            });
+    });
+</script>

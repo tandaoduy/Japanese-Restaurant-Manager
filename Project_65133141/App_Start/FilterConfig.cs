@@ -1,5 +1,6 @@
 ﻿using System.Web;
 using System.Web.Mvc;
+using Project_65133141.Filters;
 
 namespace Project_65133141
 {
@@ -7,7 +8,8 @@ namespace Project_65133141
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
-            filters.Add(new HandleErrorAttribute());
+            // Use custom area error handler instead of default
+            filters.Add(new AreaErrorHandlerAttribute());
         }
     }
 }

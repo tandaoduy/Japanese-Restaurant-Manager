@@ -287,6 +287,9 @@ INSERT INTO BanAn (TenBan, SucChua, ViTri) VALUES
 PRINT N'Cài đặt cơ sở dữ liệu QuanLyNhaHangNhat_65133141 thành công với thông tin cá nhân bổ sung!';
 GO
 
+ALTER TABLE DonHang
+ADD SoDienThoai NVARCHAR(15) NULL;
+
 
 SELECT VaiTroID, TenVaiTro
 FROM VaiTro;
@@ -316,4 +319,21 @@ WHERE NOT EXISTS (SELECT 1 FROM DanhMuc WHERE TenDanhMuc = N'Sashimi');
 INSERT INTO DanhMuc (TenDanhMuc, MoTa)
 SELECT N'Teishoku', N'Set ăn Nhật Bản'
 WHERE NOT EXISTS (SELECT 1 FROM DanhMuc WHERE TenDanhMuc = N'Teishoku');
+GO
+
+CREATE OR ALTER TRIGGER TRG_DonHang_LaySDT_User
+ON DonHang
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dh
+    SET dh.SoDienThoai = u.SDT
+    FROM DonHang dh
+    INNER JOIN inserted i ON dh.DonHangID = i.DonHangID
+    INNER JOIN Users u ON i.UserID = u.UserID
+    WHERE i.UserID IS NOT NULL
+      AND (i.SoDienThoai IS NULL OR LTRIM(RTRIM(i.SoDienThoai)) = '');
+END;
 GO

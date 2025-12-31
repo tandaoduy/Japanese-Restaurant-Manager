@@ -1,0 +1,340 @@
+@{
+    ViewBag.Title = "Hóa Đơn";
+    Layout = null; // No layout for printing
+    var hoaDon = ViewBag.HoaDon as Project_65133141.Models.HoaDon;
+    
+    if (hoaDon == null)
+    {
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>Lỗi - Không tìm thấy hóa đơn</title>
+        </head>
+        <body>
+            <h1>Lỗi: Không tìm thấy hóa đơn</h1>
+            <p>Vui lòng quay lại trang trước.</p>
+            <button onclick="window.history.back()">Quay lại</button>
+        </body>
+        </html>
+        return;
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa Đơn Thanh Toán</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: white;
+            padding: 20px;
+            color: #000;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+        }
+        .invoice-header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .invoice-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .invoice-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .invoice-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .invoice-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .invoice-restaurant-name {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .invoice-restaurant-sub {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        .invoice-header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .invoice-header p {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .invoice-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .info-section {
+            font-size: 13px;
+        }
+        .info-section p {
+            margin: 5px 0;
+        }
+        .info-label {
+            font-weight: bold;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .items-table th {
+            background: #f0f0f0;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .items-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 13px;
+        }
+        .items-table .text-right {
+            text-align: right;
+        }
+        .items-table .text-center {
+            text-align: center;
+        }
+        .total-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #000;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .total-row.total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .payment-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .payment-info p {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .print-buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .print-buttons button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #14b8a6;
+            color: white;
+        }
+        .print-buttons button:hover {
+            background: #0d9488;
+        }
+        @@media print {
+            .print-buttons {
+                display: none;
+            }
+            body {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-buttons">
+        <button onclick="window.location.href='@Url.Action("Index", "Order", new { area = "Employee_65133141" })'">Xác nhận</button>
+        <button onclick="window.print()">In</button>
+    </div>
+
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <div class="invoice-header-top">
+                <div class="invoice-header-left">
+                    <div class="invoice-logo">
+                        <img src="@Url.Content("~/Images/logoNhaHang.png")" alt="SAKURA KAZOKU Logo" />
+                    </div>
+                    <div>
+                        <div class="invoice-restaurant-name">SAKURA KAZOKU</div>
+                        <div class="invoice-restaurant-sub">161 Nguyễn Thiện Thuật, phường Nha Trang, Khánh Hòa</div>
+                        <div class="invoice-restaurant-sub">SĐT: +012 345 67890</div>
+                    </div>
+                </div>
+            </div>
+            <h1 style="text-align:center;">HÓA ĐƠN THANH TOÁN</h1>
+            <p style="text-align:center;">SỐ HĐ: @(hoaDon != null ? "HD" + hoaDon.HoaDonID.ToString("D4") : "N/A")</p>
+        </div>
+
+        <div class="invoice-info">
+            <div class="info-section">
+                <p><span class="info-label">Mã HĐ:</span> @(hoaDon?.DonHang != null ? "#" + hoaDon.DonHang.DonHangID.ToString("X").ToUpper() : "N/A")</p>
+                <p><span class="info-label">Bàn:</span> @(hoaDon?.DonHang?.BanAn != null ? hoaDon.DonHang.BanAn.TenBan + " - " + hoaDon.DonHang.BanAn.ViTri : "N/A")</p>
+                <p><span class="info-label">Giờ vào:</span> @(hoaDon?.DonHang?.NgayDat.HasValue == true ? hoaDon.DonHang.NgayDat.Value.ToString("HH:mm") : "N/A")</p>
+            </div>
+            <div class="info-section">
+                <p><span class="info-label">TN:</span> @(hoaDon?.NhanVien != null ? hoaDon.NhanVien.HoTen : "N/A")</p>
+                <p><span class="info-label">Ngày:</span> @(hoaDon?.NgayLap.HasValue == true ? hoaDon.NgayLap.Value.ToString("dd/MM/yyyy") : "")</p>
+                <p><span class="info-label">Giờ ra:</span> @(hoaDon?.NgayLap.HasValue == true ? hoaDon.NgayLap.Value.ToString("HH:mm") : "")</p>
+            </div>
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>TT</th>
+                    <th>Tên món</th>
+                    <th class="text-center">SL</th>
+                    <th class="text-right">Đơn giá</th>
+                    <th class="text-right">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (hoaDon?.DonHang?.ChiTietDonHangs != null && hoaDon.DonHang.ChiTietDonHangs.Any())
+                {
+                    int stt = 1;
+                    foreach (var detail in hoaDon.DonHang.ChiTietDonHangs)
+                    {
+                        if (detail != null && detail.MonAn != null)
+                {
+                    <tr>
+                        <td>@stt</td>
+                        <td>@detail.MonAn.TenMon</td>
+                        <td class="text-center">@detail.SoLuong</td>
+                        <td class="text-right">@string.Format("{0:N0}", detail.DonGia) ₫</td>
+                        <td class="text-right">@string.Format("{0:N0}", detail.ThanhTien ?? (detail.DonGia * detail.SoLuong)) ₫</td>
+                    </tr>
+                    stt++;
+                        }
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">Không có chi tiết đơn hàng</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            <div class="total-row">
+                <span>Thành tiền:</span>
+                <span>@string.Format("{0:N0}", hoaDon?.TongTienHang ?? 0) ₫</span>
+            </div>
+            <div class="total-row">
+                <span>Tổng tiền:</span>
+                <span>@string.Format("{0:N0}", hoaDon?.TongThanhToan ?? 0) ₫</span>
+            </div>
+            <div class="total-row">
+                <span>+@(hoaDon?.PhuongThucTT ?? "N/A"):</span>
+                <span>@string.Format("{0:N0}", hoaDon?.TongThanhToan ?? 0) ₫</span>
+            </div>
+            @{
+                var cashAmount = ViewBag.CashAmount as decimal?;
+                var change = ViewBag.Change as decimal?;
+                // Hiển thị tiền khách đưa và tiền thừa nếu thanh toán tiền mặt
+                if (hoaDon?.PhuongThucTT == "Tiền mặt")
+                {
+                if (cashAmount.HasValue && cashAmount.Value > 0)
+                {
+                    <div class="total-row">
+                        <span>Tiền khách đưa:</span>
+                        <span>@string.Format("{0:N0}", cashAmount.Value) ₫</span>
+                    </div>
+                }
+                if (change.HasValue && change.Value > 0)
+                {
+                    <div class="total-row">
+                        <span>Tiền thừa:</span>
+                        <span>@string.Format("{0:N0}", change.Value) ₫</span>
+                    </div>
+                    }
+                }
+            }
+        </div>
+
+        <div class="payment-info">
+            @{ 
+                // Xác định tên và số điện thoại khách hàng
+                string tenKhach = "Khách vãng lai";
+                string soDienThoaiKhach = null;
+
+                if (hoaDon?.DonHang != null)
+                {
+                if (hoaDon.DonHang.User != null)
+                {
+                    // Khách hàng trong hệ thống
+                        tenKhach = hoaDon.DonHang.User.HoTen ?? "Khách vãng lai";
+                    soDienThoaiKhach = hoaDon.DonHang.User.SoDienThoai;
+                }
+                else
+                {
+                    // Khách vãng lai: lấy từ thông tin đã lưu trên đơn hàng
+                    tenKhach = string.IsNullOrWhiteSpace(hoaDon.DonHang.GhiChu) ? "Khách vãng lai" : hoaDon.DonHang.GhiChu;
+                    soDienThoaiKhach = hoaDon.DonHang.SoDienThoai;
+                }
+            }
+            }
+            <p><strong>Khách hàng:</strong> @tenKhach @(string.IsNullOrWhiteSpace(soDienThoaiKhach) ? "" : "(" + soDienThoaiKhach + ")")</p>
+            <p><strong>Nhân viên:</strong> @(hoaDon?.NhanVien?.HoTen ?? "N/A")</p>
+            <p><strong>Phương thức thanh toán:</strong> @(hoaDon?.PhuongThucTT ?? "N/A")</p>
+        </div>
+
+        <div class="footer">
+            <p><strong>SAKURA KAZOKU</strong></p>
+            <p>161 Nguyễn Thiện Thuật, phường Nha Trang, Khánh Hòa</p>
+            <p>SĐT: +012 345 67890</p>
+        </div>
+    </div>
+</body>
+</html>
+

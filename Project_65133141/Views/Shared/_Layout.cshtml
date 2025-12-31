@@ -8,10 +8,10 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
     <link rel="shortcut icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
-    <!-- Google Fonts -->
+    <!-- Google Fonts - Japanese Style -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -30,60 +30,142 @@
     @Scripts.Render("~/bundles/modernizr")
     <style>
         * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Noto Sans JP', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+        
+        /* Japanese Style Header */
         .header-shadow {
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
+            background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%);
         }
         .header-scrolled {
             background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 6px 30px rgba(0,0,0,0.12);
         }
-        .red-navbar {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        
+        /* Japanese Navbar - Minimalist Traditional Design */
+        .japanese-navbar {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            z-index: 40;
+            background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);
+            border-bottom: 3px solid #D4AF37;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
-        .nav-link {
+        
+        /* Glowing Border Animation */
+        @@keyframes borderGlow {
+            0%, 100% {
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 15px rgba(212, 175, 55, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 25px rgba(212, 175, 55, 0.6), 0 0 35px rgba(255, 215, 0, 0.4);
+            }
+        }
+        
+        .japanese-navbar {
+            animation: borderGlow 3s ease-in-out infinite;
+        }
+        
+        /* Desktop Nav Links - Clean & Bold (No Icons) */
+        .japanese-nav-link {
             position: relative;
+            display: inline-block;
+            color: #FFFFFF !important;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 17px;
+            letter-spacing: 1.5px;
+            text-decoration: none;
             transition: color 0.3s ease;
         }
-        .nav-link.active {
-            color: #dc2626 !important;
-        }
-        .red-nav-link {
-            position: relative;
-            color: white !important;
-            padding-bottom: 8px;
-            overflow: hidden;
-        }
         
-        /* Hover underline animation - left to right */
-        .red-nav-link::after {
+        /* Simple Underline on Hover */
+        .japanese-nav-link::after {
             content: '';
             position: absolute;
-            bottom: 0;
-            left: 0;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
             width: 0;
-            height: 2px;
-            background: white;
-            transition: width 0.3s ease-out;
+            height: 3px;
+            background: #D4AF37;
+            transition: width 0.3s ease;
         }
         
-        .red-nav-link:hover::after {
-            width: 100%;
+        .japanese-nav-link:hover {
+            color: #FFD700 !important;
         }
         
-        /* Active page underline - fixed */
-        .red-nav-link.active::after {
-            width: 100%;
-            background: white;
+        .japanese-nav-link:hover::after {
+            width: 85%;
         }
         
-        .red-nav-link:hover {
-            color: white !important;
+        .japanese-nav-link.active {
+            color: #FFD700 !important;
         }
+        
+        .japanese-nav-link.active::after {
+            width: 85%;
+        }
+        
+        /* Mobile Menu Styles */
+        .mobile-menu-hidden {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        opacity 0.3s ease;
+        }
+        
+        .mobile-menu-visible {
+            max-height: 500px;
+            opacity: 1;
+            overflow-y: auto;
+        }
+        
+        .mobile-menu-content {
+            padding: 1.5rem;
+            background: linear-gradient(180deg, rgba(139, 0, 0, 0.98) 0%, rgba(165, 42, 42, 0.98) 100%);
+            border-bottom: 3px solid #D4AF37;
+        }
+        
+        .japanese-mobile-link {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #FFFFFF !important;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 1.2px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-icon {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+        
+        .japanese-mobile-link:last-child {
+            border-bottom: none;
+        }
+        
+        .japanese-mobile-link:hover,
+        .japanese-mobile-link.active {
+            background: rgba(212, 175, 55, 0.15);
+            color: #FFD700 !important;
+            padding-left: 28px;
+        }
+        
         @@keyframes buttonPulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -136,6 +218,66 @@
             border: none !important;
             box-shadow: none !important;
         }
+        
+        /* Responsive Header Improvements */
+        /* Tablet - keep search smaller */
+        @@media (max-width: 1279px) and (min-width: 768px) {
+            .search-container {
+                max-width: 180px;
+            }
+            
+            #search-input {
+                font-size: 14px !important;
+            }
+        }
+        
+        /* Tablet and below */
+        @@media (max-width: 1023px) {
+            #main-nav {
+                height: auto !important;
+            }
+            
+            #main-nav .h-20 {
+                height: auto !important;
+                min-height: 56px !important;
+                padding: 0.5rem 0 !important;
+            }
+            
+            .japanese-navbar {
+                top: 56px;
+            }
+        }
+        
+        /* Mobile - hide search completely, optimize header */
+        @@media (max-width: 767px) {
+            /* Hide search on mobile */
+            .search-container,
+            #search-submit-btn {
+                display: none !important;
+            }
+            
+            #main-nav .h-20 {
+                min-height: 52px !important;
+            }
+            
+            .japanese-navbar {
+                top: 52px;
+            }
+            
+            /* Smaller spacer */
+            .h-32 {
+                height: 6rem !important;
+            }
+        }
+        
+        /* Extra small mobile */
+        @@media (max-width: 480px) {
+            #main-nav .px-4 {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
+        }
+        
         #search-submit-btn {
             width: 48px !important;
             height: 48px !important;
@@ -167,13 +309,13 @@
                 <!-- Logo -->
                 <div class="flex items-center space-x-2 flex-shrink-0">
                     <a href="@Url.Action("Index", "Home")" class="flex items-center space-x-2 hover:opacity-80 transition">
-                        <img src="@Url.Content("~/Images/logoNhaHang.png")" alt="Logo" class="w-12 h-12 rounded-full object-cover shadow-md" />
-                        <h1 class="text-base font-bold text-gray-800 whitespace-nowrap tracking-wide">SAKURA KAZOKU</h1>
+                        <img src="@Url.Content("~/Images/logoNhaHang.png")" alt="Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover shadow-md" />
+                        <h1 class="hidden sm:block text-sm sm:text-base font-bold text-gray-800 whitespace-nowrap tracking-wide">SAKURA KAZOKU</h1>
                     </a>
                 </div>
 
-                <!-- Search Bar (Centered) -->
-                <div class="hidden lg:flex flex-1 justify-center mr-4">
+                <!-- Search Bar (Centered) - Hidden on mobile, visible on tablet and desktop -->
+                <div class="hidden md:flex flex-1 justify-center mr-2 lg:mr-4">
                     <div class="w-full max-w-lg flex items-center">
                         <div class="search-container flex items-center bg-white relative flex-1">
                             <!-- Search Icon (Left) -->
@@ -210,10 +352,45 @@
                     </div>
                 </div>
 
-                <!-- Header Icons and Actions -->
-                <div class="hidden lg:flex items-center space-x-3 flex-shrink-0">
+                <!-- Header Icons and Actions - Hidden on mobile, visible on tablet and desktop -->
+                <div class="hidden md:flex items-center space-x-2 lg:space-x-3 flex-shrink-0">
 
-                    @if (User.Identity.IsAuthenticated)
+                    @{
+                        // Check if session has expired but authentication cookie is still valid
+                        bool isSessionValid = Session != null && Session["UserId"] != null;
+                        bool isAuthenticated = User.Identity.IsAuthenticated;
+                        
+                        // If authenticated but session expired, log out immediately
+                        if (isAuthenticated && !isSessionValid)
+                        {
+                            // Clear authentication
+                            System.Web.Security.FormsAuthentication.SignOut();
+                            
+                            // Clear session
+                            if (Session != null)
+                            {
+                                Session.Clear();
+                                Session.Abandon();
+                            }
+                            
+                            // Clear cookies
+                            if (Request.Cookies != null)
+                            {
+                                foreach (string cookieName in Request.Cookies.AllKeys)
+                                {
+                                    HttpCookie cookie = new HttpCookie(cookieName);
+                                    cookie.Expires = DateTime.Now.AddDays(-1);
+                                    Response.Cookies.Add(cookie);
+                                }
+                            }
+                            
+                            // Redirect to home page
+                            Response.Redirect(Url.Action("Index", "Home"));
+                            return;
+                        }
+                    }
+
+                    @if (isSessionValid && User.Identity.IsAuthenticated)
                     {
                         var userName = Session["UserName"] as string ?? User.Identity.Name;
                         var userEmail = Session["UserEmail"] as string ?? "";
@@ -291,65 +468,87 @@
                     }
                 </div>
 
-                <!-- Mobile menu button -->
-                <button type="button" class="lg:hidden text-gray-700 hover:text-red-600 p-2" id="mobile-menu-button">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Japanese Style Navbar - Minimalist Design -->
+    <nav class="japanese-navbar">
+        <div class="container mx-auto px-4">
+            <!-- Desktop Menu - Centered -->
+            <div class="hidden lg:flex items-center justify-center py-2">
+                <div class="flex items-center space-x-2">
+                    <a href="@Url.Action("Index", "Home")" data-section="home" class="japanese-nav-link">TRANG CHỦ</a>
+                    <a href="@Url.Action("About", "Home")" data-section="about" class="japanese-nav-link">GIỚI THIỆU</a>
+                    <a href="@Url.Action("Index", "Menu")" data-section="menu" class="japanese-nav-link">THỰC ĐƠN</a>
+                    <a href="@Url.Action("Create", "DatBan", new { area = "User_65133141" })" data-section="dat-ban" class="japanese-nav-link">ĐẶT BÀN</a>
+                    <a href="#dat-mon" data-section="dat-mon" class="japanese-nav-link">ĐẶT MÓN</a>
+                    <a href="#tin-tuc" data-section="tin-tuc" class="japanese-nav-link">TIN TỨC</a>
+            </div>
+            
+            <!-- Mobile Menu Header: Hamburger Left, MENU Center -->
+            <div class="lg:hidden flex items-center justify-between py-3 relative">
+                <!-- Hamburger Button - Left -->
+                <button type="button" id="mobile-menu-button" class="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-white/10 transition-all z-10">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="hamburger-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                    <svg class="w-6 h-6 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="close-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Red Navigation Bar -->
-    <nav class="fixed top-20 left-0 right-0 z-40 red-navbar">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex items-center justify-center space-x-2 py-3.5 relative" id="red-nav-menu">
-                <a href="@Url.Action("Index", "Home")" data-section="home" class="red-nav-link text-base font-semibold px-5 py-2 whitespace-nowrap uppercase tracking-wide">Trang chủ</a>
-                <a href="@Url.Action("About", "Home")" data-section="about" class="red-nav-link text-base font-semibold px-5 py-2 whitespace-nowrap uppercase tracking-wide">Giới thiệu</a>
-                <a href="#menu" data-section="menu" class="red-nav-link text-base font-semibold px-5 py-2 whitespace-nowrap uppercase tracking-wide">Thực đơn</a>
-                <a href="#dat-ban" data-section="dat-ban" class="red-nav-link text-base font-semibold px-5 py-2 whitespace-nowrap uppercase tracking-wide">Đặt bàn</a>
-                <a href="#dat-mon" data-section="dat-mon" class="red-nav-link text-base font-semibold px-5 py-2 whitespace-nowrap uppercase tracking-wide">Đặt món</a>
-                <a href="#tin-tuc" data-section="tin-tuc" class="red-nav-link text-base font-semibold px-5 py-2 whitespace-nowrap uppercase tracking-wide">Tin tức</a>
-            </div>
-        </div>
-    </nav>
-
-            <!-- Mobile menu -->
-            <div class="hidden lg:hidden pb-4 border-t border-gray-200 mt-2" id="mobile-menu">
-                <div class="flex flex-col space-y-1 pt-4">
-                    <a href="@Url.Action("Index", "Home")" class="text-base font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 px-4 py-3 rounded-lg transition uppercase">Trang chủ</a>
-                    <a href="@Url.Action("About", "Home")" class="text-base font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 px-4 py-3 rounded-lg transition uppercase">Giới thiệu</a>
-                    <a href="#menu" class="text-base font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 px-4 py-3 rounded-lg transition uppercase">Thực đơn</a>
-                    <a href="#dat-ban" class="text-base font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 px-4 py-3 rounded-lg transition uppercase">Đặt bàn</a>
-                    <a href="#giao-hang" class="text-base font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 px-4 py-3 rounded-lg transition uppercase">Giao hàng</a>
-                    <div class="border-t border-gray-200 my-2"></div>
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        var userName = Session["UserName"] as string ?? User.Identity.Name;
-                        <div class="px-4 py-2">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white font-semibold text-sm">
-                                    @if (!string.IsNullOrEmpty(userName))
-                                    {
-                                        @userName.Substring(0, 1).ToUpper()
-                                    }
-                                </div>
-                                <span class="text-sm text-gray-600">Xin chào <span class="text-red-600 font-semibold">@userName</span></span>
-                            </div>
-                        </div>
-                        <a href="@Url.Action("Logout", "Account", new { area = "" })" class="text-base font-semibold text-white bg-red-600 hover:bg-red-700 px-4 py-3 rounded-lg text-center uppercase">Đăng xuất</a>
-                    }
-                    else
-                    {
-                        <a href="javascript:void(0)" onclick="openLoginModal()" class="text-base font-semibold text-gray-700 hover:text-red-600 px-4 py-3 uppercase">Đăng nhập</a>
-                        <a href="javascript:void(0)" onclick="openRegisterModal()" class="text-base font-semibold text-white bg-red-600 hover:bg-red-700 px-4 py-3 rounded-lg text-center uppercase">Đăng ký</a>
-                    }
+                
+                <!-- MENU Text - Center -->
+                <div class="absolute left-1/2 transform -translate-x-1/2">
+                    <span class="text-white font-bold text-lg letter-spacing-wide">MENU</span>
                 </div>
             </div>
+
+        <!-- Mobile Slide Menu -->
+        <div id="mobile-menu" class="mobile-menu-hidden">
+            <div class="mobile-menu-content">
+                <a href="@Url.Action("Index", "Home")" data-section="home" class="japanese-mobile-link">
+                    <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span>TRANG CHỦ</span>
+                </a>
+                <a href="@Url.Action("About", "Home")" data-section="about" class="japanese-mobile-link">
+                    <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>GIỚI THIỆU</span>
+                </a>
+                <a href="@Url.Action("Index", "Menu")" data-section="menu" class="japanese-mobile-link">
+                    <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    <span>THỰC ĐƠN</span>
+                </a>
+                <a href="javascript:void(0)" onclick="handleDatBanClick()" data-section="dat-ban" class="japanese-mobile-link">
+                    <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>ĐẶT BÀN</span>
+                </a>
+                <a href="#dat-mon" data-section="dat-mon" class="japanese-mobile-link">
+                    <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                    <span>ĐẶT MÓN</span>
+                </a>
+                <a href="#tin-tuc" data-section="tin-tuc" class="japanese-mobile-link">
+                    <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+                    </svg>
+                    <span>TIN TỨC</span>
+                </a>
+                </div>
+            </div>
+    </nav>
     
-    <!-- Spacer for fixed header + red navbar -->
-    <div class="h-36"></div>
+    <!-- Spacer for fixed header + navbar -->
+    <div class="h-32"></div>
     <div class="min-h-screen">
         @RenderBody()
     </div>
@@ -362,44 +561,224 @@
     @Html.Partial("_AuthModals")
     
     <script>
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            if (menu) {
-                menu.classList.toggle('hidden');
+        // Suppress browser extension errors and handle gracefully
+        (function() {
+            // Suppress runtime.lastError from browser extensions
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                var originalSendMessage = chrome.runtime.sendMessage;
+                if (originalSendMessage) {
+                    chrome.runtime.sendMessage = function() {
+                        try {
+                            return originalSendMessage.apply(this, arguments);
+                        } catch (e) {
+                            // Silently ignore extension errors
+                            if (e.message && e.message.includes('Receiving end does not exist')) {
+                                return;
+                            }
+                            throw e;
+                        }
+                    };
+                }
             }
-        });
+            
+            // Suppress console errors from blocked resources (like Google Maps by ad blockers)
+            var originalError = console.error;
+            console.error = function() {
+                var args = Array.prototype.slice.call(arguments);
+                var message = args.join(' ');
+                
+                // Ignore specific errors that are not from our code
+                if (message.includes('ERR_BLOCKED_BY_CLIENT') ||
+                    message.includes('runtime.lastError') ||
+                    message.includes('Receiving end does not exist') ||
+                    message.includes('maps.googleapis.com')) {
+                    return; // Suppress these errors
+                }
+                
+                // Log other errors normally
+                originalError.apply(console, args);
+            };
+        })();
 
-        // Set active menu item based on current page
+        // Handle DatBan click - check login and redirect
+        function handleDatBanClick() {
+            var isAuthenticated = @(User.Identity.IsAuthenticated ? "true" : "false");
+            
+            if (!isAuthenticated) {
+                // Show login modal
+                if (typeof openLoginModal === 'function') {
+                    openLoginModal();
+                } else {
+                    // Fallback: show alert
+                    if (confirm('Vui lòng đăng nhập để đặt bàn. Bạn có muốn chuyển đến trang đăng nhập không?')) {
+                        window.location.href = '@Url.Action("Login", "Account")';
+                    }
+                }
+                return false;
+            }
+            
+            // If logged in, redirect to booking page
+            window.location.href = '@Url.Action("Create", "DatBan", new { area = "User_65133141" })';
+        }
+
+        // Set active menu item based on current page - Only ONE active item at a time
         document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname.toLowerCase();
-            const redNavLinks = document.querySelectorAll('.red-nav-link');
+            const desktopNavLinks = document.querySelectorAll('.japanese-nav-link');
+            const mobileNavLinks = document.querySelectorAll('.japanese-mobile-link');
             
-            // Remove all active classes first to prevent duplicates
-            redNavLinks.forEach(link => link.classList.remove('active'));
+            // Remove all active classes first
+            desktopNavLinks.forEach(link => link.classList.remove('active'));
+            mobileNavLinks.forEach(link => link.classList.remove('active'));
             
-            // Find and activate only ONE link
-            for (let link of redNavLinks) {
-                const href = link.getAttribute('href');
-                const linkText = link.textContent.trim().toLowerCase();
-                
-                if (!href || href.startsWith('#')) continue;
-                
-                const linkPath = href.toLowerCase();
-                
-                // Check for About page first (higher priority)
-                if (currentPath.includes('/about') && linkPath.includes('about')) {
-                    link.classList.add('active');
-                    break; // Stop after finding first match
-                } 
-                // Check for Home page
-                else if ((linkText.includes('trang chủ') || linkText.includes('trang chu')) &&
-                         !currentPath.includes('/about') &&
-                         !currentPath.includes('/admin') &&
-                         !currentPath.includes('/employee')) {
-                    link.classList.add('active');
-                    break; // Stop after finding first match
+            // Function to extract path from href
+            function getPathFromHref(href) {
+                if (!href || href.startsWith('#') || href.startsWith('javascript:')) {
+                    return null;
                 }
+                
+                let path = href.toLowerCase();
+                if (path.includes('://')) {
+                    try {
+                        const url = new URL(path);
+                        path = url.pathname.toLowerCase();
+                    } catch (e) {
+                        return null;
+                    }
+                } else if (path.startsWith('/')) {
+                    // Already a path
+                } else {
+                    return null;
+                }
+                
+                // Remove trailing slash
+                if (path.endsWith('/') && path.length > 1) {
+                    path = path.slice(0, -1);
+                }
+                
+                return path;
+            }
+            
+            // Function to check if link matches current path
+            function matchesPath(linkHref, linkText, currentPath) {
+                const linkPath = getPathFromHref(linkHref);
+                const linkTextLower = linkText.trim().toLowerCase();
+                
+                if (!linkPath) return false;
+                
+                // Exact match
+                if (currentPath === linkPath) {
+                    return true;
+                }
+                
+                // Check specific pages with priority
+                // 1. Menu page
+                if (currentPath.includes('/menu')) {
+                    return linkPath.includes('/menu') || 
+                           linkTextLower.includes('thực đơn') || 
+                           linkTextLower.includes('thuc don');
+                }
+                
+                // 3. About page
+                if (currentPath.includes('/home/about') || currentPath.includes('/about')) {
+                    return linkPath.includes('/about') || 
+                           linkTextLower.includes('giới thiệu') || 
+                           linkTextLower.includes('gioi thieu');
+                }
+                
+                // 4. Home page
+                if (currentPath === '/' || 
+                    currentPath === '/home' || 
+                    currentPath === '/home/index' ||
+                    currentPath.endsWith('/home')) {
+                    return linkPath === '/' || 
+                           linkPath === '/home' || 
+                           linkPath.includes('/home') && !linkPath.includes('/about') ||
+                           linkTextLower.includes('trang chủ') || 
+                           linkTextLower.includes('trang chu');
+                }
+                
+                // 5. Path starts with link path
+                if (currentPath.startsWith(linkPath + '/') || currentPath.startsWith(linkPath)) {
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            // Find active link - only ONE
+            let activeFound = false;
+            
+            // Check desktop links first
+            for (let link of desktopNavLinks) {
+                if (activeFound) break;
+                
+                const href = link.getAttribute('href');
+                const linkText = link.textContent || link.innerText;
+                
+                if (matchesPath(href, linkText, currentPath)) {
+                    link.classList.add('active');
+                    activeFound = true;
+                }
+            }
+            
+            // Check mobile links - match the same link
+            if (activeFound) {
+                for (let link of mobileNavLinks) {
+                    const href = link.getAttribute('href');
+                    const linkText = link.textContent || link.innerText;
+                    
+                    if (matchesPath(href, linkText, currentPath)) {
+                        link.classList.add('active');
+                        break; // Only one active
+                    }
+                }
+            } else {
+                // If no desktop match, check mobile
+                for (let link of mobileNavLinks) {
+                    if (activeFound) break;
+                    
+                    const href = link.getAttribute('href');
+                    const linkText = link.textContent || link.innerText;
+                    
+                    if (matchesPath(href, linkText, currentPath)) {
+                        link.classList.add('active');
+                        activeFound = true;
+                    }
+                }
+            }
+            
+            // Mobile menu toggle functionality
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const closeIcon = document.getElementById('close-icon');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    // Toggle menu visibility
+                    if (mobileMenu.classList.contains('mobile-menu-hidden')) {
+                        mobileMenu.classList.remove('mobile-menu-hidden');
+                        mobileMenu.classList.add('mobile-menu-visible');
+                        hamburgerIcon.classList.add('hidden');
+                        closeIcon.classList.remove('hidden');
+                    } else {
+                        mobileMenu.classList.add('mobile-menu-hidden');
+                        mobileMenu.classList.remove('mobile-menu-visible');
+                        hamburgerIcon.classList.remove('hidden');
+                        closeIcon.classList.add('hidden');
+                    }
+                });
+                
+                // Close mobile menu when clicking on a link
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.add('mobile-menu-hidden');
+                        mobileMenu.classList.remove('mobile-menu-visible');
+                        hamburgerIcon.classList.remove('hidden');
+                        closeIcon.classList.add('hidden');
+                    });
+                });
             }
         });
 

@@ -13,13 +13,14 @@
 }
 
 <style>
-    /* --- CSS CHO ICON PHÂN LOẠI (APP STYLE) --- */
+    /* --- CSS CHO ICON PHÂN LOẠI (APP STYLE) - Responsive --- */
     .category-scroll-container {
         display: flex;
-        gap: 1.5rem;
-        padding: 1rem 0.5rem;
+        gap: 1rem;
+        padding: 0.75rem 0.5rem;
         overflow-x: auto;
         scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
     }
 
         .category-scroll-container::-webkit-scrollbar {
@@ -30,30 +31,57 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.75rem;
-        min-width: 80px;
+        gap: 0.5rem;
+        min-width: 70px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none !important;
+        flex-shrink: 0;
+    }
+
+    @@media (min-width: 640px) {
+        .category-pill {
+            min-width: 80px;
+            gap: 0.75rem;
+        }
+        .category-scroll-container {
+            gap: 1.5rem;
+            padding: 1rem 0.5rem;
+        }
     }
 
     .category-pill-icon {
-        width: 68px;
-        height: 68px;
+        width: 56px;
+        height: 56px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         background: #f8fafc;
-        border-radius: 24px;
+        border-radius: 20px;
         transition: all 0.3s ease;
     }
 
+    @@media (min-width: 640px) {
+        .category-pill-icon {
+            width: 68px;
+            height: 68px;
+            font-size: 1.8rem;
+            border-radius: 24px;
+        }
+    }
+
     .category-pill span {
-        font-size: 12px;
+        font-size: 10px;
         font-weight: 700;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+    }
+
+    @@media (min-width: 640px) {
+        .category-pill span {
+            font-size: 12px;
+        }
     }
 
     /* Trạng thái khi đang chọn (Active) - Sử dụng màu cam mới */
@@ -83,19 +111,34 @@
         transform: translateY(-3px);
     }
 
-    /* --- CSS CHO CARD SẢN PHẨM --- */
+    /* --- CSS CHO CARD SẢN PHẨM - Responsive --- */
     .product-card {
-        border-radius: 1.75rem; /* bo cong ít lại */
+        border-radius: 1.25rem;
         transition: all 0.3s ease;
         border: 1px solid rgba(0,0,0,0.04);
         background: #fff;
-        padding-bottom: 0.5rem; /* card trông đầy hơn */
+        padding-bottom: 0.5rem;
     }
 
+    @@media (min-width: 640px) {
+        .product-card {
+            border-radius: 1.75rem;
+        }
+    }
+
+    @@media (hover: hover) {
         .product-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
         }
+    }
+
+    @@media (max-width: 639px) {
+        .product-card:active {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    }
 
     .line-clamp-2 {
         display: -webkit-box;
@@ -105,31 +148,34 @@
     }
 </style>
 
-<div class="container mx-auto px-4 py-8">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-        <div>
-            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Quản lý thực đơn</h1>
-            <p class="text-gray-500 font-medium mt-1">Hệ thống quản lý thực đơn nội bộ</p>
+<div class="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+    <!-- Header Section - Responsive -->
+    <div class="flex flex-col gap-4 sm:gap-6 mb-6 sm:mb-8 md:mb-10">
+        <!-- Title Section -->
+        <div class="flex-1">
+            <h1 class="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Quản lý thực đơn</h1>
+            <p class="text-gray-500 text-sm sm:text-base font-medium mt-1">Hệ thống quản lý thực đơn nội bộ</p>
         </div>
         
-        <!-- Row with Button and Search -->
-        <div class="flex items-center gap-4">
+        <!-- Action Row: Button and Search - Stack on mobile, row on tablet+ -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
             <!-- Button Thêm Món -->
             <button onclick="openCreateProductModal()"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer border-none">
+               class="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer border-none w-full sm:w-auto">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                <span>THÊM MÓN MỚI</span>
+                <span class="hidden sm:inline">THÊM MÓN MỚI</span>
+                <span class="sm:hidden">THÊM MÓN</span>
             </button>
             
-            <!-- Search Box with Autocomplete -->
-            <div class="relative">
+            <!-- Search Box with Autocomplete - Full width on mobile, fixed on tablet+ -->
+            <div class="relative flex-1 sm:flex-initial">
                 <input type="text" 
                        id="productSearchInput" 
                        placeholder="Tìm kiếm món ăn..." 
                        autocomplete="off"
-                       class="w-64 pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-200 text-sm font-medium text-gray-700 placeholder-gray-400">
+                       class="w-full sm:w-64 pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all duration-200 text-sm font-medium text-gray-700 placeholder-gray-400">
                 <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
@@ -145,8 +191,8 @@
 
     @if (categories != null && categories.Any())
     {
-        <!-- Category Filter Pills -->
-        <div class="category-scroll-container mb-12 justify-center">
+        <!-- Category Filter Pills - Responsive padding -->
+        <div class="category-scroll-container mb-6 sm:mb-8 md:mb-12 justify-start sm:justify-center">
             <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141", categoryId = (long?)null })"
                class="category-pill @(selectedCategoryId == null ? "category-pill-active" : "")">
                 <div class="category-pill-icon">
@@ -183,7 +229,8 @@
     }
 
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+    <!-- Product Grid - Responsive: 1 col mobile, 2 cols tablet, 3-4 cols desktop -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
         @foreach (var item in Model)
         {
             var hasDiscount = item.GiaGiam.HasValue && item.GiaGiam.Value > 0 && item.GiaGiam.Value < item.GiaGoc;
@@ -192,7 +239,7 @@
             var safeName = System.Web.HttpUtility.JavaScriptStringEncode(item.TenMon ?? "món ăn này");
 
             <div class="product-card flex flex-col overflow-hidden" id="product-card-@item.MonAnID">
-                <div class="relative h-56 bg-gray-50">
+                <div class="relative h-48 sm:h-52 md:h-56 bg-gray-50">
 
                     <img src="@Url.Content(string.IsNullOrEmpty(item.HinhAnh) ? "~/Images/default.jpg" : "~/Images/Products/" + item.HinhAnh)"
                          class="w-full h-full object-cover" alt="@item.TenMon" />
@@ -207,24 +254,24 @@
                     }
                 </div>
 
-                <div class="px-4 pt-3 pb-3 flex-1 flex flex-col">
-                    <h3 class="text-sm font-semibold text-gray-800 leading-snug line-clamp-2 mb-2">
+                <div class="px-3 sm:px-4 pt-3 pb-3 flex-1 flex flex-col">
+                    <h3 class="text-sm sm:text-base font-semibold text-gray-800 leading-snug line-clamp-2 mb-2">
                         @item.TenMon
                     </h3>
 
-                    <div class="flex items-baseline gap-2 mb-4">
-                        <span class="text-[20px] font-black text-red-600 leading-tight">
+                    <div class="flex items-baseline gap-2 mb-3 sm:mb-4">
+                        <span class="text-lg sm:text-xl md:text-[20px] font-black text-red-600 leading-tight">
                             @currentPrice.ToString("N0")đ
                         </span>
-                        <span class="text-sm text-gray-400 line-through font-semibold @(hasDiscount ? "" : "invisible")">
+                        <span class="text-xs sm:text-sm text-gray-400 line-through font-semibold @(hasDiscount ? "" : "invisible")">
                             @item.GiaGoc.ToString("N0")đ
                         </span>
                     </div>
 
-                    <div class="mt-auto flex justify-between items-center gap-3 pt-1">
+                    <div class="mt-auto flex justify-between items-center gap-2 sm:gap-3 pt-1">
                         <!-- Nút Xem chi tiết (Modal) -->
                         <button onclick="openProductDetailsModal(@item.MonAnID)"
-                           class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-all shadow-sm border-none cursor-pointer">
+                           class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-all shadow-sm border-none cursor-pointer flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -233,7 +280,7 @@
 
                         <!-- Nút Sửa (Modal) -->
                         <button onclick="openEditProductModal(@item.MonAnID)"
-                           class="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center hover:bg-orange-600 transition-all shadow-sm border-none cursor-pointer">
+                           class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-orange-500 text-white flex items-center justify-center hover:bg-orange-600 transition-all shadow-sm border-none cursor-pointer flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
@@ -242,7 +289,7 @@
                         <!-- Nút Xóa (Xác nhận + AJAX) -->
                         <button type="button" 
                                 onclick="deleteProduct(@item.MonAnID, '@safeName')"
-                                class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-sm border-none cursor-pointer">
+                                class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-sm border-none cursor-pointer flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="pointer-events: none;">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -253,42 +300,43 @@
         }
     </div>
     
-    @* Pagination *@
+    @* Pagination - Responsive *@
     @if (totalPages > 1)
     {
-        <div class="mt-8 px-6 py-4 bg-white rounded-xl shadow-md">
-            <div class="flex items-center justify-center gap-2">
+        <div class="mt-6 sm:mt-8 px-4 sm:px-6 py-4 bg-white rounded-xl shadow-md overflow-x-auto">
+            <div class="flex items-center justify-center gap-1 sm:gap-2 min-w-max">
                 @Html.Raw(RenderPagination())
             </div>
-            <div class="text-center mt-3 text-sm text-gray-600">Trang @currentPage / @totalPages</div>
+            <div class="text-center mt-3 text-xs sm:text-sm text-gray-600">Trang @currentPage / @totalPages</div>
         </div>
     }
 </div>
 
-<div id="alertContainer" class="fixed top-4 right-4 z-[10000] space-y-2"></div>
+<!-- Alert Container - Responsive positioning -->
+<div id="alertContainer" class="fixed top-16 sm:top-4 right-2 sm:right-4 left-2 sm:left-auto z-[10000] space-y-2 max-w-full sm:max-w-md"></div>
 @Html.AntiForgeryToken()
 
-<!-- Modal xác nhận xóa -->
-<div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-[9999]" style="display: none;">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all">
-        <div class="p-6">
+<!-- Modal xác nhận xóa - Responsive -->
+<div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-[9999] p-4" style="display: none;">
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full mx-auto transform transition-all">
+        <div class="p-4 sm:p-6">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
-                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                     </div>
                 </div>
-                <div class="ml-4 flex-1">
-                    <h3 id="confirmDeleteTitle" class="text-lg font-bold text-gray-900">Xóa món ăn</h3>
-                    <p id="confirmDeleteMessage" class="mt-2 text-sm text-gray-600">Bạn có chắc chắn muốn xóa món ăn này không? Hành động này không thể hoàn tác.</p>
+                <div class="ml-3 sm:ml-4 flex-1 min-w-0">
+                    <h3 id="confirmDeleteTitle" class="text-base sm:text-lg font-bold text-gray-900">Xóa món ăn</h3>
+                    <p id="confirmDeleteMessage" class="mt-2 text-sm text-gray-600 break-words">Bạn có chắc chắn muốn xóa món ăn này không? Hành động này không thể hoàn tác.</p>
                 </div>
             </div>
         </div>
-        <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
-            <button type="button" id="cancelDeleteBtn" class="px-5 py-2.5 bg-white hover:bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm border border-gray-300">Hủy</button>
-            <button type="button" id="confirmDeleteBtn" class="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-sm">Xóa</button>
+        <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 rounded-b-xl sm:rounded-b-2xl flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+            <button type="button" id="cancelDeleteBtn" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-white hover:bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm border border-gray-300 w-full sm:w-auto">Hủy</button>
+            <button type="button" id="confirmDeleteBtn" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-sm w-full sm:w-auto">Xóa</button>
         </div>
     </div>
 </div>
@@ -335,7 +383,7 @@
         var cfg = config[type] || config.info;
 
         var html = `
-        <div id="${alertId}" class="${cfg.bg} px-4 py-2.5 rounded-xl shadow-md flex items-center gap-3 min-w-[300px] max-w-md transition-all duration-300 translate-x-full bg-opacity-95 border border-white/60">
+        <div id="${alertId}" class="${cfg.bg} px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md flex items-center gap-2 sm:gap-3 w-[calc(100vw-2rem)] sm:min-w-[300px] sm:max-w-md transition-all duration-300 translate-x-full bg-opacity-95 border border-white/60">
             <div class="w-7 h-7 rounded-full ${cfg.iconBg} flex items-center justify-center flex-shrink-0">
                 ${cfg.icon}
             </div>

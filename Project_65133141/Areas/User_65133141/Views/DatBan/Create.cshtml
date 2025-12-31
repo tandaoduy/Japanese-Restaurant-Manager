@@ -1,0 +1,415 @@
+@model Project_65133141.Models.DatBan
+
+@{
+    ViewBag.Title = "Đặt bàn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    var isAuthenticated = User.Identity.IsAuthenticated;
+    var userEmail = Session["UserEmail"] as string;
+    
+    // Fallback: If authenticated but no email in session, try to get from Identity.Name
+    if (isAuthenticated && string.IsNullOrEmpty(userEmail))
+    {
+        userEmail = User.Identity.Name; // Email is stored in Identity.Name
+        if (!string.IsNullOrEmpty(userEmail))
+        {
+            Session["UserEmail"] = userEmail;
+        }
+    }
+    
+    var hasValidUser = !string.IsNullOrEmpty(userEmail);
+}
+
+@if (!isAuthenticated || !hasValidUser)
+{
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 z-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%238B0000\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+        
+        <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-3xl shadow-2xl relative z-10 border-t-4 border-red-800">
+            <div class="text-center">
+                <div class="mx-auto h-20 w-20 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                    <svg class="h-10 w-10 text-red-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h2 class="mt-2 text-3xl font-display font-bold text-gray-900">Vui lòng đăng nhập</h2>
+                <p class="mt-4 text-sm text-gray-500 leading-relaxed">Để đảm bảo chất lượng phục vụ tốt nhất, quý khách vui lòng đăng nhập trước khi đặt bàn.</p>
+                @if (isAuthenticated && !hasValidUser)
+                {
+                    <p class="mt-2 text-sm text-red-600">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</p>
+                }
+            </div>
+            <div class="mt-8 space-y-4">
+                <a href="javascript:void(0)" onclick="openLoginModal()" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-red-800 to-red-700 hover:from-red-700 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-lg transform transition-all hover:-translate-y-1">
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <svg class="h-5 w-5 text-red-300 group-hover:text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                        </svg>
+                    </span>
+                    Đăng nhập tài khoản
+                </a>
+                <a href="@Url.Action("Index", "Home", new { area = "" })" class="w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-sm transition-colors">
+                    Về trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="min-h-screen py-12 relative overflow-hidden bg-gray-50">
+        <!-- Background Elements - Exact Match to Navbar -->
+        <div class="absolute top-0 left-0 w-full h-96 z-0" style="background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%); border-bottom: 3px solid #D4AF37;"></div>
+        <div class="absolute top-0 left-0 w-full h-full z-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="max-w-4xl mx-auto">
+                <!-- Page Title -->
+                <div class="text-center mb-12">
+                    <span class="text-yellow-400 font-medium tracking-widest uppercase mb-2 block text-sm">Chào mừng quý khách</span>
+                    <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-6" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">ĐẶT BÀN TRỰC TUYẾN</h1>
+                    <div class="w-24 h-1 mx-auto rounded-full" style="background: #D4AF37;"></div>
+                </div>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="mb-8 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-lg shadow-lg flex items-center">
+                        <svg class="h-6 w-6 mr-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+                    <div class="grid md:grid-cols-5 h-full">
+                        <!-- Left Decoration Side - Exact Match Gradient -->
+                        <div class="hidden md:block md:col-span-2 relative overflow-hidden p-8 text-white flex flex-col justify-between" style="background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);">
+                            <div class="absolute inset-0 opacity-20" style="background-image: url('@Url.Content("~/Images/pattern-japan.png")'); background-size: cover;"></div>
+                            <div class="relative z-10">
+                                <h3 class="text-2xl font-display font-bold mb-4" style="color: #D4AF37;">SAKURA KAZOKU</h3>
+                                <p class="text-gray-100 font-light text-sm leading-relaxed mb-6">Trải nghiệm ẩm thực Nhật Bản tinh tế trong không gian sang trọng và ấm cúng.</p>
+                                
+                                <div class="space-y-4 text-sm">
+                                    <div class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 mt-0.5" style="color: #D4AF37;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <div>
+                                            <span class="block font-semibold text-white">Giờ mở cửa</span>
+                                            <span class="text-gray-200">11:00 - 22:00</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 mt-0.5" style="color: #D4AF37;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                                        <div>
+                                            <span class="block font-semibold text-white">Điện thoại</span>
+                                            <span class="text-gray-200">0123 456 789</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="relative z-10 mt-8 pt-8 border-t border-white/20">
+                                <p class="text-xs text-center text-gray-300 italic">"Hương vị đích thực từ xứ sở hoa anh đào"</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Form Side -->
+                        <div class="md:col-span-3 p-8 md:p-10">
+                            @using (Html.BeginForm("Create", "DatBan", new { area = "User_65133141" }, FormMethod.Post, new { id = "datBanForm", @class = "space-y-6" }))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                if (!ViewData.ModelState.IsValid)
+                                {
+                                    <div class="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded-r-lg">
+                                        @Html.ValidationSummary(true, "", new { @class = "text-red-700" })
+                                    </div>
+                                }
+
+                                <div class="space-y-6">
+                                    <div class="flex items-center gap-3 pb-2 border-b border-gray-100">
+                                        <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold">1</div>
+                                        <h3 class="font-bold text-gray-800">Thông tin liên hệ</h3>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 gap-5">
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-2 text-gray-700">Họ và tên</label>
+                                            @Html.TextBoxFor(m => m.HoTenKhach, new { 
+                                                @class = "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800 placeholder-gray-400",
+                                                placeholder = "Nhập họ tên của bạn",
+                                                required = "required"
+                                            })
+                                            @Html.ValidationMessageFor(m => m.HoTenKhach, "", new { @class = "text-red-500 text-xs mt-1" })
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-2 text-gray-700">Số điện thoại</label>
+                                            @Html.TextBoxFor(m => m.SDTKhach, new { 
+                                                @class = "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800 placeholder-gray-400",
+                                                placeholder = "09xx xxx xxx",
+                                                type = "tel",
+                                                required = "required"
+                                            })
+                                            @Html.ValidationMessageFor(m => m.SDTKhach, "", new { @class = "text-red-500 text-xs mt-1" })
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-3 pb-2 border-b border-gray-100 pt-4">
+                                        <div class="w-8 h-8 rounded-full bg-red-50 text-red-800 flex items-center justify-center font-bold border border-red-100">2</div>
+                                        <h3 class="font-bold text-gray-800">Thông tin đặt bàn</h3>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-5">
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-2 text-gray-700">Ngày đặt</label>
+                                            <input type="date" id="ngayDat" name="ngayDat" 
+                                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800"
+                                                   required="required"
+                                                   min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-semibold mb-2 text-gray-700">Khung giờ</label>
+                                            <select id="khungGio" name="khungGio" 
+                                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800"
+                                                    required="required">
+                                                <option value="">Chọn giờ</option>
+                                                <option value="11:00">11:00 - 13:00</option>
+                                                <option value="13:00">13:00 - 15:00</option>
+                                                <option value="17:00">17:00 - 19:00</option>
+                                                <option value="19:00">19:00 - 21:00</option>
+                                                <option value="21:00">21:00 - 23:00</option>
+                                            </select>
+                                            @Html.HiddenFor(m => m.ThoiGianDen)
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-2 text-gray-700">Số lượng khách</label>
+                                        <div class="relative">
+                                            @Html.TextBoxFor(m => m.SoNguoi, new { 
+                                                @class = "w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800",
+                                                type = "number",
+                                                min = "1",
+                                                placeholder = "Số người",
+                                                required = "required"
+                                            })
+                                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-500">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-2 text-gray-700">Ghi chú (tùy chọn)</label>
+                                        @Html.TextAreaFor(m => m.GhiChu, new { 
+                                            @class = "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800 placeholder-gray-400",
+                                            rows = "3",
+                                            placeholder = "Yêu cầu đặc biệt (ví dụ: muốn đặt phòng VIP, phòng đôi, yêu cầu về thức ăn, ghế trẻ em, dị ứng, v.v.)"
+                                        })
+                                        @Html.ValidationMessageFor(m => m.GhiChu, "", new { @class = "text-red-500 text-xs mt-1" })
+                                        <p class="text-xs text-gray-500 mt-2">
+                                            💡 <strong>Lưu ý:</strong> Chúng tôi sẽ tự động sắp xếp bàn phù hợp với số lượng khách của bạn. 
+                                            Nếu bạn muốn đặt phòng VIP hoặc phòng đôi, vui lòng ghi rõ trong phần ghi chú. 
+                                            Chúng tôi sẽ liên hệ với bạn để xác nhận.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="pt-6">
+                                    <button type="submit" class="w-full text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 group" style="background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);">
+                                        <span>XÁC NHẬN ĐẶT BÀN</span>
+                                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    // Wait for jQuery to load (jQuery is loaded in _Layout.cshtml)
+    // showAlert function is now available globally from User area layout
+    (function() {
+        function initFormHandlers() {
+            // Check if jQuery is available
+            if (typeof jQuery === 'undefined' || typeof window.jQuery === 'undefined') {
+                // Retry after a short delay
+                setTimeout(initFormHandlers, 100);
+                return;
+            }
+            
+            var $ = window.jQuery; // Use jQuery from global scope
+            
+            // Combine date and time slot to set ThoiGianDen
+            var $ngayDatInput = $('#ngayDat');
+            var $khungGioSelect = $('#khungGio');
+            var $thoiGianDenHidden = $('#ThoiGianDen');
+
+            function updateThoiGianDen() {
+                var ngayDat = $ngayDatInput.val();
+                var khungGio = $khungGioSelect.val();
+                
+                if (ngayDat && khungGio) {
+                    var date = new Date(ngayDat);
+                    var timeParts = khungGio.split(':');
+                    date.setHours(parseInt(timeParts[0]), parseInt(timeParts[1] || 0), 0);
+                    
+                    // Format as yyyy-MM-ddTHH:mm for datetime-local
+                    var year = date.getFullYear();
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var day = String(date.getDate()).padStart(2, '0');
+                    var hours = String(date.getHours()).padStart(2, '0');
+                    var minutes = String(date.getMinutes()).padStart(2, '0');
+                    
+                    $thoiGianDenHidden.val(year + '-' + month + '-' + day + 'T' + hours + ':' + minutes);
+                }
+            }
+
+            $ngayDatInput.on('change', updateThoiGianDen);
+            $khungGioSelect.on('change', updateThoiGianDen);
+            
+            // Combine date and time slot to set ThoiGianDen
+            var $ngayDatInput = $('#ngayDat');
+            var $khungGioSelect = $('#khungGio');
+            var $thoiGianDenHidden = $('#ThoiGianDen');
+
+            function updateThoiGianDen() {
+                var ngayDat = $ngayDatInput.val();
+                var khungGio = $khungGioSelect.val();
+                
+                if (ngayDat && khungGio) {
+                    var date = new Date(ngayDat);
+                    var timeParts = khungGio.split(':');
+                    date.setHours(parseInt(timeParts[0]), parseInt(timeParts[1] || 0), 0);
+                    
+                    // Format as yyyy-MM-ddTHH:mm for datetime-local
+                    var year = date.getFullYear();
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var day = String(date.getDate()).padStart(2, '0');
+                    var hours = String(date.getHours()).padStart(2, '0');
+                    var minutes = String(date.getMinutes()).padStart(2, '0');
+                    
+                    $thoiGianDenHidden.val(year + '-' + month + '-' + day + 'T' + hours + ':' + minutes);
+                }
+            }
+
+            $ngayDatInput.on('change', updateThoiGianDen);
+            $khungGioSelect.on('change', updateThoiGianDen);
+
+            // Handle form submission with AJAX
+            $('#datBanForm').on('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+                
+                var ngayDat = $ngayDatInput.val();
+                var khungGio = $khungGioSelect.val();
+                
+                if (!ngayDat || !khungGio) {
+                    showAlert('warning', 'Vui lòng chọn đầy đủ ngày đặt và khung giờ!');
+                    return false;
+                }
+                
+                // Ensure ThoiGianDen is set before submit
+                updateThoiGianDen();
+                
+                // Double check that ThoiGianDen has a value
+                var thoiGianDen = $thoiGianDenHidden.val();
+                if (!thoiGianDen) {
+                    console.log("Hidden value is empty!");
+                    showAlert('error', 'Không thể xác định thời gian đến. Vui lòng thử lại!');
+                    return false;
+                }
+                
+                // Get form data using jQuery
+                var formData = $(this).serialize();
+                
+                // Show loading state
+                var $submitButton = $(this).find('button[type="submit"]');
+                var originalButtonText = $submitButton.html();
+                $submitButton.prop('disabled', true);
+                $submitButton.html('<span>Đang xử lý...</span>');
+                
+                // Submit via AJAX using jQuery
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.success) {
+                            // Show success notification
+                            showAlert('success', data.message);
+                            // Reset form
+                            $('#datBanForm')[0].reset();
+                            // Stay on page (no redirect)
+                        } else {
+                            // Show error message
+                            if (data.errors) {
+                                var errorMessages = [];
+                                for (var key in data.errors) {
+                                    if (data.errors.hasOwnProperty(key)) {
+                                        if (Array.isArray(data.errors[key])) {
+                                            errorMessages.push(data.errors[key].join(', '));
+                                        } else {
+                                            errorMessages.push(data.errors[key]);
+                                        }
+                                    }
+                                }
+                                showAlert('error', errorMessages.join('\n'));
+                            } else {
+                                showAlert('error', data.message || 'Đã xảy ra lỗi khi đặt bàn. Vui lòng thử lại.');
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', status, error);
+                        console.error('Response:', xhr.responseText);
+                        
+                        // Try to parse error response
+                        var errorMessage = 'Lỗi: Không thể kết nối đến server. Vui lòng thử lại.';
+                        try {
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = 'Lỗi: ' + xhr.responseJSON.message;
+                            } else if (xhr.responseText) {
+                                // If response is HTML (error page), show generic message
+                                if (xhr.responseText.indexOf('<html') !== -1) {
+                                    errorMessage = 'Lỗi: Server trả về lỗi. Vui lòng kiểm tra lại thông tin và thử lại.';
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Error parsing response:', e);
+                        }
+                        showAlert('error', errorMessage);
+                    },
+                    complete: function() {
+                        // Restore button state
+                        $submitButton.prop('disabled', false);
+                        $submitButton.html(originalButtonText);
+                    }
+                });
+                
+                return false;
+            });
+            
+            // Also update on page load if values are already set
+            if ($ngayDatInput.val() && $khungGioSelect.val()) {
+                updateThoiGianDen();
+            }
+        }
+        
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFormHandlers);
+        } else {
+            initFormHandlers();
+        }
+    })();
+</script>

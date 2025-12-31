@@ -40,6 +40,12 @@ namespace Project_65133141.Models
             set { this.MatKhau = value; } 
         }
         
+        public System.DateTime? ngay_sinh 
+        { 
+            get { return this.NgaySinh; } 
+            set { this.NgaySinh = value; } 
+        }
+        
         // Note: chi_nhanh_id and luong are not in the database model
         // These are kept for backward compatibility but will not be persisted
         public long? chi_nhanh_id { get; set; }

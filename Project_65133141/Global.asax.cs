@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using System.Web.Security;
 
 namespace Project_65133141
 {
@@ -23,6 +24,11 @@ namespace Project_65133141
             // Force UTF-8 encoding for all responses
             Response.ContentEncoding = System.Text.Encoding.UTF8;
             Response.Charset = "utf-8";
+        }
+
+        protected void Session_Start(object sender, EventArgs e)
+        {
+            
         }
     }
 }

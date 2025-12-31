@@ -21,6 +21,21 @@ namespace Project_65133141.Filters
             }
 
             var userRole = httpContext.Session["UserRole"] as string;
+            
+            // Resilience: If Session is empty but User is authenticated, recover role from Auth Ticket
+            if (string.IsNullOrEmpty(userRole) && httpContext.User.Identity is System.Web.Security.FormsIdentity formsIdentity)
+            {
+                var ticket = formsIdentity.Ticket;
+                if (ticket != null && !string.IsNullOrEmpty(ticket.UserData))
+                {
+                     userRole = ticket.UserData;
+                     // Restore to session
+                     httpContext.Session["UserRole"] = userRole;
+                     httpContext.Session["UserName"] = httpContext.User.Identity.Name;
+                     // Log for debugging if needed: System.Diagnostics.Debug.WriteLine($"Recovered role {userRole} from ticket for {httpContext.User.Identity.Name}");
+                }
+            }
+
             if (string.IsNullOrEmpty(userRole))
             {
                 return false;
@@ -30,9 +45,33 @@ namespace Project_65133141.Filters
             string roleLower = userRole.ToLower().Trim();
             foreach (var allowedRole in _allowedRoles)
             {
-                if (roleLower == allowedRole.ToLower().Trim())
+                string allowedRoleLower = allowedRole.ToLower().Trim();
+                
+                // Exact match
+                if (roleLower == allowedRoleLower)
                 {
                     return true;
+                }
+                
+                // Special handling for employee role variations
+                if (allowedRoleLower == "employee")
+                {
+                    if (roleLower == "nhân viên" || roleLower == "nhan vien" || 
+                        roleLower.Contains("nhân viên") || roleLower.Contains("nhan vien") ||
+                        roleLower.Contains("employee"))
+                    {
+                        return true;
+                    }
+                }
+                
+                // Special handling for admin role variations
+                if (allowedRoleLower == "admin")
+                {
+                    if (roleLower == "admin" || roleLower == "administrator" || 
+                        roleLower.Contains("admin"))
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -43,7 +82,7 @@ namespace Project_65133141.Filters
         {
             // Get user role to determine redirect URL
             var userRole = filterContext.HttpContext.Session["UserRole"] as string;
-            string redirectUrl = "~/Home/Index"; // Default redirect
+            string redirectUrl = "~/Home/Index"; // Default redirect to home
 
             if (!string.IsNullOrEmpty(userRole))
             {
@@ -62,32 +101,19 @@ namespace Project_65133141.Filters
                 }
             }
 
-            // Create HTML with alert and redirect
-            string errorMessage = "Bạn không có quyền truy cập trang này. Vui lòng đăng nhập với tài khoản phù hợp.";
-            string html = $@"
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset='utf-8' />
-    <title>Không có quyền truy cập</title>
-</head>
-<body>
-    <script>
-        alert('{errorMessage.Replace("'", "\\'")}');
-        window.location.href = '{redirectUrl}';
-    </script>
-</body>
-</html>";
-
-            // Return HTML content with alert
-            filterContext.Result = new ContentResult
-            {
-                Content = html,
-                ContentType = "text/html; charset=utf-8"
-            };
+            // Redirect directly to home page without alert
+            filterContext.Result = new RedirectResult(redirectUrl);
         }
     }
 }
+
+
+
+
+
+
+
+
 
 
 

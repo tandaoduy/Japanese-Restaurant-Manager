@@ -20,5 +20,9 @@ namespace Project_65133141.Models.Form
 
         [Display(Name = "Ghi nhớ đăng nhập")]
         public bool RememberMe { get; set; }
+
+        [Required(ErrorMessage = "Mã CAPTCHA là bắt buộc")]
+        [Display(Name = "Mã CAPTCHA")]
+        public string CaptchaCode { get; set; }
     }
 }

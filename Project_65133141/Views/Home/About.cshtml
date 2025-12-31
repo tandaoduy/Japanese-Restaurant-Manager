@@ -237,7 +237,6 @@
         color: #111827;
         margin-bottom: 1.5rem;
         position: relative;
-        white-space: nowrap;
     }
 
     .section-title-white {
@@ -358,6 +357,13 @@
         transform: translateX(-50%);
         z-index: 0;
     }
+    
+    /* Hide timeline center line on mobile */
+    @@media (max-width: 767px) {
+        .space-y-12::before {
+            display: none;
+        }
+    }
 
     /* Timeline cards */
     .timeline-card {
@@ -383,6 +389,13 @@
         border-radius: 50%;
         box-shadow: 0 0 0 2px #dc2626;
         z-index: 2;
+    }
+    
+    /* Hide timeline dots on mobile */
+    @@media (max-width: 767px) {
+        .grid-2:has(.timeline-card)::after {
+            display: none;
+        }
     }
 
     .timeline-year {
@@ -889,6 +902,27 @@
         /* Timeline adjustments */
         .timeline-card {
             padding: 1.5rem;
+        }
+        
+        /* Fix container overflow */
+        .about-container {
+            overflow-x: hidden;
+        }
+        
+        /* Ensure all text wraps */
+        .section-title,
+        .hero-title,
+        .timeline-title,
+        .feature-title,
+        .chef-name,
+        .value-title {
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        
+        /* Final image wrapper */
+        .final-image-wrapper img {
+            height: 250px;
         }
     }
 </style>
@@ -1463,5 +1497,4 @@
 </script>
 
 
-@* Login and Register Modals Component *@
-@Html.Partial("_AuthModals")
+@* Login and Register Modals Component - Already included in _Layout.cshtml *@

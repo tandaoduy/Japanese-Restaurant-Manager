@@ -415,7 +415,7 @@
             </div>
         </div>
     </div>
-        </section>
+</section>
 
 <section id="giao-hang" class="py-20 bg-white">
     <div class="container mx-auto px-4">
@@ -469,8 +469,12 @@
                     allowfullscreen="" 
                     loading="lazy" 
                     referrerpolicy="no-referrer-when-downgrade"
-                    class="w-full">
+                    class="w-full"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 </iframe>
+                <div style="display:none; padding: 2rem; text-align: center; background: #f3f4f6; color: #6b7280;">
+                    <p>Bản đồ không thể tải được. Vui lòng tắt trình chặn quảng cáo hoặc truy cập trực tiếp <a href="https://www.google.com/maps" target="_blank" class="text-red-600 hover:underline">Google Maps</a>.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -603,5 +607,4 @@
     })();
 </script>
 
-@* Login and Register Modals Component *@
-@Html.Partial("_AuthModals")
+@* Login and Register Modals Component - Already included in _Layout.cshtml *@

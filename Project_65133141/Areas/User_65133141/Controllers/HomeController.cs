@@ -7,6 +7,7 @@ using Project_65133141.Models;
 
 namespace Project_65133141.Areas.User_65133141.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private QuanLyNhaHangNhat_65133141Entities6 db = new QuanLyNhaHangNhat_65133141Entities6();

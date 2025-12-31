@@ -137,6 +137,26 @@
                 requestAnimationFrame(() => {
                     modalContent.classList.remove('scale-95', 'opacity-0');
                     modalContent.classList.add('scale-100', 'opacity-100');
+                    
+                    // Ensure button is clickable after animation
+                    setTimeout(() => {
+                        const confirmBtn = document.getElementById('confirmButton');
+                        if (confirmBtn) {
+                            confirmBtn.style.pointerEvents = 'auto';
+                            confirmBtn.style.cursor = 'pointer';
+                            confirmBtn.style.zIndex = '10001';
+                            // Use inline onclick as primary method
+                            confirmBtn.setAttribute('onclick', 'if(window.confirmAction){window.confirmAction();} return false;');
+                            // Also attach event listener as backup
+                            confirmBtn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (window.confirmAction) {
+                                    window.confirmAction();
+                                }
+                            }, true);
+                        }
+                    }, 200);
                 });
             });
         });
@@ -210,13 +230,34 @@
         }, 100);
         };
 
-        // Attach confirm action to button
-        document.addEventListener('DOMContentLoaded', function() {
+        // Attach confirm action to button - multiple ways to ensure it works
+        function attachConfirmButton() {
             const confirmBtn = document.getElementById('confirmButton');
-            if (confirmBtn && !confirmBtn.onclick) {
-                confirmBtn.onclick = window.confirmAction;
+            if (confirmBtn) {
+                // Remove any existing listeners
+                const newBtn = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+                
+                // Attach click event
+                newBtn.addEventListener('click', window.confirmAction);
+                newBtn.onclick = window.confirmAction;
             }
-        });
+        }
+
+        // Attach on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attachConfirmButton);
+        } else {
+            attachConfirmButton();
+        }
+
+        // Also attach when modal is shown
+        const originalShowConfirmModal = window.showConfirmModal;
+        window.showConfirmModal = function(options) {
+            originalShowConfirmModal.call(this, options);
+            // Re-attach button after modal is shown
+            setTimeout(attachConfirmButton, 50);
+        };
 
         // Close on ESC key
         document.addEventListener('keydown', function(e) {

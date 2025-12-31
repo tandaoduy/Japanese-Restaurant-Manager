@@ -1,52 +1,388 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - Employee Panel</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
     <link rel="shortcut icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
+    <!-- Google Fonts - Noto Sans Vietnamese -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    
+    <style>
+        /* Sleek Shimmer Animation for Header (Golden) */
+        @@keyframes shimmer-flow {
+            0% { transform: translateX(-100%) skewX(-15deg); }
+            100% { transform: translateX(200%) skewX(-15deg); }
+        }
+
+        .shimmer-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shimmer-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.1) 30%,
+                rgba(255, 255, 255, 0.25) 50%,
+                rgba(255, 255, 255, 0.1) 70%,
+                transparent 100%
+            );
+            transform: translateX(-100%) skewX(-15deg);
+            animation: shimmer-flow 3.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Smooth transitions */
+        a, button { transition: all 0.3s ease; }
+
+        /* Table row hover */
+        tbody tr { transition: all 0.2s ease; }
+        tbody tr:hover { background-color: #f0fdfa; } /* Teal-50 */
+
+        /* Breadcrumb Styles */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 0;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            color: #6b7280;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb-item:hover { color: #0d9488; } /* Teal-600 */
+        .breadcrumb-item.active { color: #0d9488; font-weight: 600; }
+        .breadcrumb-separator { color: #d1d5db; margin: 0 0.5rem; }
+
+        /* Sidebar Menu Styles (Teal/Ocean Blue) */
+        .sidebar-menu {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: linear-gradient(180deg, #f0fdfa 0%, #ccfbf1 100%); /* Teal-50 to Teal-100 */
+            border-right: 1px solid #5eead4;
+            padding: 0;
+            z-index: 40;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 2px 0 10px rgba(20, 184, 166, 0.1);
+        }
+
+        .sidebar-menu-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: #134e4a; /* Teal-800 */
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(20, 184, 166, 0.1);
+        }
+
+        .sidebar-menu-item svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            flex-shrink: 0;
+            color: #0d9488; /* Teal-600 */
+        }
+
+        .sidebar-menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #14b8a6 0%, #0d9488 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-menu-item:hover {
+            color: #0f766e !important; /* Teal-700 */
+            background: rgba(94, 234, 212, 0.1); /* Teal-300 with opacity */
+        }
+
+        .sidebar-menu-item:hover::before { transform: scaleY(1); }
+
+        .sidebar-menu-item.active {
+            color: #0f766e !important;
+            background: rgba(94, 234, 212, 0.2) !important;
+        }
+
+        .sidebar-menu-item.active::before { transform: scaleY(1); }
+
+        /* Main content layout */
+        .main-content-with-sidebar { margin-left: 250px; }
+
+        /* Hamburger Button */
+        .hamburger-btn {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            z-index: 60;
+        }
+
+        .hamburger-btn span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Mobile Overlay */
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 45;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .mobile-menu-overlay.active { opacity: 1; }
+
+        /* Responsive */
+        @@media (max-width: 1023px) {
+            .hamburger-btn { display: flex; }
+            .sidebar-menu { transform: translateX(-100%); transition: transform 0.3s; z-index: 50; }
+            .sidebar-menu.active { transform: translateX(0); }
+            .mobile-menu-overlay { display: block; }
+            .main-content-with-sidebar { margin-left: 0; }
+            header .container { padding-left: 1rem; padding-right: 1rem; }
+            header .h-20 { height: 4rem; }
+            .pt-20 { padding-top: 4rem; }
+            .sidebar-menu { top: 4rem; height: calc(100vh - 4rem); }
+        }
+
+        /* Global Font Override */
+        html, body, *, *::before, *::after {
+            font-family: 'Noto Sans', 'Segoe UI', sans-serif !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
-    <nav class="bg-green-600 text-white shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
+    <!-- Fixed Header (Teal/Ocean Blue Gradient) -->
+    <header class="fixed top-0 left-0 right-0 z-50 shadow-md">
+        <!-- Background Layer with Shimmer -->
+        <div class="absolute inset-0 bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-600 shimmer-effect z-0"></div>
+        
+        <!-- Content Layer -->
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo and Title -->
                 <div class="flex items-center space-x-4">
-                    <h1 class="text-xl font-bold">Employee Panel</h1>
+                    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Menu">
+                        <span></span><span></span><span></span>
+                    </button>
+                    
+                    <div class="w-14 h-14 rounded-full overflow-hidden border-3 border-white shadow-lg">
+                        <img src="@Url.Content("~/Images/logoNhaHang.png")" alt="SAKURA KAZOKU Logo" class="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Nhân Viên Hệ Thống</h1>
+                        <p class="text-sm text-cyan-100">SAKURA KAZOKU - Employee Panel</p>
+                    </div>
                 </div>
+
+                <!-- User Profile Dropdown -->
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm">
-                        Employee <strong>@(User.Identity.IsAuthenticated ? User.Identity.Name : "Guest")</strong>
-                    </span>
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <a href="@Url.Action("Logout", "Account", new { area = "" })" 
-                           class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm transition">
-                            Đăng xuất
-                        </a>
+                    @{
+                        var userName = Session["UserName"] as string ?? User.Identity.Name ?? "Nhân viên";
+                        var firstLetter = !string.IsNullOrEmpty(userName) ? userName.Substring(0, 1).ToUpper() : "N";
                     }
+                    
+                    <div class="relative" id="employee-user-menu">
+                        <button type="button" id="employee-profile-btn" class="flex items-center space-x-3 focus:outline-none hover:bg-white/10 rounded-full p-1 pr-3 transition-colors">
+                            <div class="w-10 h-10 rounded-full bg-white border-2 border-teal-200 flex items-center justify-center text-teal-600 font-bold text-lg shadow-sm">
+                                @firstLetter
+                            </div>
+                            <div class="hidden md:block text-left">
+                                <p class="text-xs text-cyan-100 leading-none mb-1">Xin chào!</p>
+                                <div class="flex items-center">
+                                    <p class="text-sm font-bold text-white leading-none">@userName</p>
+                                    <svg class="w-4 h-4 text-cyan-200 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="employee-profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50 origin-top-right transform transition-all duration-200">
+                             <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                                <p class="text-sm text-gray-500">Đang đăng nhập với quyền</p>
+                                <p class="text-base font-bold text-teal-600">Nhân Viên</p>
+                            </div>
+                            
+                            <div class="py-1 border-t border-gray-100">
+                                <a href="@Url.Action("Logout", "Account", new { area = "" })" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition font-medium">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                    Đăng xuất
+                                </a>
+                            </div>
+                            
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </nav>
-    
-    <div class="container mx-auto px-4 py-8">
-        @RenderBody()
-    </div>
+    </header>
 
-    <footer class="bg-gray-800 text-white mt-8 py-4">
-        <div class="container mx-auto px-4 text-center">
-            <p>&copy; @DateTime.Now.Year - Employee Panel - Quản lý nhà hàng</p>
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- Sidebar Menu (Golden) -->
+    <nav class="sidebar-menu">
+        <a href="@Url.Action("Index", "Home", new { area = "Employee_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <span>TRANG CHỦ</span>
+        </a>
+        
+        <div style="height: 1px; background: rgba(20, 184, 166, 0.2); margin: 0.5rem 0;"></div>
+        
+        <a href="@Url.Action("Index", "DatBan", new { area = "Employee_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DatBan" ? "active" : "")">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span>ĐẶT BÀN</span>
+        </a>
+
+        <a href="@Url.Action("Index", "Order", new { area = "Employee_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Order" ? "active" : "")">
+             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+            <span>GỌI MÓN</span>
+        </a>
+        
+        <a href="@Url.Action("Index", "BanAn", new { area = "Employee_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BanAn" ? "active" : "")">
+             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
+            <span>SƠ ĐỒ BÀN</span>
+        </a>
+
+        <a href="@Url.Action("Index", "Menu", new { area = "Employee_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Menu" ? "active" : "")">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            <span>THỰC ĐƠN</span>
+        </a>
+
+        <a href="@Url.Action("Index", "DonHang", new { area = "Employee_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DonHang" ? "active" : "")">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>QUẢN LÝ ĐƠN HÀNG</span>
+        </a>
+
+
+    </nav>
+
+    <div class="pt-20 main-content-with-sidebar">
+        <!-- Breadcrumb -->
+        <div class="bg-white border-b border-amber-100 shadow-sm">
+            <div class="container mx-auto px-4">
+                <nav class="breadcrumb">
+                    <a href="@Url.Action("Index", "Home", new { area = "Employee_65133141" })" class="breadcrumb-item hover:text-amber-600">
+                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        Trang chủ
+                    </a>
+                    @{
+                        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+                        var action = ViewContext.RouteData.Values["action"]?.ToString();
+                        
+                        if (!string.IsNullOrEmpty(controller) && controller != "Home")
+                        {
+                            <span class="breadcrumb-separator">/</span>
+                            <span class="breadcrumb-item active">
+                                @(controller == "Account" ? "Tài khoản" : 
+                                  controller == "DatBan" ? "Đặt bàn" : 
+                                  controller == "Order" ? "Gọi món" : 
+                                  controller == "BanAn" ? "Sơ đồ bàn" : 
+                                  controller == "Menu" ? "Thực đơn" : controller)
+                            </span>
+                        }
+                    }
+                </nav>
+            </div>
         </div>
-    </footer>
+
+        <div class="p-6">
+            @RenderBody()
+        </div>
+    </div>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
-    @RenderSection("scripts", required: false)
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dropdown Toggle
+            const profileBtn = document.getElementById('employee-profile-btn');
+            const dropdown = document.getElementById('employee-profile-dropdown');
+            
+            if(profileBtn && dropdown) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('hidden');
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!dropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Mobile Menu Toggle
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.querySelector('.sidebar-menu');
+            const overlay = document.getElementById('mobileMenuOverlay');
+
+            if(hamburgerBtn && sidebar && overlay) {
+                function toggleMenu() {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                }
+
+                hamburgerBtn.addEventListener('click', toggleMenu);
+                overlay.addEventListener('click', toggleMenu);
+            }
+        });
+    </script>
 </body>
 </html>

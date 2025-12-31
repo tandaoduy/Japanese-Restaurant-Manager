@@ -1,0 +1,1045 @@
+@{
+    ViewBag.Title = "Chọn Món";
+    Layout = "~/Areas/Employee_65133141/Views/Shared/_Layout.cshtml";
+    var table = ViewBag.Table as Project_65133141.Models.BanAn;
+    var categories = ViewBag.Categories as List<Project_65133141.Models.DanhMuc>;
+    var groupedMenu = ViewBag.GroupedMenu as List<System.Tuple<Project_65133141.Models.DanhMuc, List<Project_65133141.Models.MonAn>>>;
+}
+
+@Html.AntiForgeryToken()
+
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="@Url.Action("Index", "Order", new { area = "Employee_65133141" })" 
+                       class="text-gray-600 hover:text-gray-900">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                    <h1 class="text-2xl font-bold text-gray-900">@(table?.TenBan ?? "Bàn")</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <!-- Search button removed -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Menu Section -->
+            <div class="lg:col-span-2">
+                <!-- Search Box -->
+                <div class="bg-white rounded-lg shadow-sm mb-4 p-3">
+                    <div class="relative">
+                        <div class="search-box-container flex items-center bg-gray-50 border-2 border-gray-200 rounded-lg pl-4 pr-1 py-2 focus-within:border-teal-500 focus-within:bg-white transition-all">
+                            <svg class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <input type="text" id="menuSearchInput" class="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400" placeholder="Tìm kiếm món ăn..." autocomplete="off">
+                        </div>
+                        <div id="searchAutocompleteDropdown" class="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-y-auto z-50 hidden">
+                            <!-- Autocomplete items will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Tabs (Compact - Wrap) -->
+                <div class="mb-4">
+                    <div class="category-wrap-container flex flex-wrap gap-2">
+                        <button class="category-tab-compact px-3 py-1.5 rounded-lg font-semibold text-xs whitespace-nowrap active bg-teal-500 text-white" data-category="all">
+                            Tất cả
+                        </button>
+                        @if (categories != null)
+                        {
+                            foreach (var cat in categories)
+                            {
+                                <button class="category-tab-compact px-3 py-1.5 rounded-lg font-semibold text-xs whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors" data-category="@cat.DanhMucID">
+                                    @cat.TenDanhMuc
+                                </button>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Menu Items by Category -->
+                <div id="menuItemsContainer">
+                    @if (groupedMenu != null)
+                    {
+                        foreach (var group in groupedMenu)
+                        {
+                            var cat = group.Item1;
+                            var items = group.Item2;
+                            
+                            if (cat != null && items != null && items.Any())
+                            {
+                                <div class="category-section mb-8" data-category-id="@cat.DanhMucID">
+                                    <h2 class="text-2xl font-bold text-gray-900 mb-4">@cat.TenDanhMuc</h2>
+                                    <div class="space-y-4">
+                                        @foreach (var item in items)
+                                        {
+                                            var isAvailable = item.TrangThai == "Hoạt động" || item.TrangThai == "Đang phục vụ";
+                                            var imagePath = !string.IsNullOrEmpty(item.HinhAnh) 
+                                                ? (item.HinhAnh.StartsWith("~/") || item.HinhAnh.StartsWith("/") || item.HinhAnh.StartsWith("http") 
+                                                    ? item.HinhAnh 
+                                                    : "~/Images/Products/" + item.HinhAnh)
+                                                : "~/Images/logoNhaHang.png";
+                                            
+                                            <div class="bg-white rounded-lg shadow-sm p-4 flex gap-4 @(!isAvailable ? "opacity-60" : "")" 
+                                                 data-mon-an-id="@item.MonAnID">
+                                                <div class="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                                    <img src="@Url.Content(imagePath)" alt="@item.TenMon" 
+                                                         class="w-full h-full object-cover"
+                                                         onerror="this.src='@Url.Content("~/Images/logoNhaHang.png")';" />
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h3 class="font-bold text-lg text-gray-900 mb-1">@item.TenMon</h3>
+                                                    <p class="text-sm text-gray-600 mb-2">@(item.MoTa ?? "")</p>
+                                                    <div class="flex justify-between items-center">
+                                                        <span class="text-lg font-bold text-red-600">
+                                                            @string.Format("{0:N0}", item.Gia) ₫
+                                                            @if (!string.IsNullOrEmpty(item.DonViTinh))
+                                                            {
+                                                                <span class="text-sm font-normal text-gray-500">/ @item.DonViTinh</span>
+                                                            }
+                                                        </span>
+                                                        @if (isAvailable)
+                                                        {
+                                                            <div class="flex items-center gap-2">
+                                                                <button class="quantity-btn minus w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-100" 
+                                                                        data-mon-an-id="@item.MonAnID">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                                    </svg>
+                                                                </button>
+                                                                <span class="quantity-display w-8 text-center font-semibold" data-mon-an-id="@item.MonAnID">0</span>
+                                                                <button class="quantity-btn plus w-8 h-8 rounded-full border-2 border-teal-500 bg-teal-500 text-white flex items-center justify-center hover:bg-teal-600" 
+                                                                        data-mon-an-id="@item.MonAnID">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-sm text-gray-500">Hết món</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Right: Cart Section -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-sm sticky top-20">
+                    <!-- Cart Header -->
+                    <div class="p-4 border-b">
+                        <h2 class="text-xl font-bold text-gray-900 mb-2">Giỏ hàng</h2>
+                        <!-- Cart Tabs -->
+                        <div class="flex gap-2 border-b">
+                            <button class="cart-tab flex-1 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-teal-500 transition-colors" 
+                                data-tab="pending">
+                                Món đang gọi
+                                <span id="pendingCount" class="ml-2 px-2 py-0.5 bg-gray-300 text-gray-700 rounded-full text-xs">0</span>
+                            </button>
+                            <button class="cart-tab flex-1 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-teal-500 transition-colors" 
+                                data-tab="confirmed">
+                                Món đã gọi
+                                <span id="confirmedCount" class="ml-2 px-2 py-0.5 bg-gray-300 text-gray-700 rounded-full text-xs">0</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cart Content -->
+                    <div class="p-4 max-h-96 overflow-y-auto">
+                        <!-- Pending Items -->
+                        <div id="pendingCartItems" class="cart-content">
+                            <div class="text-center text-gray-500 py-8">
+                                <p>Chưa có món nào</p>
+                            </div>
+                        </div>
+
+                        <!-- Confirmed Items -->
+                        <div id="confirmedCartItems" class="cart-content hidden">
+                            <div class="text-center text-gray-500 py-8">
+                                <p>Chưa có món nào</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cart Footer -->
+                    <div class="p-4 border-t bg-gray-50">
+                        <div class="mb-4">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-600">Tạm tính:</span>
+                                <span id="pendingTotal" class="font-semibold">0 ₫</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Đã xác nhận:</span>
+                                <span id="confirmedTotal" class="font-semibold">0 ₫</span>
+                            </div>
+                            <div class="flex justify-between mt-2 pt-2 border-t font-bold text-lg">
+                                <span>Tổng cộng:</span>
+                                <span id="totalAmount" class="text-red-600">0 ₫</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="confirmOrderBtn" class="flex-1 px-4 py-2 bg-white border-2 border-teal-500 text-teal-500 rounded-lg font-semibold hover:bg-teal-50">
+                                Xác nhận
+                            </button>
+                            <button id="paymentBtn" class="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600">
+                                Thanh toán
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Container -->
+<div id="alertContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
+
+<!-- Modal xác nhận đơn hàng -->
+<div id="confirmOrderModal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-[9999] p-4" style="display: none;">
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full mx-auto transform transition-all">
+        <div class="p-4 sm:p-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-teal-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-3 sm:ml-4 flex-1 min-w-0">
+                    <h3 id="confirmOrderTitle" class="text-base sm:text-lg font-bold text-gray-900">Xác nhận đơn hàng</h3>
+                    <p id="confirmOrderMessage" class="mt-2 text-sm text-gray-600 break-words">Bạn có chắc chắn muốn xác nhận đơn hàng này không?</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 rounded-b-xl sm:rounded-b-2xl flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+            <button type="button" id="cancelConfirmOrderBtn" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-700 rounded-lg font-semibold text-sm border border-gray-300 shadow-sm hover:shadow-md active:shadow-sm transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto">Hủy</button>
+            <button type="button" id="confirmOrderBtnModal" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg active:shadow-md transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xác nhận xóa món -->
+<div id="confirmDeleteItemModal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-[9999] p-4" style="display: none;">
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full mx-auto transform transition-all">
+        <div class="p-4 sm:p-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-3 sm:ml-4 flex-1 min-w-0">
+                    <h3 id="confirmDeleteItemTitle" class="text-base sm:text-lg font-bold text-gray-900">Xóa món</h3>
+                    <p id="confirmDeleteItemMessage" class="mt-2 text-sm text-gray-600 break-words">Bạn có chắc chắn muốn xóa món này khỏi giỏ hàng không?</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 rounded-b-xl sm:rounded-b-2xl flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+            <button type="button" id="cancelDeleteItemBtn" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-700 rounded-lg font-semibold text-sm border border-gray-300 shadow-sm hover:shadow-md active:shadow-sm transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto">Hủy</button>
+            <button type="button" id="confirmDeleteItemBtn" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg active:shadow-md transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto">Xóa</button>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+
+<script>
+    var currentBanId = @table.BanID;
+    var currentCategory = 'all';
+    var currentCartTab = 'pending';
+
+    // Ensure jQuery is loaded
+    if (typeof jQuery === 'undefined') {
+        document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
+    }
+
+    (function($) {
+        // Define functions first before using them
+        window.addToCart = function(monAnId, soLuong) {
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Order", new { area = "Employee_65133141" })',
+                type: 'POST',
+                data: { banId: currentBanId, monAnId: monAnId, soLuong: soLuong },
+                success: function(response) {
+                    if (response.success) {
+                        updateQuantityDisplay(monAnId);
+                        loadCart();
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra');
+                }
+            });
+        };
+
+        window.updateCartItem = function(monAnId, soLuong) {
+            $.ajax({
+                url: '@Url.Action("UpdateCartItem", "Order", new { area = "Employee_65133141" })',
+                type: 'POST',
+                data: { banId: currentBanId, monAnId: monAnId, soLuong: soLuong },
+                success: function(response) {
+                    if (response.success) {
+                        updateQuantityDisplay(monAnId);
+                        loadCart();
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra');
+                }
+            });
+        };
+
+        window.updateQuantityDisplay = function(monAnId) {
+            // This will be updated after loading cart
+            loadCart();
+        };
+
+        window.loadCart = function() {
+            $.ajax({
+                url: '@Url.Action("GetCart", "Order", new { area = "Employee_65133141" })',
+                type: 'GET',
+                data: { banId: currentBanId },
+                success: function(response) {
+                    if (response.success) {
+                        // Update counts
+                        $('#pendingCount').text(response.pendingCount || 0);
+                        $('#confirmedCount').text(response.confirmedCount || 0);
+                        
+                        // Update cart tab styles
+                        updateCartTabStyles();
+                        
+                        // Update totals
+                        $('#pendingTotal').text(formatCurrency(response.pendingTotal || 0));
+                        $('#confirmedTotal').text(formatCurrency(response.confirmedTotal || 0));
+                        $('#totalAmount').text(formatCurrency((response.pendingTotal || 0) + (response.confirmedTotal || 0)));
+                        
+                        // Render pending items
+                        renderCartItems('#pendingCartItems', response.pending, 'pending');
+                        
+                        // Render confirmed items
+                        renderCartItems('#confirmedCartItems', response.confirmed, 'confirmed');
+                        
+                        // Update quantity displays
+                        updateAllQuantityDisplays(response.pending);
+                    }
+                },
+                error: function() {
+                    console.error('Error loading cart');
+                }
+            });
+        };
+
+        window.renderCartItems = function(containerId, items, type) {
+            var container = $(containerId);
+            if (!items || items.length === 0) {
+                container.html('<div class="text-center text-gray-500 py-8"><p>Chưa có món nào</p></div>');
+                return;
+            }
+
+            var html = '';
+            items.forEach(function(item, index) {
+                var imgSrc = item.HinhAnh ? 
+                    (item.HinhAnh.startsWith('~/') || item.HinhAnh.startsWith('/') || item.HinhAnh.startsWith('http') 
+                        ? item.HinhAnh 
+                        : '/Images/Products/' + item.HinhAnh) 
+                    : '/Images/logoNhaHang.png';
+                
+                html += '<div class="flex gap-3 mb-3 pb-3 border-b last:border-0">';
+                html += '<div class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">';
+                html += '<img src="' + imgSrc + '" alt="' + item.TenMon + '" class="w-full h-full object-cover" onerror="this.src=\'/Images/logoNhaHang.png\'" />';
+                html += '</div>';
+                html += '<div class="flex-1">';
+                html += '<h4 class="font-semibold text-sm text-gray-900 mb-1">#' + (index + 1) + ': ' + item.TenMon + '</h4>';
+                html += '<p class="text-sm font-bold text-red-600 mb-1">' + formatCurrency(item.Total) + '</p>';
+                html += '<div class="flex items-center gap-2">';
+                if (type === 'pending') {
+                    html += '<button class="text-teal-600 hover:text-teal-700" onclick="editItem(' + item.MonAnID + ')" title="Chỉnh sửa">';
+                    html += '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>';
+                    html += '</button>';
+                }
+                html += '<span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">SL: ' + item.SoLuong + '</span>';
+                // Add delete button for both pending and confirmed
+                var itemNameEscaped = (item.TenMon || '').replace(/'/g, "\\'");
+                html += '<button class="text-red-600 hover:text-red-700 ml-auto" onclick="removeFromCart(' + item.MonAnID + ', \'' + type + '\', \'' + itemNameEscaped + '\')" title="Xóa món">';
+                html += '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>';
+                html += '</button>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            container.html(html);
+        };
+
+        window.updateAllQuantityDisplays = function(pendingItems) {
+            // Reset all to 0
+            $('.quantity-display').text('0');
+            
+            // Update based on cart
+            if (pendingItems) {
+                pendingItems.forEach(function(item) {
+                    $('.quantity-display[data-mon-an-id="' + item.MonAnID + '"]').text(item.SoLuong);
+                });
+            }
+        };
+
+        window.clearPendingCart = function() {
+            // Clear all pending items by setting quantities to 0
+            $('.quantity-display').each(function() {
+                var monAnId = $(this).data('mon-an-id');
+                var currentQty = parseInt($(this).text()) || 0;
+                if (currentQty > 0) {
+                    updateCartItem(monAnId, 0);
+                }
+            });
+        };
+
+        // Show alert function (similar to Admin)
+        window.showAlert = function(type, message) {
+            var container = document.getElementById('alertContainer');
+            if (!container) return;
+
+            var alertId = 'alert-' + Date.now();
+
+            var config = {
+                success: {
+                    bg: 'bg-green-100 border border-green-200 text-green-900',
+                    iconBg: 'bg-green-500 text-white',
+                    title: 'Thành công!',
+                    icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                },
+                error: {
+                    bg: 'bg-red-100 border border-red-200 text-red-900',
+                    iconBg: 'bg-red-500 text-white',
+                    title: 'Lỗi!',
+                    icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14"></path><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+                },
+                warning: {
+                    bg: 'bg-amber-100 border border-amber-200 text-amber-900',
+                    iconBg: 'bg-amber-500 text-white',
+                    title: 'Cảnh báo!',
+                    icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01M10.29 4.21l-6.6 11.45A1 1 0 004.53 18h14.94a1 1 0 00.86-1.5l-6.6-11.45a1 1 0 00-1.74 0z"/></svg>'
+                },
+                info: {
+                    bg: 'bg-sky-100 border border-sky-200 text-sky-900',
+                    iconBg: 'bg-sky-500 text-white',
+                    title: 'Thông tin',
+                    icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01" /><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+                }
+            };
+
+            var cfg = config[type] || config.info;
+
+            var html = `
+            <div id="${alertId}" class="${cfg.bg} px-3 py-2 rounded-lg shadow-md flex items-center gap-2 max-w-md transition-all duration-300 translate-x-full bg-opacity-95 border border-white/60">
+                <div class="w-7 h-7 rounded-full ${cfg.iconBg} flex items-center justify-center flex-shrink-0">
+                    ${cfg.icon}
+                </div>
+                <div class="flex-1">
+                    <div class="font-semibold text-sm mb-0.5">${cfg.title}</div>
+                    <div class="text-sm leading-snug">${message}</div>
+                </div>
+                <button type="button" class="ml-2 text-current/70 hover:text-current" aria-label="Đóng thông báo"
+                        onclick="(function(){ var el = document.getElementById('${alertId}'); if(el){ el.classList.add('translate-x-full'); setTimeout(function(){ el.remove(); }, 250); } })()">
+                    &#10005;
+                </button>
+            </div>`;
+
+            container.insertAdjacentHTML('beforeend', html);
+
+            setTimeout(function () {
+                var el = document.getElementById(alertId);
+                if (el) el.classList.remove('translate-x-full');
+            }, 10);
+
+            setTimeout(function () {
+                var el = document.getElementById(alertId);
+                if (el) {
+                    el.classList.add('translate-x-full');
+                    setTimeout(function () { el.remove(); }, 250);
+                }
+            }, 4000);
+        };
+
+        // Modal functions
+        window.openConfirmOrderModal = function() {
+            var modal = document.getElementById('confirmOrderModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        window.closeConfirmOrderModal = function() {
+            var modal = document.getElementById('confirmOrderModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        };
+
+        window.openConfirmDeleteItemModal = function(monAnId, itemName, cartType) {
+            var modal = document.getElementById('confirmDeleteItemModal');
+            var titleEl = document.getElementById('confirmDeleteItemTitle');
+            var msgEl = document.getElementById('confirmDeleteItemMessage');
+            
+            if (titleEl) titleEl.textContent = 'Xóa món';
+            if (msgEl) {
+                var displayName = itemName || 'món này';
+                msgEl.textContent = 'Bạn có chắc chắn muốn xóa "' + displayName + '" khỏi giỏ hàng không?';
+            }
+            
+            // Store data for confirmation
+            window.pendingDeleteItem = {
+                monAnId: monAnId,
+                cartType: cartType || 'pending'
+            };
+            
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        window.closeConfirmDeleteItemModal = function() {
+            var modal = document.getElementById('confirmDeleteItemModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            window.pendingDeleteItem = null;
+        };
+
+        // Perform confirm order (called from modal)
+        window.performConfirmOrder = function() {
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            
+            $.ajax({
+                url: '@Url.Action("ConfirmOrder", "Order", new { area = "Employee_65133141" })',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: token,
+                    banId: currentBanId
+                },
+                success: function(response) {
+                    closeConfirmOrderModal();
+                    if (response.success) {
+                        if (typeof showAlert === 'function') {
+                            showAlert('success', response.message || 'Xác nhận đơn hàng thành công!');
+                        }
+                        
+                        // Reload cart to show updated data
+                        loadCart();
+                        
+                        // Reset quantity displays for pending items only
+                        updateAllQuantityDisplays([]);
+                        
+                        // Switch to confirmed tab to show the confirmed items
+                        setTimeout(function() {
+                            $('.cart-tab[data-tab="confirmed"]').click();
+                        }, 500);
+                    } else {
+                        if (typeof showAlert === 'function') {
+                            showAlert('error', response.message || 'Không thể xác nhận đơn hàng');
+                        }
+                    }
+                },
+                error: function() {
+                    closeConfirmOrderModal();
+                    if (typeof showAlert === 'function') {
+                        showAlert('error', 'Có lỗi xảy ra khi xác nhận đơn hàng');
+                    }
+                }
+            });
+        };
+
+        window.confirmOrder = function() {
+            openConfirmOrderModal();
+        };
+
+        // Perform delete item (called from modal)
+        window.performDeleteItem = function() {
+            if (!window.pendingDeleteItem) {
+                closeConfirmDeleteItemModal();
+                return;
+            }
+            
+            var monAnId = window.pendingDeleteItem.monAnId;
+            var cartType = window.pendingDeleteItem.cartType;
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            
+            $.ajax({
+                url: '@Url.Action("RemoveFromCart", "Order", new { area = "Employee_65133141" })',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: token,
+                    banId: currentBanId,
+                    monAnId: monAnId,
+                    cartType: cartType || 'pending'
+                },
+                success: function(response) {
+                    closeConfirmDeleteItemModal();
+                    if (response.success) {
+                        if (typeof showAlert === 'function') {
+                            showAlert('success', response.message || 'Đã xóa món khỏi giỏ hàng');
+                        }
+                        
+                        // Reload cart to show updated data
+                        loadCart();
+                        
+                        // Update quantity display if it's a pending item
+                        if (cartType === 'pending') {
+                            $('.quantity-display[data-mon-an-id="' + monAnId + '"]').text('0');
+                        }
+                    } else {
+                        if (typeof showAlert === 'function') {
+                            showAlert('error', response.message || 'Không thể xóa món');
+                        }
+                    }
+                },
+                error: function() {
+                    closeConfirmDeleteItemModal();
+                    if (typeof showAlert === 'function') {
+                        showAlert('error', 'Có lỗi xảy ra khi xóa món');
+                    }
+                }
+            });
+        };
+
+        window.removeFromCart = function(monAnId, cartType, itemName) {
+            openConfirmDeleteItemModal(monAnId, itemName, cartType);
+        };
+
+        window.editItem = function(monAnId) {
+            // Scroll to item and highlight
+            $('html, body').animate({
+                scrollTop: $('[data-mon-an-id="' + monAnId + '"]').offset().top - 100
+            }, 500);
+            
+            $('[data-mon-an-id="' + monAnId + '"]').css('background-color', '#fef3c7').delay(2000).queue(function() {
+                $(this).css('background-color', '').dequeue();
+            });
+        };
+
+        window.formatCurrency = function(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
+        };
+
+        // Modal event handlers
+        $(document).ready(function() {
+            // Confirm Order Modal
+            $('#cancelConfirmOrderBtn').on('click', function() {
+                closeConfirmOrderModal();
+            });
+            
+            $('#confirmOrderBtnModal').on('click', function() {
+                performConfirmOrder();
+            });
+            
+            // Close modal when clicking outside
+            $('#confirmOrderModal').on('click', function(e) {
+                if (e.target === this) {
+                    closeConfirmOrderModal();
+                }
+            });
+            
+            // Confirm Delete Item Modal
+            $('#cancelDeleteItemBtn').on('click', function() {
+                closeConfirmDeleteItemModal();
+            });
+            
+            $('#confirmDeleteItemBtn').on('click', function() {
+                performDeleteItem();
+            });
+            
+            // Close modal when clicking outside
+            $('#confirmDeleteItemModal').on('click', function(e) {
+                if (e.target === this) {
+                    closeConfirmDeleteItemModal();
+                }
+            });
+            
+            // Confirm Order Button
+            $('#confirmOrderBtn').on('click', function() {
+                confirmOrder();
+            });
+        });
+
+        // Search Autocomplete
+        var allMenuItems = [];
+        var searchDebounceTimer;
+        
+        // Collect all menu items for search
+        function collectMenuItems() {
+            allMenuItems = [];
+            $('.category-section').each(function() {
+                var categoryId = $(this).data('category-id');
+                $(this).find('[data-mon-an-id]').each(function() {
+                    var itemName = $(this).find('h3').text().trim();
+                    var monAnId = $(this).data('mon-an-id');
+                    if (itemName && monAnId) {
+                        allMenuItems.push({
+                            name: itemName,
+                            monAnId: monAnId,
+                            categoryId: categoryId,
+                            element: $(this)
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Initialize search autocomplete
+        function initSearchAutocomplete() {
+            var searchInput = $('#menuSearchInput');
+            var dropdown = $('#searchAutocompleteDropdown');
+            
+            // Handle search input
+            searchInput.on('input', function() {
+                clearTimeout(searchDebounceTimer);
+                var query = $(this).val().trim();
+                
+                if (query.length === 0) {
+                    dropdown.addClass('hidden');
+                    filterMenuItems('');
+                    return;
+                }
+                
+                searchDebounceTimer = setTimeout(function() {
+                    showAutocompleteSuggestions(query);
+                    filterMenuItems(query);
+                }, 300);
+            });
+            
+            searchInput.on('focus', function() {
+                var query = $(this).val().trim();
+                if (query.length > 0) {
+                    showAutocompleteSuggestions(query);
+                    dropdown.removeClass('hidden');
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.search-box-container, #searchAutocompleteDropdown').length) {
+                    dropdown.addClass('hidden');
+                }
+            });
+        }
+        
+        
+        // Update cart tab styles based on active state
+        function updateCartTabStyles() {
+            $('.cart-tab').each(function() {
+                if ($(this).hasClass('active')) {
+                    $(this).addClass('border-teal-500 text-teal-500').removeClass('border-transparent text-gray-500');
+                    $(this).find('span').addClass('bg-teal-500 text-white').removeClass('bg-gray-300 text-gray-700');
+                } else {
+                    $(this).addClass('border-transparent text-gray-500').removeClass('border-teal-500 text-teal-500');
+                    $(this).find('span').addClass('bg-gray-300 text-gray-700').removeClass('bg-teal-500 text-white');
+                }
+            });
+        }
+        
+        function showAutocompleteSuggestions(query) {
+            var dropdown = $('#searchAutocompleteDropdown');
+            var lowerQuery = query.toLowerCase();
+            
+            // Get unique matching items
+            var matches = allMenuItems
+                .filter(function(item) {
+                    return item.name.toLowerCase().includes(lowerQuery);
+                })
+                .map(function(item) { return item.name; })
+                .filter(function(name, index, self) {
+                    return self.indexOf(name) === index;
+                })
+                .slice(0, 5);
+            
+            if (matches.length === 0) {
+                dropdown.html('<div class="autocomplete-item text-gray-500">Không tìm thấy kết quả</div>');
+                dropdown.removeClass('hidden');
+                return;
+            }
+            
+            var html = matches.map(function(name) {
+                var escapedName = name.replace(/'/g, "\\'");
+                return '<div class="autocomplete-item" onclick="selectSearchSuggestion(\'' + escapedName + '\')">' + name + '</div>';
+            }).join('');
+            
+            dropdown.html(html);
+            dropdown.removeClass('hidden');
+        }
+        
+        window.selectSearchSuggestion = function(name) {
+            $('#menuSearchInput').val(name);
+            $('#searchAutocompleteDropdown').addClass('hidden');
+            filterMenuItems(name);
+        };
+        
+        function filterMenuItems(searchTerm) {
+            var lowerSearch = searchTerm.toLowerCase();
+            
+            if (searchTerm.length === 0) {
+                // Show all items based on current category
+                if (currentCategory === 'all') {
+                    $('.category-section').show();
+                    $('.category-section [data-mon-an-id]').each(function() {
+                        var $item = $(this);
+                        $item.removeAttr('style');
+                        $item.css('display', 'flex');
+                        // Ensure all child elements are visible
+                        $item.find('.quantity-btn, .quantity-display').show();
+                    });
+                } else {
+                    $('.category-section').hide();
+                    $('.category-section[data-category-id="' + currentCategory + '"]').show();
+                    $('.category-section[data-category-id="' + currentCategory + '"] [data-mon-an-id]').each(function() {
+                        var $item = $(this);
+                        $item.removeAttr('style');
+                        $item.css('display', 'flex');
+                        // Ensure all child elements are visible
+                        $item.find('.quantity-btn, .quantity-display').show();
+                    });
+                }
+                return;
+            }
+            
+            // Filter items by search term
+            $('.category-section').each(function() {
+                var categoryId = $(this).data('category-id');
+                var hasMatch = false;
+                
+                // Find menu item cards (divs with data-mon-an-id)
+                $(this).find('[data-mon-an-id]').each(function() {
+                    var $item = $(this);
+                    var itemName = $item.find('h3').text().trim().toLowerCase();
+                    if (itemName.includes(lowerSearch)) {
+                        // Show item and ensure flex layout is maintained
+                        $item.removeAttr('style'); // Remove any inline styles that might hide it
+                        $item.css({
+                            'display': 'flex',
+                            'gap': '1rem'
+                        });
+                        // Ensure flex class exists
+                        if (!$item.hasClass('flex')) {
+                            $item.addClass('flex');
+                        }
+                        // Explicitly show all quantity controls
+                        $item.find('.quantity-btn, .quantity-display').css({
+                            'display': 'flex',
+                            'visibility': 'visible',
+                            'opacity': '1'
+                        });
+                        $item.find('.quantity-btn.plus, .quantity-btn.minus').css('display', 'flex');
+                        $item.find('.quantity-display').css('display', 'block');
+                        hasMatch = true;
+                    } else {
+                        $item.css('display', 'none');
+                    }
+                });
+                
+                // Show/hide category section based on matches
+                if (hasMatch) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        // Now initialize after functions are defined
+        $(document).ready(function() {
+            // Collect menu items for search
+            collectMenuItems();
+            
+            // Initialize search autocomplete
+            initSearchAutocomplete();
+            
+            // Category tab switching
+            $('.category-tab-compact').on('click', function() {
+                $('.category-tab-compact').removeClass('active bg-teal-500 text-white').addClass('bg-gray-100 text-gray-700');
+                $(this).addClass('active bg-teal-500 text-white').removeClass('bg-gray-100 text-gray-700');
+                currentCategory = $(this).data('category');
+                
+                // Clear search when changing category
+                $('#menuSearchInput').val('');
+                $('#searchAutocompleteDropdown').addClass('hidden');
+                
+                if (currentCategory === 'all') {
+                    $('.category-section').show();
+                    $('.category-section [data-mon-an-id]').show();
+                } else {
+                    $('.category-section').hide();
+                    $('.category-section[data-category-id="' + currentCategory + '"]').show();
+                    $('.category-section [data-mon-an-id]').show();
+                }
+            });
+            
+            // Initialize cart tab active state on page load
+            updateCartTabStyles();
+            
+            // Load cart on page load
+            loadCart();
+
+            // Cart tab switching
+            $('.cart-tab').on('click', function() {
+                $('.cart-tab').removeClass('active');
+                $(this).addClass('active');
+                currentCartTab = $(this).data('tab');
+                
+                // Update styles
+                updateCartTabStyles();
+                
+                if (currentCartTab === 'pending') {
+                    $('#pendingCartItems').removeClass('hidden');
+                    $('#confirmedCartItems').addClass('hidden');
+                } else {
+                    $('#pendingCartItems').addClass('hidden');
+                    $('#confirmedCartItems').removeClass('hidden');
+                }
+            });
+
+            // Quantity buttons
+            $(document).on('click', '.quantity-btn.plus', function() {
+                var monAnId = $(this).data('mon-an-id');
+                addToCart(monAnId, 1);
+            });
+
+            $(document).on('click', '.quantity-btn.minus', function() {
+                var monAnId = $(this).data('mon-an-id');
+                var currentQty = parseInt($('.quantity-display[data-mon-an-id="' + monAnId + '"]').text()) || 0;
+                if (currentQty > 0) {
+                    updateCartItem(monAnId, currentQty - 1);
+                }
+            });
+
+            // Clear cart button removed - no longer needed
+
+            // Confirm order
+            $('#confirmOrderBtn').on('click', function() {
+                confirmOrder();
+            });
+
+            // Payment button - redirect to payment page
+            $('#paymentBtn').on('click', function() {
+                var banId = @(table?.BanID ?? 0);
+                
+                // Check if there are confirmed items
+                var confirmedCount = parseInt($('#confirmedCount').text()) || 0;
+                if (confirmedCount === 0) {
+                    if (typeof showAlert === 'function') {
+                        showAlert('Vui lòng xác nhận đơn hàng trước khi thanh toán', 'warning');
+                    } else {
+                        alert('Vui lòng xác nhận đơn hàng trước khi thanh toán');
+                    }
+                    return;
+                }
+                
+                window.location.href = '@Url.Action("Index", "Payment", new { area = "Employee_65133141" })?banId=' + banId;
+            });
+
+            // Load initial cart
+            loadCart();
+        }); // Close document.ready
+    })(jQuery); // Close jQuery wrapper
+</script>
+
+<style>
+    /* Search Box Styles */
+    .search-box-container {
+        transition: all 0.3s ease;
+    }
+    
+    .search-box-container:focus-within {
+        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.15);
+    }
+    
+    /* Autocomplete Dropdown */
+    #searchAutocompleteDropdown {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .autocomplete-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    
+    .autocomplete-item:hover {
+        background: #f0fdfa;
+    }
+    
+    /* Compact Category Tabs (Wrap - No Background) */
+    .category-wrap-container {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    .category-tab-compact {
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+    
+    .category-tab-compact.active {
+        background-color: #14b8a6 !important;
+        color: white !important;
+        box-shadow: 0 2px 4px rgba(20, 184, 166, 0.3);
+    }
+    
+    .cart-tab.active {
+        border-bottom-color: #14b8a6 !important;
+        color: #14b8a6 !important;
+    }
+    
+    .cart-tab.active span {
+        background-color: #14b8a6 !important;
+        color: white !important;
+    }
+    
+    /* Ensure quantity controls are always visible */
+    [data-mon-an-id] .quantity-btn,
+    [data-mon-an-id] .quantity-display {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    [data-mon-an-id] .quantity-display {
+        display: block !important;
+    }
+</style>
+

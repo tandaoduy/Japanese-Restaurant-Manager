@@ -35,35 +35,44 @@ namespace Project_65133141.Controllers
 
         // POST: Account/Login
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        // [ValidateAntiForgeryToken]  // Disabled for AJAX modal login to avoid missing cookie issues
         public ActionResult Login(LoginForm model, string returnUrl)
         {
             // Check if it's an AJAX request (from modal)
             bool isAjaxRequest = Request.IsAjaxRequest();
 
+            // Validate CAPTCHA
+            if (!CaptchaController.VerifyCaptcha(Session, model.CaptchaCode))
+            {
+                ModelState.AddModelError("CaptchaCode", "Mã xác nhận không đúng. Vui lòng thử lại.");
+                
+                if (isAjaxRequest)
+                {
+                    var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        );
+                    return Json(new { success = false, errors = errors });
+                }
+                
+                return View(model);
+            }
+
             if (ModelState.IsValid)
             {
-                // Find user by email
-                var user = db.nhan_vien.FirstOrDefault(u => u.Email == model.Email);
-
-                if (user != null)
+                // Try to find customer in Users table first
+                var customerUser = db.Users.FirstOrDefault(u => u.Email == model.Email);
+                
+                if (customerUser != null)
                 {
-                    // Verify password - check both MatKhau and SDT for backward compatibility
-                    bool isPasswordValid = false;
-                    if (!string.IsNullOrEmpty(user.MatKhau))
-                    {
-                        isPasswordValid = VerifyPassword(model.Password, user.MatKhau);
-                    }
-                    else if (!string.IsNullOrEmpty(user.SDT))
-                    {
-                        // Backward compatibility: check if password was stored in SDT
-                        isPasswordValid = VerifyPassword(model.Password, user.SDT);
-                    }
+                    // Verify password for customer
+                    bool isPasswordValid = VerifyPassword(model.Password, customerUser.Password);
 
                     if (isPasswordValid)
                     {
                         // Check if account is disabled
-                        if (user.TrangThai == "Vô hiệu hóa")
+                        if (customerUser.TrangThai == false)
                         {
                             ModelState.AddModelError("", "Tài khoản đã bị vô hiệu hoá");
                             
@@ -80,16 +89,39 @@ namespace Project_65133141.Controllers
                             return View(model);
                         }
 
-                        // Create authentication ticket
-                        FormsAuthentication.SetAuthCookie(user.Email, model.RememberMe);
+                        // Customer role
+                        var userRole = "Khách hàng";
 
-                        // Store user info in session
-                        Session["UserId"] = user.NhanVienID;
-                        Session["UserName"] = user.HoTen;
-                        Session["UserEmail"] = user.Email;
-                        Session["UserRole"] = user.VaiTro?.TenVaiTro;
+                        // Customer: Session cookie (no persistent cookie)
+                        var ticket = new FormsAuthenticationTicket(
+                            1,
+                            customerUser.Email,
+                            DateTime.Now,
+                            DateTime.Now.AddMinutes(60), // 60 minutes timeout
+                            false, // NOT persistent - session cookie
+                            userRole,
+                            FormsAuthentication.FormsCookiePath
+                        );
+                        var encryptedTicket = FormsAuthentication.Encrypt(ticket);
+                        var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket)
+                        {
+                            HttpOnly = true,
+                            Secure = false,
+                            Path = FormsAuthentication.FormsCookiePath
+                        };
+                        Response.Cookies.Add(cookie);
+                        
+                        // Set session timeout to 60 minutes
+                        Session.Timeout = 60;
+                        Session["UserId"] = customerUser.UserID; // Use UserID from Users table
+                        Session["UserName"] = customerUser.HoTen;
+                        Session["UserEmail"] = customerUser.Email;
+                        Session["UserRole"] = userRole;
+                        Session["IsAdminOrEmployee"] = false;
+                        Session["SessionStartTime"] = DateTime.Now;
+                        Session["SessionExpiryTime"] = DateTime.Now.AddMinutes(60);
 
-                        // Redirect to return URL or based on role
+                        // Redirect to return URL or home page
                         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         {
                             if (isAjaxRequest)
@@ -99,13 +131,142 @@ namespace Project_65133141.Controllers
                             return Redirect(returnUrl);
                         }
                         
-                        // Redirect based on user role
-                        var redirectUrl = GetRedirectUrlForRole(user.VaiTro?.TenVaiTro);
+                        // Customer always redirect to home page
+                        var redirectUrl = Url.Action("Index", "Home");
                         if (isAjaxRequest)
                         {
                             return Json(new { success = true, redirectUrl = redirectUrl });
                         }
-                        return RedirectToRoleArea(user.VaiTro?.TenVaiTro);
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+                else
+                {
+                    // Try to find admin/employee in nhan_vien table
+                    var user = db.nhan_vien.FirstOrDefault(u => u.Email == model.Email);
+
+                    if (user != null)
+                    {
+                        // Verify password - check both MatKhau and SDT for backward compatibility
+                        bool isPasswordValid = false;
+                        if (!string.IsNullOrEmpty(user.MatKhau))
+                        {
+                            isPasswordValid = VerifyPassword(model.Password, user.MatKhau);
+                        }
+                        else if (!string.IsNullOrEmpty(user.SDT))
+                        {
+                            // Backward compatibility: check if password was stored in SDT
+                            isPasswordValid = VerifyPassword(model.Password, user.SDT);
+                        }
+
+                        if (isPasswordValid)
+                        {
+                            // Check if account is disabled
+                            if (user.TrangThai == "Vô hiệu hóa")
+                            {
+                                ModelState.AddModelError("", "Tài khoản đã bị vô hiệu hoá");
+                                
+                                if (isAjaxRequest)
+                                {
+                                    var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
+                                        .ToDictionary(
+                                            kvp => kvp.Key,
+                                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                                        );
+                                    return Json(new { success = false, errors = errors });
+                                }
+                                
+                                return View(model);
+                            }
+
+                            // Determine user role
+                            var userRole = user.VaiTro?.TenVaiTro;
+                            var roleLower = userRole?.ToLower().Trim() ?? "";
+                            bool isAdminOrEmployee = roleLower == "admin" || roleLower.Contains("admin") || 
+                                                     roleLower == "administrator" ||
+                                                     roleLower == "nhân viên" || roleLower == "nhan vien" || 
+                                                     roleLower == "employee" || roleLower.Contains("nhân viên") || 
+                                                     roleLower.Contains("nhan vien");
+
+                            // Set authentication cookie with different settings for admin/employee vs user
+                            if (isAdminOrEmployee)
+                            {
+                                // Admin/Employee: Session cookie (no persistent cookie, expires when browser closes)
+                                // Set timeout to 1 minute
+                                var ticket = new FormsAuthenticationTicket(
+                                    1,
+                                    user.Email,
+                                    DateTime.Now,
+                                    DateTime.Now.AddMinutes(60), // 60 minutes timeout
+                                    false, // NOT persistent - session cookie
+                                    userRole,
+                                    FormsAuthentication.FormsCookiePath
+                                );
+                                var encryptedTicket = FormsAuthentication.Encrypt(ticket);
+                                var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket)
+                                {
+                                    HttpOnly = true,
+                                    Secure = false,
+                                    Path = FormsAuthentication.FormsCookiePath
+                                };
+                                Response.Cookies.Add(cookie);
+                                
+                                // Set session timeout to 60 minutes
+                                Session.Timeout = 60;
+                            }
+                            else
+                            {
+                                // User/Customer: Session cookie (no persistent cookie, expires when browser closes)
+                                // Set timeout to 1 minute
+                                var ticket = new FormsAuthenticationTicket(
+                                    1,
+                                    user.Email,
+                                    DateTime.Now,
+                                    DateTime.Now.AddMinutes(60), // 60 minutes timeout
+                                    false, // NOT persistent - session cookie
+                                    userRole,
+                                    FormsAuthentication.FormsCookiePath
+                                );
+                                var encryptedTicket = FormsAuthentication.Encrypt(ticket);
+                                var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket)
+                                {
+                                    HttpOnly = true,
+                                    Secure = false,
+                                    Path = FormsAuthentication.FormsCookiePath
+                                };
+                                Response.Cookies.Add(cookie);
+                                
+                                // Set session timeout to 60 minutes
+                                Session.Timeout = 60;
+                            }
+
+                            // Store user info in session
+                            Session["UserId"] = user.NhanVienID;
+                            Session["UserName"] = user.HoTen;
+                            Session["UserEmail"] = user.Email;
+                            Session["UserRole"] = userRole;
+                            Session["IsAdminOrEmployee"] = isAdminOrEmployee;
+                            Session["SessionStartTime"] = DateTime.Now;
+                            Session["SessionExpiryTime"] = DateTime.Now.AddMinutes(60);
+
+                            // Redirect to return URL or based on role
+                            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                            {
+                                if (isAjaxRequest)
+                                {
+                                    return Json(new { success = true, redirectUrl = returnUrl });
+                                }
+                                return Redirect(returnUrl);
+                            }
+                            
+                            // Redirect based on user role
+                            var redirectUrl = GetRedirectUrlForRole(user.VaiTro?.TenVaiTro);
+                            if (isAjaxRequest)
+                            {
+                                return Json(new { success = true, redirectUrl = redirectUrl });
+                            }
+                            return RedirectToRoleArea(user.VaiTro?.TenVaiTro);
+                        }
                     }
                 }
 
@@ -153,16 +314,34 @@ namespace Project_65133141.Controllers
 
         // POST: Account/Register
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        // [ValidateAntiForgeryToken]  // Disabled for AJAX modal register; CAPTCHA is used for protection
         public ActionResult Register(RegisterForm model)
         {
             // Check if it's an AJAX request (from modal)
             bool isAjaxRequest = Request.IsAjaxRequest();
 
+            // Validate CAPTCHA
+            if (!CaptchaController.VerifyCaptcha(Session, model.CaptchaCode))
+            {
+                ModelState.AddModelError("CaptchaCode", "Mã xác nhận không đúng. Vui lòng thử lại.");
+                
+                if (isAjaxRequest)
+                {
+                    var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        );
+                    return Json(new { success = false, errors = errors });
+                }
+                
+                return View(model);
+            }
+
             if (ModelState.IsValid)
             {
-                // Check if email already exists
-                if (db.nhan_vien.Any(u => u.Email == model.Email))
+                // Check if email already exists in Users table (chỉ khách hàng)
+                if (db.Users.Any(u => u.Email == model.Email))
                 {
                     ModelState.AddModelError("Email", "Email này đã được sử dụng");
                     
@@ -176,23 +355,11 @@ namespace Project_65133141.Controllers
                         return Json(new { success = false, errors = errors });
                     }
                     
-                    // Get default user role for hidden field
-                    var defaultUserRoleForError = db.vai_tro
-                        .FirstOrDefault(r => r.TenVaiTro.ToLower() == "khách hàng" || 
-                                            r.TenVaiTro.ToLower() == "khach hang" || 
-                                            r.TenVaiTro.ToLower() == "user" || 
-                                            r.TenVaiTro.ToLower() == "customer");
-                    
-                    if (defaultUserRoleForError != null)
-                    {
-                        ViewBag.DefaultUserRoleId = defaultUserRoleForError.VaiTroID;
-                    }
-                    
                     return View(model);
                 }
 
-                // Check if phone number already exists
-                if (!string.IsNullOrEmpty(model.PhoneNumber) && db.nhan_vien.Any(u => u.SDT == model.PhoneNumber))
+                // Check if phone number already exists in Users table
+                if (!string.IsNullOrEmpty(model.PhoneNumber) && db.Users.Any(u => u.SDT == model.PhoneNumber))
                 {
                     ModelState.AddModelError("PhoneNumber", "Số điện thoại này đã được sử dụng");
                     
@@ -206,90 +373,96 @@ namespace Project_65133141.Controllers
                         return Json(new { success = false, errors = errors });
                     }
                     
-                    // Get default user role for hidden field
-                    var defaultUserRoleForError = db.vai_tro
-                        .FirstOrDefault(r => r.TenVaiTro.ToLower() == "khách hàng" || 
-                                            r.TenVaiTro.ToLower() == "khach hang" || 
-                                            r.TenVaiTro.ToLower() == "user" || 
-                                            r.TenVaiTro.ToLower() == "customer");
-                    
-                    if (defaultUserRoleForError != null)
-                    {
-                        ViewBag.DefaultUserRoleId = defaultUserRoleForError.VaiTroID;
-                    }
-                    
                     return View(model);
                 }
 
-                // Get default user role (customer/user) if RoleId is not provided or is 0
-                long roleId = model.RoleId;
-                if (roleId == 0)
+                // Create new customer user in Users table
+                var newUser = new User
                 {
-                    var defaultUserRoleForRegistration = db.vai_tro
-                        .FirstOrDefault(r => r.TenVaiTro.ToLower() == "khách hàng" || 
-                                            r.TenVaiTro.ToLower() == "khach hang" || 
-                                            r.TenVaiTro.ToLower() == "user" || 
-                                            r.TenVaiTro.ToLower() == "customer");
-                    
-                    if (defaultUserRoleForRegistration == null)
-                    {
-                        ModelState.AddModelError("", "Không tìm thấy vai trò mặc định (Khách hàng)!");
-                        
-                        if (isAjaxRequest)
-                        {
-                            var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
-                                .ToDictionary(
-                                    kvp => kvp.Key,
-                                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                                );
-                            return Json(new { success = false, errors = errors });
-                        }
-                        
-                        ViewBag.Roles = new SelectList(db.vai_tro.ToList(), "VaiTroID", "TenVaiTro");
-                        return View(model);
-                    }
-                    
-                    roleId = defaultUserRoleForRegistration.VaiTroID;
-                }
-
-                // Create new user
-                var newUser = new NhanVien
-                {
-                    HoTen = model.FullName,
+                    Username = model.Email, // Use email as username
+                    Password = HashPassword(model.Password),
                     Email = model.Email,
+                    HoTen = model.FullName,
                     SDT = model.PhoneNumber,
-                    MatKhau = HashPassword(model.Password),
-                    VaiTroID = roleId,
-                    TaiKhoan = model.Email, // Use email as username
-                    NgayVaoLam = null, // Customers don't have start date
-                    TrangThai = "Hoạt động",
-                    DiaChi = !string.IsNullOrEmpty(model.Address) ? model.Address : null // Save address if provided
+                    DiaChi = !string.IsNullOrEmpty(model.Address) ? model.Address : null,
+                    NgayTao = DateTime.Now,
+                    TrangThai = true,
+                    DiemTichLuy = 0
                 };
 
                 try
                 {
-                    db.nhan_vien.Add(newUser);
+                    db.Users.Add(newUser);
                     db.SaveChanges();
 
-                    // Auto login after registration
-                    FormsAuthentication.SetAuthCookie(newUser.Email, false);
-                    Session["UserId"] = newUser.NhanVienID;
+                    // Auto login after registration (Customer only)
+                    var userRole = "Khách hàng"; // Default role for customers
+                    
+                    // Customer: Session cookie (no persistent cookie)
+                    var ticket = new FormsAuthenticationTicket(
+                        1,
+                        newUser.Email,
+                        DateTime.Now,
+                        DateTime.Now.AddMinutes(60), // 60 minutes timeout
+                        false, // NOT persistent - session cookie
+                        userRole,
+                        FormsAuthentication.FormsCookiePath
+                    );
+                    var encryptedTicket = FormsAuthentication.Encrypt(ticket);
+                    var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket)
+                    {
+                        HttpOnly = true,
+                        Secure = false,
+                        Path = FormsAuthentication.FormsCookiePath
+                    };
+                    Response.Cookies.Add(cookie);
+                    
+                    // Set session timeout to 1 minute
+                    Session.Timeout = 1;
+                    Session["UserId"] = newUser.UserID; // Use UserID from Users table
                     Session["UserName"] = newUser.HoTen;
                     Session["UserEmail"] = newUser.Email;
-                    var userRole = db.vai_tro.Find(newUser.VaiTroID)?.TenVaiTro;
                     Session["UserRole"] = userRole;
+                    Session["IsAdminOrEmployee"] = false;
+                    Session["SessionStartTime"] = DateTime.Now;
+                    Session["SessionExpiryTime"] = DateTime.Now.AddMinutes(1);
 
                     if (isAjaxRequest)
                     {
-                        // Customer/User always redirect to home page
+                        // Customer always redirect to home page
                         var redirectUrl = Url.Action("Index", "Home");
                         return Json(new { success = true, redirectUrl = redirectUrl });
                     }
 
                     TempData["SuccessMessage"] = "Đăng ký thành công!";
                     
-                    // Customer/User always redirect to home page
+                    // Customer always redirect to home page
                     return RedirectToAction("Index", "Home");
+                }
+                catch (System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                {
+                    // Handle Entity Framework validation errors
+                    var errorMessages = new List<string>();
+                    foreach (var validationErrors in dbEx.EntityValidationErrors)
+                    {
+                        foreach (var validationError in validationErrors.ValidationErrors)
+                        {
+                            errorMessages.Add($"{validationError.PropertyName}: {validationError.ErrorMessage}");
+                            ModelState.AddModelError(validationError.PropertyName, validationError.ErrorMessage);
+                        }
+                    }
+                    var fullErrorMessage = "Lỗi xác thực dữ liệu: " + string.Join("; ", errorMessages);
+                    ModelState.AddModelError("", fullErrorMessage);
+                    
+                    if (isAjaxRequest)
+                    {
+                        var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
+                            .ToDictionary(
+                                kvp => kvp.Key,
+                                kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                            );
+                        return Json(new { success = false, errors = errors });
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -336,16 +509,155 @@ namespace Project_65133141.Controllers
         // GET: Account/Logout
         public ActionResult Logout()
         {
+            try
+            {
+                // Clear all cart sessions (for all possible tables)
+                if (Session != null)
+                {
+                    var keysToRemove = new List<string>();
+                    foreach (string key in Session.Keys)
+                    {
+                        if (key != null && (key.StartsWith("Cart_Pending_") || key.StartsWith("Cart_Confirmed_")))
+                        {
+                            keysToRemove.Add(key);
+                        }
+                    }
+                    
+                    foreach (var key in keysToRemove)
+                    {
+                        Session.Remove(key);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but continue with logout
+                System.Diagnostics.Debug.WriteLine("Error clearing cart sessions: " + ex.Message);
+            }
+            
+            // Clear authentication
             FormsAuthentication.SignOut();
-            Session.Clear();
-            Session.Abandon();
+            
+            // Clear all session data
+            if (Session != null)
+            {
+                Session.Clear();
+                Session.Abandon();
+            }
+            
+            // Clear all cookies
+            if (Request.Cookies != null)
+            {
+                foreach (string cookieName in Request.Cookies.AllKeys)
+                {
+                    HttpCookie cookie = new HttpCookie(cookieName);
+                    cookie.Expires = DateTime.Now.AddDays(-1);
+                    Response.Cookies.Add(cookie);
+                }
+            }
+            
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: Account/ForgotPassword
+        // GET: Account/ForgotPassword - Disabled
         public ActionResult ForgotPassword()
         {
-            return View();
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ForgotPassword(string Email, string NewPassword, string ConfirmPassword, string CaptchaCode)
+        {
+            bool isAjaxRequest = Request.IsAjaxRequest();
+
+            // Validate CAPTCHA
+            if (!CaptchaController.VerifyCaptcha(Session, CaptchaCode))
+            {
+                if (isAjaxRequest)
+                {
+                    return Json(new { success = false, errorMessage = "Mã xác nhận không đúng. Vui lòng thử lại." });
+                }
+
+                TempData["ErrorMessage"] = "Mã xác nhận không đúng. Vui lòng thử lại.";
+                return RedirectToAction("ForgotPassword");
+            }
+
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(NewPassword) || string.IsNullOrWhiteSpace(ConfirmPassword))
+            {
+                if (isAjaxRequest)
+                {
+                    return Json(new { success = false, errorMessage = "Vui lòng nhập đầy đủ thông tin." });
+                }
+
+                TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ thông tin.";
+                return RedirectToAction("ForgotPassword");
+            }
+
+            // Chuẩn hóa email để tránh lỗi do khoảng trắng hoặc chữ hoa/thường
+            var normalizedEmail = Email.Trim().ToLower();
+
+            if (NewPassword != ConfirmPassword)
+            {
+                if (isAjaxRequest)
+                {
+                    return Json(new { success = false, errorMessage = "Mật khẩu xác nhận không khớp." });
+                }
+
+                TempData["ErrorMessage"] = "Mật khẩu xác nhận không khớp.";
+                return RedirectToAction("ForgotPassword");
+            }
+
+            // Tìm người dùng theo email (không phân biệt hoa thường)
+            User user = null;
+            try
+            {
+                user = db.Users.FirstOrDefault(u => u.Email.ToLower() == normalizedEmail);
+            }
+            catch (Exception ex)
+            {
+                if (isAjaxRequest)
+                {
+                    return Json(new { success = false, errorMessage = "Lỗi kết nối cơ sở dữ liệu: " + ex.Message });
+                }
+
+                TempData["ErrorMessage"] = "Lỗi kết nối cơ sở dữ liệu: " + ex.Message;
+                return RedirectToAction("ForgotPassword");
+            }
+            if (user == null)
+            {
+                if (isAjaxRequest)
+                {
+                    return Json(new { success = false, errorMessage = "Không tìm thấy tài khoản với email này." });
+                }
+
+                TempData["ErrorMessage"] = "Không tìm thấy tài khoản với email này.";
+                return RedirectToAction("ForgotPassword");
+            }
+
+            try
+            {
+                user.Password = HashPassword(NewPassword);
+                db.SaveChanges();
+                if (isAjaxRequest)
+                {
+                    return Json(new { success = true, message = "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại." });
+                }
+
+                TempData["SuccessMessage"] = "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.";
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                if (isAjaxRequest)
+                {
+                    return Json(new { success = false, errorMessage = "Lỗi khi cập nhật mật khẩu: " + ex.Message });
+                }
+
+                TempData["ErrorMessage"] = "Lỗi khi cập nhật mật khẩu: " + ex.Message;
+                return RedirectToAction("ForgotPassword");
+            }
+
         }
 
         // Helper method to hash password using SHA256

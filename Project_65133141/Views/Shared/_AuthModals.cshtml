@@ -18,7 +18,7 @@
         </div>
 
         <div class="auth-modal-body">
-            @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "login-form", id = "loginFormModal", novalidate = "novalidate" }))
+            @using (Html.BeginForm("Login", "Account", new { area = "" }, FormMethod.Post, new { @class = "login-form", id = "loginFormModal", novalidate = "novalidate" }))
             {
                 @Html.AntiForgeryToken()
 
@@ -51,14 +51,135 @@
                     <span class="auth-error-message" data-valmsg-for="Password" data-valmsg-replace="true"></span>
                 </div>
 
-                <div class="auth-forgot-password">
+                <!-- Forgot Password Link - Disabled -->
+                <!-- <div class="auth-forgot-password">
                     <a href="javascript:void(0)" onclick="showForgotPassword()">Quên mật khẩu?</a>
+                </div> -->
+
+                <!-- CAPTCHA -->
+                <div class="auth-form-group">
+                    <label class="auth-form-label">
+                        Mã xác nhận <span class="auth-required">*</span>
+                    </label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div style="flex: 1;">
+                            <div class="auth-input-wrapper">
+                                <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                                <input type="text" name="CaptchaCode" id="loginCaptchaCode" class="auth-form-control" placeholder="Nhập mã xác nhận" autocomplete="off" maxlength="5" style="text-transform: uppercase;" />
+                            </div>
+                        </div>
+                        <button type="button" class="auth-btn-refresh" onclick="refreshLoginCaptcha()" title="Làm mới mã">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
+                        <div style="flex-shrink: 0;">
+                            <img id="loginCaptchaImage" src="@Url.Action("Generate", "Captcha")" alt="CAPTCHA" style="height: 50px; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                    </div>
+                    <span class="auth-error-message" data-valmsg-for="CaptchaCode" data-valmsg-replace="true"></span>
                 </div>
 
                 <button type="submit" class="auth-btn-submit" id="loginSubmitBtn">Đăng nhập</button>
 
                 <div class="auth-register-link">
                     Chưa có tài khoản? <a href="javascript:void(0)" onclick="switchToRegister()">Tạo tài khoản mới</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div id="forgotPasswordModal" class="auth-modal-overlay" style="display: none;">
+    <div class="auth-modal-container">
+        <button type="button" class="auth-close-btn" onclick="closeForgotPasswordModal()">&times;</button>
+
+        <div class="auth-modal-header">
+            <div class="auth-logo">
+                <img src="@Url.Content("~/Images/logoNhaHang.png")" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+            </div>
+            <h2 class="auth-modal-title">Quên mật khẩu</h2>
+            <p class="auth-modal-subtitle">Đặt lại mật khẩu cho tài khoản của bạn</p>
+        </div>
+
+        <div class="auth-modal-body">
+            @using (Html.BeginForm("ForgotPassword", "Account", new { area = "" }, FormMethod.Post, new { @class = "forgot-password-form", id = "forgotPasswordFormModal", novalidate = "novalidate" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div id="forgotPasswordGeneralError" class="auth-error-message" style="display: none; background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;"></div>
+                <div id="forgotPasswordGeneralSuccess" class="auth-error-message" style="display: none; background: #ecfdf3; border: 1px solid #bbf7d0; color: #16a34a; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;"></div>
+
+                <div class="auth-form-group">
+                    <label class="auth-form-label">
+                        Email đã đăng ký <span class="auth-required">*</span>
+                    </label>
+                    <div class="auth-input-wrapper">
+                        <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                        </svg>
+                        <input type="email" name="Email" class="auth-form-control" placeholder="email@example.com" autocomplete="username" required />
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-form-label">
+                        Mật khẩu mới <span class="auth-required">*</span>
+                    </label>
+                    <div class="auth-input-wrapper">
+                        <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <input type="password" name="NewPassword" class="auth-form-control" placeholder="Mật khẩu mới" autocomplete="new-password" required />
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-form-label">
+                        Xác nhận mật khẩu mới <span class="auth-required">*</span>
+                    </label>
+                    <div class="auth-input-wrapper">
+                        <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <input type="password" name="ConfirmPassword" class="auth-form-control" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required />
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-form-label">
+                        Mã xác nhận <span class="auth-required">*</span>
+                    </label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div style="flex: 1;">
+                            <div class="auth-input-wrapper">
+                                <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                                <input type="text" name="CaptchaCode" id="forgotPasswordCaptchaCode" class="auth-form-control" placeholder="Nhập mã xác nhận" autocomplete="off" maxlength="5" style="text-transform: uppercase;" />
+                            </div>
+                        </div>
+                        <button type="button" class="auth-btn-refresh" onclick="refreshForgotPasswordCaptcha()" title="Làm mới mã">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
+                        <div style="flex-shrink: 0;">
+                            <img id="forgotPasswordCaptchaImage" src="@Url.Action("Generate", "Captcha")" alt="CAPTCHA" style="height: 50px; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="auth-btn-group">
+                    <button type="button" class="auth-btn auth-btn-cancel" onclick="closeForgotPasswordModal()">Hủy</button>
+                    <button type="submit" class="auth-btn auth-btn-submit" id="forgotPasswordSubmitBtn">Đặt lại mật khẩu</button>
+                </div>
+
+                <div class="auth-login-link">
+                    Nhớ mật khẩu? <a href="javascript:void(0)" onclick="backToLoginFromForgot()">Quay lại đăng nhập</a>
                 </div>
             }
         </div>
@@ -82,7 +203,7 @@
             @{
                 var defaultUserRoleForRegister = ViewBag.DefaultUserRoleId as long?;
             }
-            @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "register-form", id = "registerFormModal" }))
+            @using (Html.BeginForm("Register", "Account", new { area = "" }, FormMethod.Post, new { @class = "register-form", id = "registerFormModal" }))
             {
                 @Html.AntiForgeryToken()
 
@@ -108,7 +229,7 @@
                             <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                             </svg>
-                            <input type="tel" name="PhoneNumber" class="auth-form-control" placeholder="0123456789" autocomplete="tel" />
+                            <input type="tel" name="PhoneNumber" id="registerPhoneNumber" class="auth-form-control" placeholder="0123456789" autocomplete="tel" pattern="[0-9]*" inputmode="numeric" />
                         </div>
                         <span class="auth-error-message" data-valmsg-for="PhoneNumber" data-valmsg-replace="true"></span>
                     </div>
@@ -205,6 +326,32 @@
                 @* Hidden field for default user role - automatically set to customer/user role *@
                 @Html.Raw(defaultUserRoleForRegister.HasValue ? "<input type=\"hidden\" name=\"RoleId\" value=\"" + defaultUserRoleForRegister.Value + "\" />" : "")
 
+                <!-- CAPTCHA -->
+                <div class="auth-form-group">
+                    <label class="auth-form-label">
+                        Mã xác nhận <span class="auth-required">*</span>
+                    </label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div style="flex: 1;">
+                            <div class="auth-input-wrapper">
+                                <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                                <input type="text" name="CaptchaCode" id="registerCaptchaCode" class="auth-form-control" placeholder="Nhập mã xác nhận" autocomplete="off" maxlength="5" style="text-transform: uppercase;" />
+                            </div>
+                        </div>
+                        <button type="button" class="auth-btn-refresh" onclick="refreshRegisterCaptcha()" title="Làm mới mã">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
+                        <div style="flex-shrink: 0;">
+                            <img id="registerCaptchaImage" src="@Url.Action("Generate", "Captcha")" alt="CAPTCHA" style="height: 50px; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                    </div>
+                    <span class="auth-error-message" data-valmsg-for="CaptchaCode" data-valmsg-replace="true"></span>
+                </div>
+
                 <div class="auth-btn-group">
                     <button type="button" class="auth-btn auth-btn-cancel" onclick="closeRegisterModal()">Hủy</button>
                     <button type="submit" class="auth-btn auth-btn-submit" id="registerSubmitBtn">Đăng ký</button>
@@ -282,6 +429,41 @@
             transform: translateY(0);
             opacity: 1;
         }
+    }
+
+    function openForgotPasswordModal() {
+        const modal = document.getElementById('forgotPasswordModal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        const form = document.getElementById('forgotPasswordFormModal');
+        if (form) {
+            // Clear messages and inputs (except email, to keep from login if needed later)
+            const errorBox = document.getElementById('forgotPasswordGeneralError');
+            const successBox = document.getElementById('forgotPasswordGeneralSuccess');
+            if (errorBox) { errorBox.textContent = ''; errorBox.style.display = 'none'; }
+            if (successBox) { successBox.textContent = ''; successBox.style.display = 'none'; }
+
+            const passwordInputs = form.querySelectorAll('input[type="password"], input[name="CaptchaCode"]');
+            passwordInputs.forEach(i => i.value = '');
+        }
+
+        setTimeout(refreshForgotPasswordCaptcha, 100);
+    }
+
+    function closeForgotPasswordModal() {
+        const modal = document.getElementById('forgotPasswordModal');
+        if (!modal) return;
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function backToLoginFromForgot() {
+        closeForgotPasswordModal();
+        setTimeout(() => {
+            openLoginModal();
+        }, 300);
     }
 
     .auth-modal-header {
@@ -387,9 +569,9 @@
 
     .auth-form-control:focus {
         outline: none;
-        border-color: #dc2626;
+        border-color: #2563eb;
         background: white;
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
     .auth-error-message {
@@ -418,21 +600,21 @@
     }
 
     .auth-forgot-password a {
-        color: #dc2626;
+        color: #2563eb;
         font-size: 13px;
         text-decoration: none;
         transition: color 0.3s;
     }
 
     .auth-forgot-password a:hover {
-        color: #b91c1c;
+        color: #1d4ed8;
         text-decoration: underline;
     }
 
     .auth-btn-submit {
         width: 100%;
         padding: 14px;
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: white;
         border: none;
         border-radius: 8px;
@@ -440,13 +622,13 @@
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .auth-btn-submit:hover {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
     }
 
     .auth-btn-submit:active {
@@ -462,14 +644,14 @@
     }
 
     .auth-register-link a, .auth-login-link a {
-        color: #dc2626;
+        color: #2563eb;
         font-weight: 600;
         text-decoration: none;
         transition: color 0.3s;
     }
 
     .auth-register-link a:hover, .auth-login-link a:hover {
-        color: #b91c1c;
+        color: #1d4ed8;
     }
 
     .auth-close-btn {
@@ -492,8 +674,8 @@
     }
 
     .auth-close-btn:hover {
-        background: rgba(220, 38, 38, 0.1);
-        color: #dc2626;
+        background: rgba(37, 99, 235, 0.12);
+        color: #2563eb;
         transform: scale(1.1);
     }
 
@@ -629,6 +811,32 @@
         cursor: not-allowed;
         opacity: 0.7 !important;
     }
+
+    .auth-btn-refresh {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 50px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        color: #666;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .auth-btn-refresh:hover {
+        background: #f9f9f9;
+        color: #dc2626;
+        border-color: #dc2626;
+    }
+
+    .auth-btn-refresh svg {
+        width: 20px;
+        height: 20px;
+    }
 </style>
 
 <script>
@@ -649,6 +857,77 @@
             const inputs = loginForm.querySelectorAll('.auth-form-control');
             inputs.forEach(input => {
                 input.classList.remove('input-validation-error', 'field-validation-error');
+            });
+        }
+
+        if (freshForgotForm) {
+            console.log('Attaching submit handler to forgot password form');
+
+            freshForgotForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const generalError = document.getElementById('forgotPasswordGeneralError');
+                const generalSuccess = document.getElementById('forgotPasswordGeneralSuccess');
+                if (generalError) { generalError.textContent = ''; generalError.style.display = 'none'; }
+                if (generalSuccess) { generalSuccess.textContent = ''; generalSuccess.style.display = 'none'; }
+
+                const submitBtn = document.getElementById('forgotPasswordSubmitBtn');
+                if (submitBtn && submitBtn.disabled) {
+                    return false;
+                }
+
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Đang xử lý...';
+                    submitBtn.style.opacity = '0.7';
+                }
+
+                const formData = new FormData(freshForgotForm);
+
+                fetch(freshForgotForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.success) {
+                            if (generalSuccess) {
+                                generalSuccess.textContent = data.message || 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.';
+                                generalSuccess.style.display = 'block';
+                            }
+
+                            // Tự động quay lại login sau một chút
+                            setTimeout(() => {
+                                closeForgotPasswordModal();
+                                openLoginModal();
+                            }, 2000);
+                        } else {
+                            const message = data && data.errorMessage ? data.errorMessage : 'Có lỗi xảy ra. Vui lòng thử lại.';
+                            if (generalError) {
+                                generalError.textContent = message;
+                                generalError.style.display = 'block';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Forgot password error:', error);
+                        if (generalError) {
+                            generalError.textContent = 'Có lỗi xảy ra. Vui lòng thử lại.';
+                            generalError.style.display = 'block';
+                        }
+                    })
+                    .finally(() => {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Đặt lại mật khẩu';
+                            submitBtn.style.opacity = '1';
+                        }
+                        refreshForgotPasswordCaptcha();
+                    });
             });
         }
     }
@@ -677,7 +956,9 @@
             });
         }
         
+        // Setup phone number validation
         setTimeout(function() {
+            setupPhoneNumberValidation();
             if (typeof initPasswordStrengthCheckerModal === 'function') {
                 initPasswordStrengthCheckerModal();
             }
@@ -704,19 +985,50 @@
     }
 
     function showForgotPassword() {
-        alert('Tính năng quên mật khẩu đang được phát triển');
+        closeLoginModal();
+        setTimeout(() => {
+            openForgotPasswordModal();
+        }, 300);
+    }
+
+    function openForgotPasswordModal() {
+        const modal = document.getElementById('forgotPasswordModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        refreshForgotPasswordCaptcha();
+    }
+
+    function closeForgotPasswordModal() {
+        document.getElementById('forgotPasswordModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function refreshForgotPasswordCaptcha() {
+        const img = document.getElementById('forgotPasswordCaptchaImage');
+        if (img) {
+            img.src = '@Url.Action("Generate", "Captcha")?t=' + new Date().getTime();
+            document.getElementById('forgotPasswordCaptchaCode').value = '';
+        }
     }
 
     // Close modals when clicking outside
     document.addEventListener('click', function(e) {
         const loginModal = document.getElementById('loginModal');
         const registerModal = document.getElementById('registerModal');
+        const forgotModal = document.getElementById('forgotPasswordModal');
+        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
         
         if (e.target === loginModal) {
             closeLoginModal();
         }
         if (e.target === registerModal) {
             closeRegisterModal();
+        }
+        if (e.target === forgotModal) {
+            closeForgotPasswordModal();
+        }
+        if (e.target === forgotPasswordModal) {
+            closeForgotPasswordModal();
         }
     });
 
@@ -725,6 +1037,7 @@
         if (e.key === 'Escape') {
             closeLoginModal();
             closeRegisterModal();
+            closeForgotPasswordModal();
         }
     });
 
@@ -829,11 +1142,13 @@
         console.log('Initializing form handlers');
         const loginForm = document.getElementById('loginFormModal');
         const registerForm = document.getElementById('registerFormModal');
+        const forgotForm = document.getElementById('forgotPasswordFormModal');
         
         console.log('Login form found:', loginForm);
         console.log('Register form found:', registerForm);
+        console.log('Forgot password form found:', forgotForm);
         
-        if (!loginForm || !registerForm) {
+        if (!loginForm || !registerForm || !forgotForm) {
             console.warn('Forms not found, retrying...');
             setTimeout(initializeFormHandlers, 100);
             return;
@@ -854,10 +1169,13 @@
         loginForm.parentNode.replaceChild(newLoginForm, loginForm);
         const newRegisterForm = registerForm.cloneNode(true);
         registerForm.parentNode.replaceChild(newRegisterForm, registerForm);
+        const newForgotForm = forgotForm.cloneNode(true);
+        forgotForm.parentNode.replaceChild(newForgotForm, forgotForm);
         
         // Get fresh references
         const freshLoginForm = document.getElementById('loginFormModal');
         const freshRegisterForm = document.getElementById('registerFormModal');
+        const freshForgotForm = document.getElementById('forgotPasswordFormModal');
 
         if (freshLoginForm) {
             console.log('Attaching submit handler to login form');
@@ -1210,11 +1528,44 @@
         }
     }
     
+    // Phone number validation - chỉ cho phép nhập số
+    function setupPhoneNumberValidation() {
+        const phoneInput = document.getElementById('registerPhoneNumber');
+        if (!phoneInput) return;
+
+        // Chỉ cho phép nhập số
+        phoneInput.addEventListener('input', function(e) {
+            // Loại bỏ tất cả ký tự không phải số
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Ngăn chặn paste ký tự không phải số
+        phoneInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const numbersOnly = paste.replace(/[^0-9]/g, '');
+            this.value = numbersOnly;
+        });
+
+        // Ngăn chặn nhập ký tự không phải số từ bàn phím
+        phoneInput.addEventListener('keypress', function(e) {
+            const char = String.fromCharCode(e.which);
+            if (!/[0-9]/.test(char)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+
     // Initialize form handlers when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeFormHandlers);
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFormHandlers();
+            setupPhoneNumberValidation();
+        });
     } else {
         initializeFormHandlers();
+        setupPhoneNumberValidation();
     }
 
     // Check login before ordering
@@ -1230,6 +1581,49 @@
             alert('Vui lòng đăng nhập để đặt món!');
             openLoginModal();
         }
+    }
+
+    // Refresh CAPTCHA for login form
+    function refreshLoginCaptcha() {
+        var captchaImage = document.getElementById('loginCaptchaImage');
+        var captchaInput = document.getElementById('loginCaptchaCode');
+        if (captchaImage) {
+            // Add timestamp to force refresh
+            captchaImage.src = '@Url.Action("Generate", "Captcha")?t=' + new Date().getTime();
+        }
+        if (captchaInput) {
+            captchaInput.value = '';
+        }
+    }
+
+    // Refresh CAPTCHA for register form
+    function refreshRegisterCaptcha() {
+        var captchaImage = document.getElementById('registerCaptchaImage');
+        var captchaInput = document.getElementById('registerCaptchaCode');
+        if (captchaImage) {
+            // Add timestamp to force refresh
+            captchaImage.src = '@Url.Action("Generate", "Captcha")?t=' + new Date().getTime();
+        }
+        if (captchaInput) {
+            captchaInput.value = '';
+        }
+    }
+
+    // Refresh CAPTCHA when opening modals
+    var originalOpenLoginModal = typeof openLoginModal !== 'undefined' ? openLoginModal : null;
+    if (originalOpenLoginModal) {
+        window.openLoginModal = function() {
+            originalOpenLoginModal();
+            setTimeout(refreshLoginCaptcha, 100);
+        };
+    }
+
+    var originalOpenRegisterModal = typeof openRegisterModal !== 'undefined' ? openRegisterModal : null;
+    if (originalOpenRegisterModal) {
+        window.openRegisterModal = function() {
+            originalOpenRegisterModal();
+            setTimeout(refreshRegisterCaptcha, 100);
+        };
     }
 </script>
 

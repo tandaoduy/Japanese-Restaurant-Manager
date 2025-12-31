@@ -17,7 +17,8 @@ namespace Project_65133141.Areas.Employee_65133141
             context.MapRoute(
                 "Employee_65133141_default",
                 "Employee_65133141/{controller}/{action}/{id}",
-                new { action = "Index", id = UrlParameter.Optional }
+                new { action = "Index", id = UrlParameter.Optional },
+                new[] { "Project_65133141.Areas.Employee_65133141.Controllers" }
             );
         }
     }

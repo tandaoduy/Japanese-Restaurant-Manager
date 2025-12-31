@@ -1,4 +1,10 @@
-﻿@{
+﻿@using System
+@using System.Linq
+@using System.Collections.Generic
+@using System.Web.Mvc
+@using Project_65133141.Models
+
+@{
     ViewBag.Title = "Trang chủ - Nhà hàng Nhật";
 }
 
@@ -280,7 +286,7 @@
         </div>
 
         @* Category Filter *@
-        @if (ViewBag.AllCategories != null && ((List<Project_65133141.Models.DanhMuc>)ViewBag.AllCategories).Count > 0)
+        @if (ViewBag.AllCategories != null && ((List<DanhMuc>)ViewBag.AllCategories).Count > 0)
         {
             <div class="category-scroll-container mb-12">
                 <div class="category-pill category-pill-active" data-category="all" onclick="filterByCategory('all')">
@@ -288,11 +294,12 @@
                     <span>Tất cả</span>
                 </div>
 
-                @foreach (var cat in (List<Project_65133141.Models.DanhMuc>)ViewBag.AllCategories)
+                @foreach (var cat in (List<DanhMuc>)ViewBag.AllCategories)
                 {
                     var upperName = (cat.TenDanhMuc ?? "").ToUpperInvariant();
                     string icon = "🍽️";
 
+                    // Set icon based on category name
                     if (upperName.Contains("SASHIMI")) { icon = "🥢"; }
                     else if (upperName.Contains("SUSHI") || upperName.Contains("SHUSHI")) { icon = "🍣"; }
                     else if (upperName.Contains("CƠM") || upperName.Contains("MÌ")) { icon = "🍜"; }
@@ -308,10 +315,10 @@
             </div>
         }
 
-        @if (ViewBag.FeaturedProducts != null && ((List<Project_65133141.Models.MonAn>)ViewBag.FeaturedProducts).Count > 0)
+        @if (ViewBag.FeaturedProducts != null && ((List<MonAn>)ViewBag.FeaturedProducts).Count > 0)
         {
             <div class="grid md:grid-cols-3 gap-8" id="products-grid">
-                @foreach (var product in (List<Project_65133141.Models.MonAn>)ViewBag.FeaturedProducts)
+                @foreach (var product in (List<MonAn>)ViewBag.FeaturedProducts)
                 {
                     var categories = ViewBag.Categories as Dictionary<long, string>;
                     var categoryName = categories != null && categories.ContainsKey(product.DanhMucID)
@@ -362,10 +369,10 @@
                             @* Discount Badge *@
                             @if (product.GiaGiam.HasValue && product.GiaGiam.Value > 0 && product.GiaGiam.Value < product.GiaGoc)
                             {
-                                var badgeDiscountPercent = (int)Math.Round(100 - (product.GiaGiam.Value / product.GiaGoc) * 100);
+                                var discountPercent = (int)Math.Round(100 - (product.GiaGiam.Value / product.GiaGoc) * 100);
                                 <div class="absolute top-3 right-3 z-10">
                                     <span class="bg-red-600 text-white text-xs font-black px-3 py-1 rounded-xl uppercase shadow-lg">
-                                        -@badgeDiscountPercent%
+                                        -@discountPercent%
                                     </span>
                                 </div>
                             }
@@ -436,57 +443,6 @@
     }
 </script>
 
-<section id="dat-ban" class="py-24 bg-gradient-to-br from-red-700 via-red-800 to-red-900 text-white relative overflow-hidden">
-    <div class="absolute inset-0 opacity-10">
-        <div class="absolute top-10 right-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
-        <div class="absolute bottom-10 left-10 w-80 h-80 bg-white rounded-full blur-3xl"></div>
-    </div>
-    <div class="container mx-auto px-6 relative z-10">
-        <div class="max-w-3xl mx-auto text-center">
-            <h2 class="text-5xl md:text-6xl font-display font-bold mb-6">Đặt bàn ngay hôm nay</h2>
-            <p class="text-xl md:text-2xl mb-10 text-red-100 font-light leading-relaxed">
-                Đảm bảo có chỗ ngồi cho bạn và gia đình. Đặt bàn trước để nhận ưu đãi đặc biệt!
-            </p>
-            <div class="bg-white rounded-2xl p-8 md:p-10 text-gray-800 shadow-2xl">
-                <form class="space-y-5">
-                    <div class="grid md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-semibold mb-2 text-gray-700">Họ và tên</label>
-                            <input type="text" class="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all outline-none" placeholder="Nhập họ tên">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold mb-2 text-gray-700">Số điện thoại</label>
-                            <input type="tel" class="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all outline-none" placeholder="Nhập số điện thoại">
-                        </div>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-semibold mb-2 text-gray-700">Ngày</label>
-                            <input type="date" class="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold mb-2 text-gray-700">Giờ</label>
-                            <input type="time" class="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all outline-none">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-2 text-gray-700">Số người</label>
-                        <select class="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all outline-none">
-                            <option>1 người</option>
-                            <option>2 người</option>
-                            <option>3-4 người</option>
-                            <option>5-6 người</option>
-                            <option>Trên 6 người</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-xl text-lg font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                        Đặt bàn ngay
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-        </section>
 
 <section id="giao-hang" class="py-20 bg-white">
     <div class="container mx-auto px-4">
@@ -539,8 +495,12 @@
                     allowfullscreen="" 
                     loading="lazy" 
                     referrerpolicy="no-referrer-when-downgrade"
-                    class="w-full">
+                    class="w-full"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 </iframe>
+                <div style="display:none; padding: 2rem; text-align: center; background: #f3f4f6; color: #6b7280;">
+                    <p>Bản đồ không thể tải được. Vui lòng tắt trình chặn quảng cáo hoặc truy cập trực tiếp <a href="https://www.google.com/maps" target="_blank" class="text-red-600 hover:underline">Google Maps</a>.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -671,4 +631,5 @@
             initCarousel();
         }
     })();
+
 </script>

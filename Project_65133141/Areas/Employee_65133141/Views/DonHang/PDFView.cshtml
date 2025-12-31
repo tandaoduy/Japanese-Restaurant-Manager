@@ -1,0 +1,12 @@
+@{
+    Layout = null;
+    Response.ContentType = "text/html";
+}
+@Html.Raw(ViewBag.HTMLContent)
+
+<script>
+    window.onload = function() {
+        window.print();
+    };
+</script>
+

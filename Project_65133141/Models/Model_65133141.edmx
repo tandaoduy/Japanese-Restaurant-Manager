@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="QuanLyNhaHangNhat_65133141Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="QuanLyNhaHangNhat_65133141Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="BanAn">
           <Key>
             <PropertyRef Name="BanID" />
@@ -103,6 +103,7 @@
           <Property Name="TongTien" Type="decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="TrangThai" Type="nvarchar" MaxLength="50" />
           <Property Name="GhiChu" Type="nvarchar(max)" />
+          <Property Name="SoDienThoai" Type="nvarchar" MaxLength="15" />
         </EntityType>
         <EntityType Name="HoaDon">
           <Key>
@@ -517,8 +518,7 @@
             <End Role="TinTuc" EntitySet="TinTuc" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="QuanLyNhaHangNhat_65133141Model" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -638,6 +638,7 @@
           <NavigationProperty Name="NhanVien" Relationship="Self.FK__DonHang__NhanVie__6D0D32F4" FromRole="DonHang" ToRole="NhanVien" />
           <NavigationProperty Name="User" Relationship="Self.FK__DonHang__UserID__6E01572D" FromRole="DonHang" ToRole="Users" />
           <NavigationProperty Name="HoaDons" Relationship="Self.FK__HoaDon__DonHangI__7A672E12" FromRole="DonHang" ToRole="HoaDon" />
+          <Property Name="SoDienThoai" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="HoaDon">
           <Key>
@@ -1170,6 +1171,7 @@
           <EntitySetMapping Name="DonHangs">
             <EntityTypeMapping TypeName="QuanLyNhaHangNhat_65133141Model.DonHang">
               <MappingFragment StoreEntitySet="DonHang">
+                <ScalarProperty Name="SoDienThoai" ColumnName="SoDienThoai" />
                 <ScalarProperty Name="DonHangID" ColumnName="DonHangID" />
                 <ScalarProperty Name="BanID" ColumnName="BanID" />
                 <ScalarProperty Name="NhanVienID" ColumnName="NhanVienID" />

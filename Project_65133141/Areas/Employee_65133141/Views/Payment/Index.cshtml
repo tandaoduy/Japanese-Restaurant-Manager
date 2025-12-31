@@ -1,0 +1,430 @@
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web.Mvc
+@using Project_65133141.Models
+@using Project_65133141.Areas.Employee_65133141.Controllers
+@{
+    ViewBag.Title = "Thanh Toán";
+    Layout = "~/Areas/Employee_65133141/Views/Shared/_Layout.cshtml";
+    
+    var table = ViewBag.Table as BanAn;
+    var confirmedCart = ViewBag.ConfirmedCart as List<CartItem> ?? new List<CartItem>();
+    var total = ViewBag.Total != null ? (decimal)ViewBag.Total : 0;
+    var nhanVien = ViewBag.NhanVien as NhanVien;
+    var users = ViewBag.Users as List<User> ?? new List<User>();
+    
+    if (table == null)
+    {
+        Response.Redirect(Url.Action("Index", "Order", new { area = "Employee_65133141" }));
+        return;
+    }
+}
+
+<div class="min-h-screen bg-gray-50 py-6">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Thanh Toán</h2>
+            
+            <!-- Table Info -->
+            <div class="mb-6 p-4 bg-teal-50 rounded-lg">
+                <p class="text-sm text-gray-600">Bàn: <span class="font-semibold text-teal-700">@(table.TenBan ?? "N/A")</span></p>
+                <p class="text-sm text-gray-600">Nhân viên: <span class="font-semibold text-teal-700">@(nhanVien?.HoTen ?? "N/A")</span></p>
+            </div>
+
+            <!-- Order Items -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Danh sách món đã xác nhận</h3>
+                <div class="border rounded-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">STT</th>
+                                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Tên món</th>
+                                <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700">SL</th>
+                                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Đơn giá</th>
+                                <th class="px-4 py-2 text-right text-sm font-semibold text-gray-700">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (confirmedCart != null && confirmedCart.Any())
+                            {
+                                int stt = 1;
+                                foreach (var item in confirmedCart)
+                                {
+                                    if (item != null)
+                                    {
+                                        <tr class="border-t">
+                                            <td class="px-4 py-2 text-sm text-gray-700">@stt</td>
+                                            <td class="px-4 py-2 text-sm text-gray-900">@(item.TenMon ?? "N/A")</td>
+                                            <td class="px-4 py-2 text-center text-sm text-gray-700">@item.SoLuong</td>
+                                            <td class="px-4 py-2 text-right text-sm text-gray-700">@string.Format("{0:N0}", item.Gia) ₫</td>
+                                            <td class="px-4 py-2 text-right text-sm font-semibold text-gray-900">@string.Format("{0:N0}", item.Gia * item.SoLuong) ₫</td>
+                                        </tr>
+                                        stt++;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="px-4 py-4 text-center text-sm text-gray-500">Không có món nào đã xác nhận</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="bg-gray-50">
+                            <tr>
+                                <td colspan="4" class="px-4 py-3 text-right text-lg font-bold text-gray-900">Tổng cộng:</td>
+                                <td class="px-4 py-3 text-right text-lg font-bold text-teal-600">@string.Format("{0:N0}", total) ₫</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customer Selection -->
+            <div id="customerSelectionDiv" class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Thông tin khách hàng</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Loại khách hàng</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="customerType" value="system" class="mr-2" checked>
+                                <span class="text-sm text-gray-700">Khách hàng trong hệ thống</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="customerType" value="external" class="mr-2">
+                                <span class="text-sm text-gray-700">Khách hàng ngoài hệ thống</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="systemCustomerDiv">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chọn khách hàng <span class="text-red-500">*</span></label>
+                        <select id="userId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                            <option value="">-- Chọn khách hàng --</option>
+                            @if (users != null && users.Any())
+                            {
+                                foreach (var user in users)
+                                {
+                                    if (user != null)
+                                    {
+                                        <option value="@user.UserID">@(user.HoTen ?? "N/A")@(user.Email != null ? " (" + user.Email + ")" : "")</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div id="externalCustomerDiv" style="display: none;">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Họ tên khách hàng <span class="text-red-500">*</span></label>
+                                <input type="text" id="customerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Nhập họ tên khách hàng">
+                                <p id="customerNameError" class="mt-1 text-sm text-red-500" style="display:none;"></p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Số điện thoại <span class="text-red-500">*</span></label>
+                                <input type="text" id="customerPhone" maxlength="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Nhập số điện thoại">
+                                <p id="customerPhoneError" class="mt-1 text-sm text-red-500" style="display:none;"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Method & Next Step -->
+            <div id="paymentStep" class="mb-6" style="display: none;">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Phương thức thanh toán</h3>
+                <div class="space-y-4">
+                    <div class="p-4 border-2 border-gray-200 rounded-lg hover:border-teal-500 transition-colors payment-method-option" data-method="cash">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="paymentMethod" value="cash" class="mr-3" checked>
+                            <span class="text-lg font-semibold text-gray-900">Tiền mặt</span>
+                        </label>
+                        <div class="flex-1 mt-3">
+                            <div id="cashPaymentDiv" class="mt-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Số tiền khách đưa</label>
+                                <input type="number" id="cashAmount" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Nhập số tiền" min="@total.ToString("F0")" step="1000">
+                                <p id="cashError" class="mt-1 text-sm text-red-500" style="display:none;"></p>
+                                <div id="changeAmount" class="mt-2 text-sm font-semibold text-teal-600" style="display: none;">
+                                    Tiền thừa: <span id="changeValue">0</span> ₫
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 border-2 border-gray-200 rounded-lg hover:border-teal-500 transition-colors payment-method-option" data-method="transfer">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="paymentMethod" value="transfer" class="mr-3">
+                            <span class="text-lg font-semibold text-gray-900">Chuyển khoản</span>
+                        </label>
+                        <div class="flex-1 mt-3">
+                            <div id="transferPaymentDiv" class="mt-3" style="display: none;">
+                                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                    <p class="text-sm text-gray-600 mb-2">Quét mã QR để thanh toán</p>
+                                    <div id="qrCodeContainer" class="flex justify-center">
+                                        <img src="@Url.Content("~/Images/QR.png")" alt="QR Code" class="w-64 h-64 object-contain border-2 border-gray-300 rounded-lg">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2">Số tiền: <span class="font-semibold">@string.Format("{0:N0}", total) ₫</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4">
+                <button type="button" onclick="window.history.back()" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                    Quay lại
+                </button>
+                <button type="button" id="processPaymentBtn" class="flex-1 px-6 py-3 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600 transition-colors">
+                    Xác nhận thanh toán
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Container -->
+<div id="alertContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
+
+@Html.AntiForgeryToken()
+
+<!-- jQuery (required for the scripts below) -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<script>
+jQuery(document).ready(function($) {
+    var total = parseFloat('@total.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)');
+    var banId = parseInt('@table.BanID');
+
+    // Payment method toggle
+    $('input[name="paymentMethod"]').on('change', function() {
+        if ($(this).val() === 'cash') {
+            // Show cash payment input
+            $('#cashPaymentDiv').show();
+            $('#transferPaymentDiv').hide();
+        } else {
+            // Show transfer QR code, hide cash
+            $('#cashPaymentDiv').hide();
+            $('#transferPaymentDiv').show();
+            generateQRCode();
+        }
+    });
+
+    // Initialize: show cash payment by default
+    $('#cashPaymentDiv').show();
+
+    // Initialize customer type display
+    function updateCustomerTypeDisplay() {
+        var selectedType = $('input[name="customerType"]:checked').val();
+        if (selectedType === 'system') {
+            $('#systemCustomerDiv').show();
+            $('#externalCustomerDiv').hide();
+            // Clear external customer inputs
+            $('#customerName').val('');
+            $('#customerPhone').val('');
+        } else if (selectedType === 'external') {
+            $('#systemCustomerDiv').hide();
+            $('#externalCustomerDiv').show();
+            // Clear system customer selection
+            $('#userId').val('');
+        }
+
+        updateNextStepVisibility();
+    }
+
+    // Control visibility of payment step (bước tiếp theo)
+    function updateNextStepVisibility() {
+        var selectedType = $('input[name="customerType"]:checked').val();
+
+        if (selectedType === 'system') {
+            var userId = $('#userId').val();
+            if (userId && userId !== '') {
+                $('#paymentStep').show();
+            } else {
+                $('#paymentStep').hide();
+            }
+        } else if (selectedType === 'external') {
+            var name = $('#customerName').val();
+            var phone = $('#customerPhone').val();
+            if (name && name.trim() !== '' && phone && phone.trim() !== '') {
+                $('#paymentStep').show();
+            } else {
+                $('#paymentStep').hide();
+            }
+        } else {
+            $('#paymentStep').hide();
+        }
+    }
+
+    // Customer type toggle - handle both change and click events
+    $('input[name="customerType"]').on('change', function() {
+        updateCustomerTypeDisplay();
+    });
+
+    // Also handle clicks to ensure it works
+    $('input[name="customerType"]').on('click', function() {
+        var self = this;
+        setTimeout(function() {
+            if ($(self).is(':checked')) {
+                updateCustomerTypeDisplay();
+            }
+        }, 10);
+    });
+
+    // When selecting a system customer, show next step only after a customer is chosen
+    $('#userId').on('change', function() {
+        updateNextStepVisibility();
+    });
+
+    // For external customers, show next step only after name + phone are filled
+    $('#customerName, #customerPhone').on('input', function() {
+        updateNextStepVisibility();
+    });
+
+    // Restrict customer name: only letters (including Vietnamese) and spaces
+    $('#customerName').on('input', function () {
+        var value = $(this).val();
+        // Cho phép chữ (Unicode letter) và khoảng trắng
+        var cleaned = value.replace(/[^\p{L}\s]/gu, '');
+        if (value !== cleaned) {
+            $(this).val(cleaned);
+        }
+        $('#customerNameError').hide().text('');
+    });
+
+    // Restrict phone: only digits, max 10
+    $('#customerPhone').on('input', function () {
+        var value = $(this).val();
+        var digitsOnly = value.replace(/[^0-9]/g, '').substring(0, 10);
+        if (value !== digitsOnly) {
+            $(this).val(digitsOnly);
+        }
+        $('#customerPhoneError').hide().text('');
+    });
+
+    // Initialize on page load
+    updateCustomerTypeDisplay();
+    updateNextStepVisibility();
+
+    // Calculate change for cash payment & validate amount inline
+    $('#cashAmount').on('input', function() {
+        var cashAmount = parseFloat($(this).val()) || 0;
+        $('#cashError').hide().text('');
+
+        if (cashAmount >= total) {
+            var change = cashAmount - total;
+            $('#changeValue').text(change.toLocaleString('vi-VN'));
+            $('#changeAmount').show();
+        } else if (cashAmount > 0) {
+            $('#changeAmount').hide();
+            $('#cashError').text('Số tiền khách đưa phải lớn hơn hoặc bằng tổng tiền.').show();
+        } else {
+            $('#changeAmount').hide();
+        }
+    });
+
+    // Show QR code image
+    function generateQRCode() {
+        $('#qrCodeContainer').html('<img src="@Url.Content("~/Images/QR.png")" alt="QR Code" class="w-64 h-64 object-contain border-2 border-gray-300 rounded-lg">');
+    }
+
+    // Process payment
+    $('#processPaymentBtn').on('click', function() {
+        var paymentMethod = $('input[name="paymentMethod"]:checked').val();
+        var customerType = $('input[name="customerType"]:checked').val();
+        var userId = $('#userId').val();
+        var customerName = $('#customerName').val();
+        var cashAmount = $('#cashAmount').val();
+
+        // Validation
+        if (paymentMethod === 'cash') {
+            var cashNumber = parseFloat(cashAmount || '0');
+            if (!cashAmount || cashNumber < total) {
+                $('#cashError').text('Số tiền khách đưa phải lớn hơn hoặc bằng tổng tiền.').show();
+                $('#cashAmount').focus();
+                return;
+            } else {
+                $('#cashError').hide().text('');
+            }
+        }
+        
+        // Validate customer information (required for all payment methods)
+        if (customerType === 'system') {
+            if (!userId) {
+                showAlert('Vui lòng chọn khách hàng', 'warning');
+                return;
+            }
+        } else if (customerType === 'external') {
+            var isValidExternal = true;
+
+                if (!customerName || customerName.trim() === '') {
+                $('#customerNameError').text('Vui lòng nhập họ tên khách hàng.').show();
+                isValidExternal = false;
+            }
+
+            // Tên chỉ cho phép chữ và khoảng trắng
+            var namePattern = /^[\p{L}\s]+$/u;
+            if (customerName && customerName.trim() !== '' && !namePattern.test(customerName.trim())) {
+                $('#customerNameError').text('Họ tên chỉ được phép chứa chữ và khoảng trắng.').show();
+                isValidExternal = false;
+                }
+
+                var phone = $('#customerPhone').val();
+                if (!phone || phone.trim() === '') {
+                $('#customerPhoneError').text('Vui lòng nhập số điện thoại.').show();
+                isValidExternal = false;
+            } else if (!/^\d{10}$/.test(phone.trim())) {
+                $('#customerPhoneError').text('Số điện thoại phải gồm đúng 10 chữ số.').show();
+                isValidExternal = false;
+            }
+
+            if (!isValidExternal) {
+                    return;
+                }
+        }
+
+        // Build preview URL and redirect
+        try {
+            var baseUrl = '@Url.Action("Preview", "Payment", new { area = "Employee_65133141" })';
+            var previewUrl = baseUrl + '?banId=' + encodeURIComponent(banId) +
+                '&paymentMethod=' + encodeURIComponent(paymentMethod) +
+                '&customerType=' + encodeURIComponent(customerType);
+
+            if (customerType === 'system' && userId) {
+                previewUrl += '&userId=' + encodeURIComponent(userId);
+            } else if (customerType === 'external') {
+                previewUrl += '&customerName=' + encodeURIComponent(customerName || '') +
+                    '&customerPhone=' + encodeURIComponent($('#customerPhone').val() || '');
+            }
+
+            if (paymentMethod === 'cash' && cashAmount) {
+                previewUrl += '&cashAmount=' + encodeURIComponent(cashAmount);
+            }
+
+            window.location.href = previewUrl;
+        } catch (e) {
+            console.error('Error redirecting to preview:', e);
+            showAlert('Lỗi khi chuyển đến trang xem trước: ' + e.message, 'error');
+                $('#processPaymentBtn').prop('disabled', false).text('Xác nhận thanh toán');
+            }
+    });
+
+    // Show alert function
+    function showAlert(message, type) {
+        var alertId = 'alert-' + Date.now();
+        var bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+        var alertHtml = '<div id="' + alertId + '" class="' + bgColor + ' text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">' +
+            '<span>' + message + '</span>' +
+            '<button onclick="$(\'#' + alertId + '\').remove()" class="ml-auto text-white hover:text-gray-200">×</button>' +
+            '</div>';
+        $('#alertContainer').append(alertHtml);
+        setTimeout(function() {
+            $('#' + alertId).fadeOut(function() {
+                $(this).remove();
+            });
+        }, 5000);
+    }
+});
+</script>
+

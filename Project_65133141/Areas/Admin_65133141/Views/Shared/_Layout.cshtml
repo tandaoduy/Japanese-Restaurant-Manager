@@ -99,61 +99,84 @@
             margin: 0 0.5rem;
         }
 
-        /* Sidebar Menu Styles */
+        /* Sidebar Menu Styles - Matching Image Design */
         .sidebar-menu {
             position: fixed;
             left: 0;
             top: 80px;
             width: 250px;
             height: calc(100vh - 80px);
-            background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
-            padding: 2rem 0;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            padding: 0;
             z-index: 40;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar-menu-item {
             position: relative;
-            display: block;
-            padding: 1rem 2rem;
-            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: #94a3b8;
             text-decoration: none;
             font-size: 0.875rem;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            transition: color 0.3s ease;
-            overflow: hidden;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .sidebar-menu-item::after {
+        .sidebar-menu-item svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        /* Hover: Light blue-grey text */
+        .sidebar-menu-item:hover {
+            color: #cbd5e1 !important;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-menu-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        /* Active: Red text + Red left border */
+        .sidebar-menu-item.active {
+            color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.1) !important;
+        }
+
+        .sidebar-menu-item.active::before {
+            transform: scaleY(1);
+        }
+
+        /* Separator line after active item */
+        .sidebar-menu-item.active::after {
             content: '';
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
-            transform: translateX(-100%);
-            transition: transform 0.4s ease;
-        }
-
-        /* Hover: White text + Underline */
-        .sidebar-menu-item:hover {
-            color: #ffffff !important;
-        }
-
-        .sidebar-menu-item:hover::after {
-            transform: translateX(0);
-        }
-
-        /* Active: Red text + Underline */
-        .sidebar-menu-item.active {
-            color: #ef4444 !important;
-            background: transparent !important;
-        }
-
-        .sidebar-menu-item.active::after {
-            transform: translateX(0);
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.3), transparent);
         }
 
         /* Adjust main content for sidebar */
@@ -554,8 +577,12 @@
 </head>
 <body class="bg-gray-50">
     <!-- Fixed Admin Header -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-600 via-red-700 to-rose-600 shadow-md shimmer-effect">
-        <div class="container mx-auto px-4">
+    <header class="fixed top-0 left-0 right-0 z-50 shadow-md">
+        <!-- Background Layer with Shimmer -->
+        <div class="absolute inset-0 bg-gradient-to-r from-red-600 via-red-700 to-rose-600 shimmer-effect z-0"></div>
+        
+        <!-- Content Layer -->
+        <div class="container mx-auto px-4 relative z-10">
             <div class="flex items-center justify-between h-20">
                 <!-- Logo and Title -->
                 <div class="flex items-center space-x-4">
@@ -575,13 +602,73 @@
                     </div>
                 </div>
 
-                <!-- User Info -->
+                <!-- User Profile Dropdown -->
                 <div class="flex items-center space-x-4">
-                    <div class="text-right">
-                        <p class="text-sm text-pink-100">Admin</p>
-                        <p class="text-white font-semibold">@(User.Identity.IsAuthenticated ? User.Identity.Name : "Guest")</p>
+                    @{
+                        var userName = Session["UserName"] as string ?? User.Identity.Name ?? "Admin";
+                        var firstLetter = !string.IsNullOrEmpty(userName) ? userName.Substring(0, 1).ToUpper() : "A";
+                    }
+                    
+                    <div class="relative" id="admin-user-menu text-left">
+                        <button type="button" id="admin-profile-btn" class="flex items-center space-x-3 focus:outline-none hover:bg-white/10 rounded-full p-1 pr-3 transition-colors">
+                            <div class="w-10 h-10 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                                @firstLetter
+                            </div>
+                            <div class="hidden md:block text-left">
+                                <p class="text-xs text-blue-200 leading-none mb-1">Xin chào!</p>
+                                <div class="flex items-center">
+                                    <p class="text-sm font-bold text-white leading-none">@userName</p>
+                                    <svg class="w-4 h-4 text-blue-200 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="admin-profile-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50 origin-top-right transform transition-all duration-200">
+                             <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                                <p class="text-sm text-gray-500">Đang đăng nhập với quyền</p>
+                                <p class="text-base font-bold text-red-600">Quản Trị Viên</p>
+                            </div>
+                            
+                            <div class="py-1">
+                                <a href="@Url.Action("Index", "Account", new { area = "Admin_65133141" })" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 transition">
+                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    Thông tin tài khoản
+                                </a>
+
+                            </div>
+                            
+                            <div class="border-t border-gray-100 mt-1 pt-1">
+                                <a href="@Url.Action("Logout", "Account", new { area = "" })" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition font-medium">
+                                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                    Đăng xuất
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const profileBtn = document.getElementById('admin-profile-btn');
+                        const dropdown = document.getElementById('admin-profile-dropdown');
+                        
+                        // Toggle dropdown
+                        profileBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            dropdown.classList.toggle('hidden');
+                        });
+                        
+                        // Close when clicking outside
+                        document.addEventListener('click', function(e) {
+                            if (!dropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                                dropdown.classList.add('hidden');
+                            }
+                        });
+                    });
+                </script>
             </div>
         </div>
     </header>
@@ -593,61 +680,73 @@
     <nav class="sidebar-menu">
         <a href="@Url.Action("Index", "Home", new { area = "Admin_65133141" })" 
            class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
-            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
-            Trang chủ
+            <span>TRANG CHỦ</span>
         </a>
+        
+        <div style="height: 1px; background: rgba(239, 68, 68, 0.2); margin: 0.5rem 0;"></div>
         
         <a href="@Url.Action("Index", "Employee", new { area = "Admin_65133141" })" 
            class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" ? "active" : "")">
-            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
             </svg>
-            Quản lý nhân viên
+            <span>QUẢN LÝ NHÂN VIÊN</span>
         </a>
         
         <a href="@Url.Action("Index", "Customer", new { area = "Admin_65133141" })" 
            class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Customer" ? "active" : "")">
-            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
             </svg>
-            Quản lý khách hàng
+            <span>QUẢN LÝ KHÁCH HÀNG</span>
         </a>
         
         <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141" })" 
            class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "active" : "")">
-            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
             </svg>
-            Quản lý thực đơn
+            <span>QUẢN LÝ THỰC ĐƠN</span>
         </a>
         
         <a href="@Url.Action("Index", "DonHang", new { area = "Admin_65133141" })" 
            class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DonHang" ? "active" : "")">
-            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
             </svg>
-            Quản lý đơn hàng
+            <span>QUẢN LÝ ĐƠN HÀNG</span>
         </a>
         
-        <a href="#" class="sidebar-menu-item">
-            <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+        <a href="@Url.Action("Index", "BanAn", new { area = "Admin_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BanAn" ? "active" : "")">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
             </svg>
-            Thống kê
+            <span>TRẠNG THÁI BÀN</span>
         </a>
-
+        
+        <a href="@Url.Action("Index", "DatBan", new { area = "Admin_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DatBan" ? "active" : "")">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <span>QUẢN LÝ ĐẶT BÀN</span>
+        </a>
+        
         <!-- Logout Button at Bottom -->
         @if (User.Identity.IsAuthenticated)
         {
-            <a href="@Url.Action("Logout", "Account", new { area = "" })" 
-               class="sidebar-menu-item" style="position: absolute; bottom: 2rem; left: 0; right: 0;">
-                <svg class="w-5 h-5 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-                Đăng xuất
-            </a>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem 0;">
+                <a href="@Url.Action("Logout", "Account", new { area = "" })" class="sidebar-menu-item" style="position: relative;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    <span>ĐĂNG XUẤT</span>
+                </a>
+            </div>
         }
     </nav>
 
@@ -676,7 +775,9 @@
                                     @(controller == "Account" ? "Quản lý tài khoản" : 
                                       controller == "Employee" ? "Quản lý nhân viên" : 
                                       controller == "Customer" ? "Quản lý khách hàng" : 
-                                      controller == "Product" ? "Quản lý thực đơn" : controller)
+                                      controller == "Product" ? "Quản lý thực đơn" : 
+                                      controller == "DatBan" ? "Quản lý đặt bàn" : 
+                                      controller == "DonHang" ? "Quản lý đơn hàng" : controller)
                                 </span>
                             }
                             else
@@ -685,7 +786,9 @@
                                     @(controller == "Account" ? "Quản lý tài khoản" : 
                                       controller == "Employee" ? "Quản lý nhân viên" : 
                                       controller == "Customer" ? "Quản lý khách hàng" : 
-                                      controller == "Product" ? "Quản lý thực đơn" : controller)
+                                      controller == "Product" ? "Quản lý thực đơn" : 
+                                      controller == "DatBan" ? "Quản lý đặt bàn" : 
+                                      controller == "DonHang" ? "Quản lý đơn hàng" : controller)
                                 </a>
                                 <span class="breadcrumb-separator">/</span>
                                 <span class="breadcrumb-item active">
@@ -718,7 +821,8 @@
                 // Filter out known harmless extension errors
                 if (errorMsg.includes('runtime.lastError') || 
                     errorMsg.includes('Could not establish connection') ||
-                    errorMsg.includes('Receiving end does not exist')) {
+                    errorMsg.includes('Receiving end does not exist') ||
+                    errorMsg.includes('ERR_BLOCKED_BY_CLIENT')) {
                     return; // Suppress these errors
                 }
                 
@@ -726,6 +830,18 @@
                 originalError.apply(console, arguments);
             };
         })();
+
+        // Suppress global errors from browser extensions
+        window.addEventListener('error', function(e) {
+            const errorMsg = e.message || '';
+            if (errorMsg.includes('runtime.lastError') || 
+                errorMsg.includes('Could not establish connection') ||
+                errorMsg.includes('Receiving end does not exist') ||
+                errorMsg.includes('ERR_BLOCKED_BY_CLIENT')) {
+                e.preventDefault();
+                return false;
+            }
+        }, true);
     </script>
 
     <script>
@@ -777,6 +893,266 @@
     
     @* Include Confirm Modal Component *@
     @Html.Partial("~/Views/Components/_ConfirmModal.cshtml")
+    
+    @* Anti-forgery token for AJAX requests *@
+    @Html.AntiForgeryToken()
+    
+    @* Session Timeout Warning Modal *@
+    <div id="sessionTimeoutModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <div class="flex items-center justify-center mb-4">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2 text-center">Phiên làm việc sắp hết hạn</h3>
+            <p class="text-gray-600 mb-4 text-center" id="sessionTimeoutMessage">
+                Phiên làm việc của bạn sẽ hết hạn trong <span id="timeRemaining" class="font-bold text-red-600">30</span> phút.
+            </p>
+            <p class="text-sm text-gray-500 mb-6 text-center">
+                Bạn có muốn mở rộng thời gian làm việc không?
+            </p>
+            <div class="flex gap-3">
+                <button onclick="extendSession()" class="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-semibold">
+                    Mở rộng thời gian
+                </button>
+                <button onclick="logoutSession()" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-semibold">
+                    Đăng xuất
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @* Session Expired Modal *@
+    <div id="sessionExpiredModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95" style="animation: modalSlideIn 0.3s ease-out forwards;">
+            <div class="p-8">
+                <!-- Icon -->
+                <div class="flex items-center justify-center mb-6">
+                    <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center animate-pulse">
+                        <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">Phiên làm việc đã hết hạn</h3>
+                
+                <!-- Message -->
+                <p class="text-gray-600 mb-6 text-center leading-relaxed">
+                    Phiên làm việc của bạn đã hết hạn do không hoạt động trong thời gian dài. 
+                    <br />
+                    <span class="font-semibold text-gray-800">Vui lòng đăng nhập lại để tiếp tục.</span>
+                </p>
+                
+                <!-- Button -->
+                <div class="flex justify-center">
+                    <button onclick="redirectToLogin()" class="bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-3 rounded-lg font-semibold text-lg rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                        </svg>
+                        <span>Đăng nhập lại</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @@keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+    </style>
+
+    <script>
+        // Session timeout management for Admin/Employee
+        (function() {
+            var sessionCheckInterval = null;
+            var warningShown = false;
+            var sessionExpired = false;
+            var checkInterval = 60000; // Check every 60 seconds (for 60 minutes timeout)
+            var warningTime = 1800; // Show warning 30 minutes before expiry (half of 60 minutes)
+
+            function checkSession() {
+                if (sessionExpired) return;
+
+                fetch('@Url.Action("Check", "Session", new { area = "Admin_65133141" })', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.authenticated || data.isExpired) {
+                        // Session expired
+                        sessionExpired = true;
+                        if (sessionCheckInterval) {
+                            clearInterval(sessionCheckInterval);
+                        }
+                        // Show session expired modal instead of alert
+                        showSessionExpiredModal();
+                        return;
+                    }
+
+                    if (data.isExpiringSoon && !warningShown) {
+                        // Show warning modal
+                        warningShown = true;
+                        // timeRemaining is in seconds
+                        showSessionTimeoutModal(data.timeRemaining);
+                    }
+                })
+                .catch(error => {
+                    console.error('Session check error:', error);
+                });
+            }
+
+            function showSessionTimeoutModal(timeRemaining) {
+                var modal = document.getElementById('sessionTimeoutModal');
+                var timeElement = document.getElementById('timeRemaining');
+                var messageElement = document.getElementById('sessionTimeoutMessage');
+                
+                if (modal && timeElement) {
+                    // timeRemaining is in seconds, convert to minutes
+                    var minutes = Math.floor(timeRemaining / 60);
+                    timeElement.textContent = minutes;
+                    messageElement.innerHTML = 'Phiên làm việc của bạn sẽ hết hạn trong <span id="timeRemaining" class="font-bold text-red-600">' + minutes + '</span> phút.';
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    
+                    // Update countdown every minute
+                    var countdownInterval = setInterval(function() {
+                        // Re-fetch timeRemaining from server
+                        fetch('@Url.Action("Check", "Session", new { area = "Admin_65133141" })', {
+                            method: 'GET',
+                            credentials: 'same-origin',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.authenticated && data.timeRemaining) {
+                                minutes = Math.floor(data.timeRemaining / 60);
+                                if (minutes <= 0) {
+                                    clearInterval(countdownInterval);
+                                    timeElement.textContent = '0';
+                                } else {
+                                    timeElement.textContent = minutes;
+                                    messageElement.innerHTML = 'Phiên làm việc của bạn sẽ hết hạn trong <span id="timeRemaining" class="font-bold text-red-600">' + minutes + '</span> phút.';
+                                }
+                            }
+                        });
+                    }, 60000); // Update every minute
+                    
+                    // Store interval to clear when modal is closed
+                    modal.dataset.countdownInterval = countdownInterval;
+                }
+            }
+
+            window.extendSession = function() {
+                var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                var formData = new FormData();
+                formData.append('__RequestVerificationToken', token);
+                
+                fetch('@Url.Action("Extend", "Session", new { area = "Admin_65133141" })', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        warningShown = false;
+                        var modal = document.getElementById('sessionTimeoutModal');
+                        if (modal) {
+                            // Clear countdown interval if exists
+                            if (modal.dataset.countdownInterval) {
+                                clearInterval(parseInt(modal.dataset.countdownInterval));
+                                delete modal.dataset.countdownInterval;
+                            }
+                            modal.classList.add('hidden');
+                            modal.classList.remove('flex');
+                        }
+                        // Reset check interval
+                        if (sessionCheckInterval) {
+                            clearInterval(sessionCheckInterval);
+                        }
+                        startSessionCheck();
+                    } else {
+                        alert('Không thể mở rộng phiên làm việc: ' + (data.message || 'Lỗi không xác định'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Extend session error:', error);
+                    alert('Có lỗi xảy ra khi mở rộng phiên làm việc.');
+                });
+            };
+
+            window.logoutSession = function() {
+                if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                    window.location.href = '@Url.Action("Logout", "Account", new { area = "" })';
+                }
+            };
+
+            // Show session expired modal
+            function showSessionExpiredModal() {
+                var modal = document.getElementById('sessionExpiredModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    // Prevent closing by clicking outside
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === modal) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    });
+                }
+            }
+
+            // Redirect to login
+            window.redirectToLogin = function() {
+                window.location.href = '@Url.Action("Logout", "Account", new { area = "" })';
+            };
+
+            function startSessionCheck() {
+                // Check immediately
+                checkSession();
+                // Then check every minute
+                sessionCheckInterval = setInterval(checkSession, checkInterval);
+            }
+
+            // Start checking when page loads
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', startSessionCheck);
+            } else {
+                startSessionCheck();
+            }
+
+            // Also check on user activity
+            var activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+            activityEvents.forEach(function(event) {
+                document.addEventListener(event, function() {
+                    if (!warningShown && !sessionExpired) {
+                        checkSession();
+                    }
+                }, { passive: true });
+            });
+        })();
+    </script>
     
     @RenderSection("scripts", required: false)
 </body>

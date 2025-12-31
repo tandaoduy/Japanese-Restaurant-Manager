@@ -1,0 +1,636 @@
+@using System.Web
+@using Project_65133141.Areas.Employee_65133141.Controllers
+@{
+    ViewBag.Title = "Xem Trước Hóa Đơn";
+    Layout = null;
+    
+    var table = ViewBag.Table as Project_65133141.Models.BanAn;
+    var confirmedCart = ViewBag.ConfirmedCart as List<CartItem> ?? new List<CartItem>();
+    var total = ViewBag.Total != null ? (decimal)ViewBag.Total : 0;
+    var nhanVien = ViewBag.NhanVien as Project_65133141.Models.NhanVien;
+    var paymentMethod = ViewBag.PaymentMethod as string ?? "cash";
+    var cashAmount = ViewBag.CashAmount as decimal?;
+    var change = ViewBag.Change as decimal? ?? 0;
+    var customerName = ViewBag.CustomerName as string ?? "Khách vãng lai";
+    var customerPhone = ViewBag.CustomerPhone as string;
+    
+    // Get parameters for form submission
+    var banId = table?.BanID ?? 0;
+    var customerType = ViewBag.CustomerType as string ?? "external";
+    var userId = ViewBag.CustomerUserId as long?;
+    var customerNameInput = ViewBag.CustomerNameInput as string ?? "";
+    var customerPhoneInput = ViewBag.CustomerPhoneInput as string ?? "";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xem Trước Hóa Đơn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            color: #000;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .invoice-header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .invoice-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .invoice-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .invoice-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .invoice-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .invoice-restaurant-name {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #dc2626;
+        }
+        .invoice-restaurant-sub {
+            font-size: 12px;
+            margin-top: 2px;
+            color: #666;
+        }
+        .invoice-header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 15px 0 10px 0;
+            text-align: center;
+        }
+        .invoice-header p {
+            font-size: 14px;
+            margin: 5px 0;
+            text-align: center;
+        }
+        .invoice-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .info-section {
+            font-size: 13px;
+        }
+        .info-section p {
+            margin: 5px 0;
+        }
+        .info-label {
+            font-weight: bold;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .items-table th {
+            background: #f0f0f0;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .items-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 13px;
+        }
+        .items-table .text-right {
+            text-align: right;
+        }
+        .items-table .text-center {
+            text-align: center;
+        }
+        .total-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #000;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .total-row.total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .payment-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .payment-info p {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .action-buttons {
+            text-align: center;
+            margin: 30px auto 20px auto;
+            max-width: 800px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 0 30px;
+        }
+        .action-buttons button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-confirm {
+            background: #14b8a6;
+            color: white;
+        }
+        .btn-confirm:hover {
+            background: #0d9488;
+        }
+        .btn-print {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-print:hover {
+            background: #2563eb;
+        }
+        .btn-cancel {
+            background: #6b7280;
+            color: white;
+        }
+        .btn-cancel:hover {
+            background: #4b5563;
+        }
+        /* Modal styles */
+        #confirmPaymentModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 20px;
+        }
+        #confirmPaymentModal.show {
+            display: flex !important;
+        }
+        #confirmPaymentModal > div {
+            position: relative;
+            z-index: 100000;
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        #confirmPaymentModal .w-12 {
+            width: 48px !important;
+            height: 48px !important;
+            flex-shrink: 0;
+        }
+        #confirmPaymentModal .w-6 {
+            width: 24px !important;
+            height: 24px !important;
+        }
+        #confirmPaymentModal svg {
+            width: 24px !important;
+            height: 24px !important;
+            max-width: 24px !important;
+            max-height: 24px !important;
+            flex-shrink: 0;
+        }
+        @@media print {
+            .action-buttons {
+                display: none;
+            }
+            body {
+                padding: 0;
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <div class="invoice-header-top">
+                <div class="invoice-header-left">
+                    <div class="invoice-logo">
+                        <img src="@Url.Content("~/Images/logoNhaHang.png")" alt="SAKURA KAZOKU Logo" />
+                    </div>
+                    <div>
+                        <div class="invoice-restaurant-name">SAKURA KAZOKU</div>
+                        <div class="invoice-restaurant-sub">161 Nguyễn Thiện Thuật, phường Nha Trang, Khánh Hòa</div>
+                        <div class="invoice-restaurant-sub">SĐT: +012 345 67890</div>
+                    </div>
+                </div>
+            </div>
+            <h1>HÓA ĐƠN THANH TOÁN</h1>
+            <p style="text-align:center;">SỐ HĐ: @{
+                var previewHoaDonId = ViewBag.PreviewHoaDonId as long? ?? 0;
+                @("HD" + previewHoaDonId.ToString("D4"))
+            }</p>
+        </div>
+
+        <div class="invoice-info">
+            <div class="info-section">
+                <p><span class="info-label">Bàn:</span> @(table?.TenBan ?? "N/A") - @(table?.ViTri ?? "N/A")</p>
+                <p><span class="info-label">Giờ vào:</span> @{
+                    var ngayDat = ViewBag.NgayDat as DateTime?;
+                    if (ngayDat.HasValue)
+                    {
+                        @ngayDat.Value.ToString("HH:mm")
+                    }
+                    else
+                    {
+                        @DateTime.Now.ToString("HH:mm")
+                    }
+                }</p>
+                <p><span class="info-label">Ngày:</span> @DateTime.Now.ToString("dd/MM/yyyy")</p>
+            </div>
+            <div class="info-section">
+                <p><span class="info-label">TN:</span> @(nhanVien?.HoTen ?? "N/A")</p>
+                <p><span class="info-label">Giờ ra:</span> @DateTime.Now.ToString("HH:mm")</p>
+                <p><span class="info-label">Phương thức:</span> @(paymentMethod == "cash" ? "Tiền mặt" : "Chuyển khoản")</p>
+            </div>
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>TT</th>
+                    <th>Tên món</th>
+                    <th class="text-center">SL</th>
+                    <th class="text-right">Đơn giá</th>
+                    <th class="text-right">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (confirmedCart != null && confirmedCart.Any())
+                {
+                    int stt = 1;
+                    foreach (var item in confirmedCart)
+                    {
+                        if (item != null)
+                        {
+                            <tr>
+                                <td>@stt</td>
+                                <td>@(item.TenMon ?? "N/A")</td>
+                                <td class="text-center">@item.SoLuong</td>
+                                <td class="text-right">@string.Format("{0:N0}", item.Gia) ₫</td>
+                                <td class="text-right">@string.Format("{0:N0}", item.Gia * item.SoLuong) ₫</td>
+                            </tr>
+                            stt++;
+                        }
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">Không có món nào</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            <div class="total-row">
+                <span>Thành tiền:</span>
+                <span>@string.Format("{0:N0}", total) ₫</span>
+            </div>
+            <div class="total-row">
+                <span>Tổng tiền:</span>
+                <span>@string.Format("{0:N0}", total) ₫</span>
+            </div>
+            @if (paymentMethod == "cash" && cashAmount.HasValue && cashAmount.Value > 0)
+            {
+                <div class="total-row">
+                    <span>Tiền khách đưa:</span>
+                    <span>@string.Format("{0:N0}", cashAmount.Value) ₫</span>
+                </div>
+                if (change > 0)
+                {
+                    <div class="total-row">
+                        <span>Tiền thừa:</span>
+                        <span>@string.Format("{0:N0}", change) ₫</span>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="payment-info">
+            <p><strong>Khách hàng:</strong> @customerName@(string.IsNullOrWhiteSpace(customerPhone) ? "" : " (" + customerPhone + ")")</p>
+            <p><strong>Nhân viên:</strong> @(nhanVien?.HoTen ?? "N/A")</p>
+            <p><strong>Phương thức thanh toán:</strong> @(paymentMethod == "cash" ? "Tiền mặt" : "Chuyển khoản")</p>
+        </div>
+
+        <div class="footer">
+            <p><strong>SAKURA KAZOKU</strong></p>
+            <p>161 Nguyễn Thiện Thuật, phường Nha Trang, Khánh Hòa</p>
+            <p>SĐT: +012 345 67890</p>
+        </div>
+    </div>
+
+    <!-- Action Buttons - Đặt dưới hóa đơn -->
+    <div class="action-buttons">
+        <button type="button" class="btn-confirm" id="confirmPaymentBtn">Xác nhận thanh toán</button>
+        <button type="button" class="btn-print" onclick="window.print()">In</button>
+        <button type="button" class="btn-cancel" onclick="window.history.back()">Quay lại</button>
+    </div>
+
+    <!-- Modal xác nhận thanh toán -->
+    <div id="confirmPaymentModal">
+        <div style="background: white; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); max-width: 500px; width: 100%; margin: 0 auto;">
+            <div style="padding: 24px;">
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-right: 16px;">
+                        <svg style="width: 24px; height: 24px; color: #0d9488;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <h3 style="font-size: 18px; font-weight: bold; color: #111827; margin: 0 0 8px 0;">Xác nhận thanh toán</h3>
+                        <p style="margin: 8px 0; font-size: 14px; color: #4b5563;">Bạn có chắc chắn muốn xác nhận thanh toán cho hóa đơn này không?</p>
+                        <p style="margin: 8px 0; font-size: 14px; font-weight: 600; color: #111827;">Tổng tiền: @string.Format("{0:N0}", total) ₫</p>
+                    </div>
+                </div>
+            </div>
+            <div style="background: #f9fafb; padding: 16px 24px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" id="cancelPaymentBtn" style="padding: 8px 16px; color: #374151; background: white; border: 1px solid #d1d5db; border-radius: 8px; font-weight: 500; cursor: pointer;">
+                    Hủy
+                </button>
+                <button type="button" id="confirmPaymentModalBtn" style="padding: 8px 16px; background: #14b8a6; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
+                    Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @Html.AntiForgeryToken()
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    
+    <!-- Alert Container -->
+    <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+    
+    <script>
+        // Show alert function (giống Admin)
+        function showAlert(type, message) {
+            var container = document.getElementById('alertContainer');
+            if (!container) {
+                // Fallback to browser alert
+                alert(message);
+                return;
+            }
+
+            var alertId = 'alert-' + Date.now();
+
+            var config = {
+                success: {
+                    bg: 'bg-green-100 border border-green-200 text-green-900',
+                    iconBg: 'bg-green-500 text-white',
+                    title: 'Thành công!',
+                    icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                },
+                error: {
+                    bg: 'bg-red-100 border border-red-200 text-red-900',
+                    iconBg: 'bg-red-500 text-white',
+                    title: 'Lỗi!',
+                    icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14"></path><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+                },
+                warning: {
+                    bg: 'bg-amber-100 border border-amber-200 text-amber-900',
+                    iconBg: 'bg-amber-500 text-white',
+                    title: 'Cảnh báo!',
+                    icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01M10.29 4.21l-6.6 11.45A1 1 0 004.53 18h14.94a1 1 0 00.86-1.5l-6.6-11.45a1 1 0 00-1.74 0z"/></svg>'
+                },
+                info: {
+                    bg: 'bg-sky-100 border border-sky-200 text-sky-900',
+                    iconBg: 'bg-sky-500 text-white',
+                    title: 'Thông tin',
+                    icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01" /><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+                }
+            };
+
+            var cfg = config[type] || config.info;
+
+            var html = `
+            <div id="${alertId}" class="${cfg.bg} px-3 py-2 rounded-lg shadow-md flex items-center gap-2 max-w-md transition-all duration-300 translate-x-full bg-opacity-95 border border-white/60">
+                <div class="w-7 h-7 rounded-full ${cfg.iconBg} flex items-center justify-center flex-shrink-0">
+                    ${cfg.icon}
+                </div>
+                <div class="flex-1">
+                    <div class="font-semibold text-sm mb-0.5">${cfg.title}</div>
+                    <div class="text-sm leading-snug">${message}</div>
+                </div>
+                <button type="button" class="ml-2 text-current/70 hover:text-current" aria-label="Đóng thông báo"
+                        onclick="(function(){ var el = document.getElementById('${alertId}'); if(el){ el.classList.add('translate-x-full'); setTimeout(function(){ el.remove(); }, 250); } })()">
+                    &#10005;
+                </button>
+            </div>`;
+
+            container.insertAdjacentHTML('beforeend', html);
+
+            setTimeout(function () {
+                var el = document.getElementById(alertId);
+                if (el) el.classList.remove('translate-x-full');
+            }, 10);
+
+            setTimeout(function () {
+                var el = document.getElementById(alertId);
+                if (el) {
+                    el.classList.add('translate-x-full');
+                    setTimeout(function () { el.remove(); }, 250);
+                }
+            }, 4000);
+        }
+
+        // Modal functions
+        function openConfirmPaymentModal() {
+            var modal = document.getElementById('confirmPaymentModal');
+            if (modal) {
+                modal.classList.add('show');
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                console.log('Modal opened');
+            } else {
+                console.error('Modal not found');
+            }
+        }
+
+        function closeConfirmPaymentModal() {
+            var modal = document.getElementById('confirmPaymentModal');
+            if (modal) {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                console.log('Modal closed');
+            }
+        }
+
+        // Đảm bảo jQuery đã load
+        if (typeof jQuery === 'undefined') {
+            document.write('<script src="https://code.jquery.com/jquery-3.7.0.min.js"><\/script>');
+        }
+
+        // Sử dụng cả vanilla JS và jQuery để đảm bảo hoạt động
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mở modal khi bấm nút xác nhận thanh toán (vanilla JS)
+            var confirmBtn = document.getElementById('confirmPaymentBtn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Confirm payment button clicked');
+                    openConfirmPaymentModal();
+                });
+            }
+
+            // Đóng modal khi bấm hủy
+            var cancelBtn = document.getElementById('cancelPaymentBtn');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeConfirmPaymentModal();
+                });
+            }
+        });
+
+        jQuery(document).ready(function($) {
+            console.log('Payment Preview page loaded');
+            
+            // Mở modal khi bấm nút xác nhận thanh toán (jQuery backup)
+            $('#confirmPaymentBtn').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Confirm payment button clicked (jQuery)');
+                openConfirmPaymentModal();
+            });
+
+            // Đóng modal khi bấm hủy (jQuery backup)
+            $('#cancelPaymentBtn').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeConfirmPaymentModal();
+            });
+
+            // Xác nhận thanh toán từ modal
+            $('#confirmPaymentModalBtn').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var $btn = $(this);
+                $btn.prop('disabled', true).text('Đang xử lý...');
+
+                var data = {
+                    banId: @(banId),
+                    paymentMethod: '@Html.Raw(HttpUtility.JavaScriptStringEncode(paymentMethod))',
+                    cashAmount: @(cashAmount.HasValue ? cashAmount.Value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "null"),
+                    customerType: '@Html.Raw(HttpUtility.JavaScriptStringEncode(customerType))',
+                    userId: @(userId.HasValue ? userId.Value.ToString() : "null"),
+                    customerName: '@Html.Raw(HttpUtility.JavaScriptStringEncode(customerNameInput ?? ""))',
+                    customerPhone: '@Html.Raw(HttpUtility.JavaScriptStringEncode(customerPhoneInput ?? ""))'
+                };
+
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '@Url.Action("ConfirmPayment", "Payment", new { area = "Employee_65133141" })',
+                    type: 'POST',
+                    data: $.extend(data, { __RequestVerificationToken: token }),
+                    dataType: 'json',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    success: function(response) {
+                        closeConfirmPaymentModal();
+                        if (response && response.success) {
+                            // Redirect to Order/Index - alert sẽ hiển thị từ TempData
+                            window.location.href = '@Url.Action("Index", "Order", new { area = "Employee_65133141" })';
+                        } else {
+                            showAlert('error', response && response.message ? response.message : 'Có lỗi xảy ra');
+                            $btn.prop('disabled', false).text('Xác nhận');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        closeConfirmPaymentModal();
+                        console.error('Payment error:', { xhr: xhr, status: status, error: error });
+                        
+                        var errorMessage = 'Có lỗi xảy ra khi xử lý thanh toán';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            // Nếu response là HTML (có thể do redirect hoặc lỗi server)
+                            if (xhr.responseText.indexOf('<!DOCTYPE') !== -1) {
+                                errorMessage = 'Lỗi: Server trả về HTML thay vì JSON. Có thể do session hết hạn hoặc lỗi xác thực.';
+                            } else {
+                                try {
+                                    var errorData = JSON.parse(xhr.responseText);
+                                    if (errorData.message) {
+                                        errorMessage = errorData.message;
+                                    }
+                                } catch (e) {
+                                    // Ignore parse error
+                                }
+                            }
+                        }
+                        
+                        showAlert('error', errorMessage);
+                        $btn.prop('disabled', false).text('Xác nhận');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

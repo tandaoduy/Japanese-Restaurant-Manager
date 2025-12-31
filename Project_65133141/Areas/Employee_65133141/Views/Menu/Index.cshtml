@@ -1,0 +1,688 @@
+@using System
+@using System.Linq
+@using System.Collections.Generic
+@using System.Web.Mvc
+@using Project_65133141.Models
+
+@{
+    ViewBag.Title = "Xem Menu - Nhân Viên";
+    Layout = "~/Areas/Employee_65133141/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    /* Search Box Styles */
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto 3rem auto;
+        position: relative;
+    }
+
+    .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .search-box:focus-within {
+        border-color: #14b8a6;
+        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.15);
+    }
+
+    .search-icon {
+        width: 20px;
+        height: 20px;
+        color: #9ca3af;
+        margin-right: 0.75rem;
+    }
+
+    .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        font-size: 16px;
+        color: #1f2937;
+    }
+
+    .search-input::placeholder {
+        color: #9ca3af;
+    }
+
+    .autocomplete-dropdown {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 50;
+        display: none;
+    }
+
+    .autocomplete-dropdown.active {
+        display: block;
+    }
+
+    .autocomplete-item {
+        padding: 0.75rem 1.25rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-item:hover {
+        background: #f0fdfa;
+    }
+
+    .autocomplete-item mark {
+        background: #5eead4;
+        font-weight: 600;
+        padding: 0 2px;
+        border-radius: 2px;
+    }
+
+    /* Category Filter Styles */
+    .category-scroll-container {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1rem 0.5rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+        .category-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+    .category-pill {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 80px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none !important;
+        cursor: pointer;
+    }
+
+    .category-pill-icon {
+        width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        background: #f8fafc;
+        border-radius: 24px;
+        transition: all 0.3s ease;
+    }
+
+    .category-pill span {
+        font-size: 12px;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .category-pill-active .category-pill-icon {
+        background: #14b8a6;
+        color: white;
+        box-shadow: 0 10px 25px -5px rgba(20, 184, 166, 0.4);
+        transform: translateY(-5px);
+    }
+
+    .category-pill-active span {
+        color: #14b8a6;
+    }
+
+    .category-pill:not(.category-pill-active):hover .category-pill-icon {
+        background: #f1f5f9;
+        transform: translateY(-3px);
+    }
+
+    /* Pagination Styles */
+    .pagination-container {
+        margin-top: 3rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .pagination-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .pagination-btn {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #e5e7eb;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        color: #6b7280;
+    }
+
+    .pagination-btn:hover:not(.active):not(:disabled) {
+        border-color: #14b8a6;
+        color: #14b8a6;
+        transform: translateY(-2px);
+    }
+
+    .pagination-btn.active {
+        background: #14b8a6;
+        border-color: #14b8a6;
+        color: white;
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .pagination-info {
+        color: #6b7280;
+        font-size: 14px;
+    }
+</style>
+
+<section id="menu" class="py-24 bg-gradient-to-b from-gray-50 to-white">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-12">
+            <h2 class="text-5xl md:text-6xl font-display font-bold text-gray-900 mb-5">Thực đơn nhà hàng</h2>
+            <div class="w-24 h-1.5 bg-gradient-to-r from-red-500 to-red-700 mx-auto mb-6 rounded-full"></div>
+            <p class="text-gray-600 text-lg md:text-xl font-light">Khám phá các món ăn đặc trưng của chúng tôi</p>
+        </div>
+
+        @* Error Message *@
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                @ViewBag.ErrorMessage
+            </div>
+        }
+
+        @* Search Box *@
+        <div class="search-container">
+            <div class="search-box">
+                <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Tìm kiếm món ăn..." autocomplete="off">
+            </div>
+            <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+        </div>
+
+        @* Category Filter *@
+        @{
+            var allCategories = new List<DanhMuc>();
+            var groupedList = ViewBag.GroupedMenu as List<Tuple<DanhMuc, List<MonAn>>>;
+            
+            if (groupedList != null && groupedList.Count > 0)
+            {
+                allCategories = groupedList.Where(g => g != null && g.Item1 != null)
+                                          .Select(g => g.Item1)
+                                          .Distinct()
+                                          .ToList();
+            }
+        }
+        
+        @if (allCategories != null && allCategories.Count > 0)
+        {
+            <div class="category-scroll-container mb-12">
+                @* 1. ALL *@
+                <div class="category-pill category-pill-active" data-category="all" onclick="filterByCategory('all')">
+                    <div class="category-pill-icon">📚</div>
+                    <span>Tất cả</span>
+                </div>
+
+                @* Render actual categories with Emojis to match Home Index *@
+                @foreach (var cat in allCategories)
+                {
+                    var upperName = (cat.TenDanhMuc ?? "").ToUpperInvariant();
+                    string icon = "🍽️";
+
+                    // Set icon based on category name (Matches Home/Index.cshtml)
+                    if (upperName.Contains("SASHIMI")) { icon = "🥢"; }
+                    else if (upperName.Contains("SUSHI") || upperName.Contains("SHUSHI")) { icon = "🍣"; }
+                    else if (upperName.Contains("CƠM") || upperName.Contains("MÌ")) { icon = "🍜"; }
+                    else if (upperName.Contains("TEISHOKU")) { icon = "🍱"; }
+                    else if (upperName.Contains("UỐNG") || upperName.Contains("NƯỚC")) { icon = "🥤"; }
+                    else if (upperName.Contains("TRÁNG MIỆNG")) { icon = "🍰"; }
+
+                    <div class="category-pill" data-category="@cat.DanhMucID" onclick="filterByCategory(@cat.DanhMucID)">
+                        <div class="category-pill-icon">@icon</div>
+                        <span>@cat.TenDanhMuc</span>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (groupedList != null && groupedList.Count > 0)
+        {
+            <div class="grid md:grid-cols-3 gap-8" id="products-grid">
+                @foreach (var group in groupedList)
+                {
+                    var cat = group.Item1;
+                    var items = group.Item2;
+
+                    if (cat != null && items != null && items.Any())
+                    {
+                        foreach (var product in items)
+                        {
+                            var categoryName = cat.TenDanhMuc ?? "Khác";
+                            var gradientClass = "from-gray-400 to-gray-600";
+
+                            // Set gradient based on category
+                            if (categoryName.Contains("SUSHI") || categoryName.Contains("SHUSHI"))
+                            {
+                                gradientClass = "from-pink-400 via-pink-500 to-pink-600";
+                            }
+                            else if (categoryName.Contains("CƠM") || categoryName.Contains("MÌ"))
+                            {
+                                gradientClass = "from-orange-400 via-orange-500 to-orange-600";
+                            }
+                            else if (categoryName.Contains("UỐNG"))
+                            {
+                                gradientClass = "from-teal-400 via-teal-500 to-cyan-600";
+                            }
+                            else if (categoryName.Contains("TRÁNG MIỆNG"))
+                            {
+                                gradientClass = "from-purple-400 via-purple-500 to-purple-600";
+                            }
+                            else
+                            {
+                                gradientClass = "from-blue-400 via-blue-500 to-blue-600";
+                            }
+
+                            <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group product-card" data-category="@cat.DanhMucID">
+                                <div class="h-56 bg-gradient-to-br @gradientClass flex items-center justify-center relative overflow-hidden">
+                                    <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                                    @if (!string.IsNullOrWhiteSpace(product.HinhAnh))
+                                    {
+                                        var imagePath = product.HinhAnh;
+                                        if (!imagePath.StartsWith("~/") && !imagePath.StartsWith("/") && !imagePath.StartsWith("http"))
+                                        {
+                                            imagePath = "~/Images/Products/" + imagePath;
+                                        }
+                                        <img src="@Url.Content(imagePath)" alt="@product.TenMon" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300" onerror="this.onerror=null; this.src='@Url.Content("~/Images/logoNhaHang.png")';" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-7xl transform group-hover:scale-110 transition-transform duration-300 relative z-10">🍽️</span>
+                                    }
+                                    
+                                    @* Discount Badge *@
+                                    @if (product.GiaGiam.HasValue && product.GiaGiam.Value > 0 && product.GiaGiam.Value < product.GiaGoc)
+                                    {
+                                        var discountPercent = (int)Math.Round(100 - (product.GiaGiam.Value / product.GiaGoc) * 100);
+                                        <div class="absolute top-3 right-3 z-10">
+                                            <span class="bg-red-600 text-white text-xs font-black px-3 py-1 rounded-xl uppercase shadow-lg">
+                                                -@discountPercent%
+                                            </span>
+                                        </div>
+                                    }
+                                    
+                                    @* Status Badge *@
+                                    @{
+                                        var isAvailable = product.TrangThai == "Hoạt động" || product.TrangThai == "Đang phục vụ";
+                                    }
+                                    @if (!isAvailable)
+                                    {
+                                        <div class="absolute top-3 left-3 z-10">
+                                            <span class="bg-gray-800 text-white text-xs font-black px-3 py-1 rounded-xl uppercase shadow-lg">
+                                                Hết món
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="p-6">
+                                    <h3 class="text-2xl font-bold mb-3 text-gray-900">@product.TenMon</h3>
+                                    <p class="text-gray-600 mb-5 leading-relaxed line-clamp-2">@(product.MoTa ?? "Món ăn đặc sắc")</p>
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-baseline gap-3">
+                                            @if (product.GiaGiam.HasValue && product.GiaGiam.Value > 0 && product.GiaGiam.Value < product.GiaGoc)
+                                            {
+                                                <span class="text-2xl font-bold text-red-600">@String.Format("{0:N0}đ", product.Gia)</span>
+                                                <span class="text-lg text-gray-400 line-through ml-2">@String.Format("{0:N0}đ", product.GiaGoc)</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-2xl font-bold text-red-600">@String.Format("{0:N0}đ", product.Gia)</span>
+                                            }
+                                            <span class="text-sm text-gray-500">/@product.DonViTinh</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-12">
+                <p class="text-gray-500 text-xl">Hiện chưa có món ăn nào được hiển thị</p>
+            </div>
+        }
+
+        @* Pagination *@
+        <div class="pagination-container" id="paginationContainer">
+            <div class="pagination-buttons">
+                <button class="pagination-btn" id="firstPageBtn" onclick="goToPage(1)" title="Trang đầu">«</button>
+                <button class="pagination-btn" id="prevPageBtn" onclick="changePage(-1)" title="Trang trước">‹</button>
+                <div id="pageNumbers" style="display: flex; gap: 0.5rem;"></div>
+                <button class="pagination-btn" id="nextPageBtn" onclick="changePage(1)" title="Trang sau">›</button>
+                <button class="pagination-btn" id="lastPageBtn" onclick="goToPage('last')" title="Trang cuối">»</button>
+            </div>
+            <div class="pagination-info" id="paginationInfo">Trang 1 / 1</div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Global variables
+    let allProducts = [];
+    let filteredProducts = [];
+    let currentCategory = 'all';
+    let currentSearchTerm = '';
+    const itemsPerPage = 9;
+    let currentPage = 1;
+    let totalPages = 1;
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Collect all products
+        collectAllProducts();
+        
+        // Initialize search autocomplete
+        initSearchAutocomplete();
+        
+        // Show all products initially (don't hide anything on first load)
+        showAllProducts();
+        
+        // Initialize pagination
+        updatePagination();
+        
+        // Close autocomplete when clicking outside
+        document.addEventListener('click', function(e) {
+            const searchContainer = document.querySelector('.search-container');
+            if (!searchContainer || !searchContainer.contains(e.target)) {
+                closeAutocomplete();
+            }
+        });
+    });
+    
+    // Show all products initially
+    function showAllProducts() {
+        allProducts.forEach(p => {
+            p.element.style.display = '';
+            p.element.style.opacity = '1';
+            p.element.style.transform = 'scale(1)';
+        });
+    }
+
+    // Collect all product cards into an array
+    function collectAllProducts() {
+        const productCards = document.querySelectorAll('.product-card');
+        allProducts = Array.from(productCards).map(card => {
+            const h3 = card.querySelector('h3');
+            return {
+                element: card,
+                name: h3 ? h3.textContent.trim() : '',
+                category: card.getAttribute('data-category') || ''
+            };
+        });
+        filteredProducts = [...allProducts];
+    }
+
+    // Search Autocomplete
+    function initSearchAutocomplete() {
+        const searchInput = document.getElementById('searchInput');
+        const dropdown = document.getElementById('autocompleteDropdown');
+        let debounceTimer;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+
+            if (query.length === 0) {
+                closeAutocomplete();
+                currentSearchTerm = '';
+                applyFilters();
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                currentSearchTerm = query;
+                showAutocompleteSuggestions(query);
+                applyFilters();
+            }, 300);
+        });
+
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                showAutocompleteSuggestions(this.value.trim());
+            }
+        });
+    }
+
+    function showAutocompleteSuggestions(query) {
+        const dropdown = document.getElementById('autocompleteDropdown');
+        const lowerQuery = query.toLowerCase();
+        
+        // Get unique matching product names
+        const matches = allProducts
+            .filter(p => p.name.toLowerCase().includes(lowerQuery))
+            .map(p => p.name)
+            .filter((name, index, self) => self.indexOf(name) === index)
+            .slice(0, 5);
+
+        if (matches.length === 0) {
+            dropdown.innerHTML = '<div class="autocomplete-item" style="color: #9ca3af;">Không tìm thấy kết quả</div>';
+            dropdown.classList.add('active');
+            return;
+        }
+
+        dropdown.innerHTML = matches.map(name => {
+            const highlighted = highlightMatch(name, query);
+            return `<div class="autocomplete-item" onclick="selectSuggestion('${escapeHtml(name)}')">${highlighted}</div>`;
+        }).join('');
+
+        dropdown.classList.add('active');
+    }
+
+    function highlightMatch(text, query) {
+        const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    function escapeRegex(text) {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function selectSuggestion(name) {
+        document.getElementById('searchInput').value = name;
+        currentSearchTerm = name;
+        closeAutocomplete();
+        applyFilters();
+    }
+
+    function closeAutocomplete() {
+        document.getElementById('autocompleteDropdown').classList.remove('active');
+    }
+
+    // Category filter functionality
+    function filterByCategory(categoryId) {
+        currentCategory = categoryId;
+        currentPage = 1; // Reset to first page
+        
+        const categoryPills = document.querySelectorAll('.category-pill');
+        categoryPills.forEach(pill => {
+            if (pill.getAttribute('data-category') == categoryId) {
+                pill.classList.add('category-pill-active');
+            } else {
+                pill.classList.remove('category-pill-active');
+            }
+        });
+
+        applyFilters();
+    }
+
+    // Apply both category and search filters
+    function applyFilters() {
+        // If no filters, show all
+        if (currentCategory === 'all' && currentSearchTerm === '') {
+            filteredProducts = [...allProducts];
+            currentPage = 1;
+            totalPages = 1;
+            showAllProducts();
+            updatePagination();
+            return;
+        }
+        
+        filteredProducts = allProducts.filter(product => {
+            // Category filter
+            const categoryMatch = currentCategory === 'all' || product.category == currentCategory;
+            
+            // Search filter
+            const searchMatch = currentSearchTerm === '' || 
+                                product.name.toLowerCase().includes(currentSearchTerm.toLowerCase());
+            
+            return categoryMatch && searchMatch;
+        });
+
+        // Update pagination
+        totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        
+        showCurrentPage();
+        updatePagination();
+    }
+
+    // Pagination functions
+    function showCurrentPage() {
+        // If no filters applied, show all products
+        if (currentCategory === 'all' && currentSearchTerm === '') {
+            showAllProducts();
+            return;
+        }
+        
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        // Hide all products first
+        allProducts.forEach(p => {
+            p.element.style.display = 'none';
+            p.element.style.opacity = '0';
+        });
+
+        // Show only products on current page
+        filteredProducts.slice(start, end).forEach(p => {
+            p.element.style.display = '';
+            p.element.style.opacity = '0';
+            p.element.style.transform = 'scale(0.95)';
+            
+            // Animate in
+            setTimeout(() => {
+                p.element.style.opacity = '1';
+                p.element.style.transform = 'scale(1)';
+            }, 50);
+        });
+    }
+
+    function updatePagination() {
+        const pageNumbersContainer = document.getElementById('pageNumbers');
+        const paginationInfo = document.getElementById('paginationInfo');
+        const firstBtn = document.getElementById('firstPageBtn');
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+        const lastBtn = document.getElementById('lastPageBtn');
+
+        // Update info text
+        paginationInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
+
+        // Update button states
+        firstBtn.disabled = currentPage === 1;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+        lastBtn.disabled = currentPage === totalPages;
+
+        // Generate page numbers (show max 5 pages)
+        pageNumbersContainer.innerHTML = '';
+        const maxPages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+        let endPage = Math.min(totalPages, startPage + maxPages - 1);
+        
+        if (endPage - startPage < maxPages - 1) {
+            startPage = Math.max(1, endPage - maxPages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+            pageBtn.textContent = i;
+            pageBtn.onclick = () => goToPage(i);
+            pageNumbersContainer.appendChild(pageBtn);
+        }
+    }
+
+    function changePage(delta) {
+        const newPage = currentPage + delta;
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            showCurrentPage();
+            updatePagination();
+            
+            // Scroll to top of products grid
+            document.getElementById('products-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function goToPage(page) {
+        if (page === 'last') {
+            page = totalPages;
+        }
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            showCurrentPage();
+            updatePagination();
+            
+            // Scroll to top of products grid
+            document.getElementById('products-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+</script>

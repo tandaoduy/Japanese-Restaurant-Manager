@@ -1,0 +1,236 @@
+<!-- Delete DatBan (reservation) Modal - similar style to Delete Product Modal -->
+<div id="deleteDatBanModal" class="fixed inset-0 hidden items-center justify-center z-[9999] transition-opacity duration-300 ease-out opacity-0"
+     style="display: none; pointer-events: none; font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 ease-out scale-95 opacity-0"
+         id="deleteDatBanModalContent"
+         style="font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; will-change: transform, opacity;">
+
+        <div class="flex items-center justify-between p-6 border-b border-gray-100">
+            <div class="flex items-center space-x-4">
+                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center flex-shrink-0 animate-pulse">
+                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 leading-tight">Xóa đặt bàn</h3>
+                    <p class="text-sm text-red-600 mt-0.5 font-medium">Hành động này không thể hoàn tác</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeDeleteDatBanModal()"
+                    class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 active:bg-gray-200 rounded-full p-2 transition-all duration-200 ease-in-out flex-shrink-0 transform hover:scale-110 active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <div class="bg-red-50 border-l-4 border-red-600 rounded-lg p-4 mb-4">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="ml-3">
+                        <p class="text-sm font-bold text-red-800">Bạn sắp xóa đặt bàn của khách:</p>
+                        <p id="deleteDatBanName" class="text-base font-black text-red-900 mt-1"></p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-gray-700 text-base leading-relaxed font-normal">
+                Phiếu đặt bàn này sẽ bị xóa vĩnh viễn khỏi hệ thống và không thể khôi phục.
+            </p>
+
+            <div class="mt-4 bg-gray-50 rounded-lg p-4 border-2 border-gray-200 hover:border-red-400 transition-colors">
+                <label for="deleteDatBanCheckbox" class="flex items-start select-none group">
+                    <input type="checkbox" id="deleteDatBanCheckbox"
+                           class="mt-0.5 w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500 focus:ring-2 cursor-pointer"
+                           checked>
+                    <span class="ml-3 text-sm text-gray-700 font-medium group-hover:text-gray-900">
+                        Xác nhận rằng hành động này không thể hoàn tác
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 p-6 border-t border-gray-100 bg-gray-50 rounded-b-3xl">
+            <button type="button" onclick="closeDeleteDatBanModal()"
+                    class="px-6 py-2.5 bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-700 rounded-xl font-semibold text-sm transition-all duration-200 ease-in-out border border-gray-300 shadow-sm hover:shadow-md active:shadow-sm transform hover:scale-105 active:scale-95">
+                Hủy bỏ
+            </button>
+            <button type="button" id="confirmDeleteDatBanButton"
+                    onclick="confirmDeleteDatBan()"
+                    class="px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ease-in-out text-white shadow-md hover:shadow-lg active:shadow-md transform hover:scale-105 active:scale-95 bg-red-600 hover:bg-red-700 active:bg-red-800 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
+                <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    <span id="deleteDatBanButtonText">Xóa đặt bàn</span>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    if (typeof window.deleteDatBanModalInitialized === 'undefined') {
+        window.deleteDatBanModalInitialized = true;
+        window.currentDeleteDatBanId = null;
+        window.currentDeleteDatBanName = null;
+
+        window.openDeleteDatBanModal = function (id, name) {
+            var modal = document.getElementById('deleteDatBanModal');
+            var modalContent = document.getElementById('deleteDatBanModalContent');
+            var nameEl = document.getElementById('deleteDatBanName');
+            var checkbox = document.getElementById('deleteDatBanCheckbox');
+            var confirmBtn = document.getElementById('confirmDeleteDatBanButton');
+
+            if (!modal || !modalContent || !nameEl || !checkbox || !confirmBtn) {
+                console.error('Không tìm thấy phần tử modal xóa đặt bàn');
+                return;
+            }
+
+            console.log('openDeleteDatBanModal', id, name);
+            window.currentDeleteDatBanId = id;
+            window.currentDeleteDatBanName = name || ('đặt bàn #' + id);
+
+            nameEl.textContent = window.currentDeleteDatBanName;
+            checkbox.checked = false;
+            confirmBtn.disabled = true;
+
+            modal.style.pointerEvents = 'auto';
+            modal.style.display = 'flex';
+            requestAnimationFrame(function () {
+                modal.classList.remove('hidden');
+                requestAnimationFrame(function () {
+                    modal.style.opacity = '1';
+                    requestAnimationFrame(function () {
+                        modalContent.classList.remove('scale-95', 'opacity-0');
+                        modalContent.classList.add('scale-100', 'opacity-100');
+                    });
+                });
+            });
+        };
+
+        window.closeDeleteDatBanModal = function () {
+            var modal = document.getElementById('deleteDatBanModal');
+            var modalContent = document.getElementById('deleteDatBanModalContent');
+
+            if (!modal || !modalContent) return;
+
+            modal.style.pointerEvents = 'none';
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            modal.style.opacity = '0';
+
+            setTimeout(function () {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+                modal.style.opacity = '0';
+                modal.style.pointerEvents = 'none';
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-95', 'opacity-0');
+                window.currentDeleteDatBanId = null;
+                window.currentDeleteDatBanName = null;
+            }, 300);
+        };
+
+        window.confirmDeleteDatBan = function () {
+            var confirmBtn = document.getElementById('confirmDeleteDatBanButton');
+            var buttonText = document.getElementById('deleteDatBanButtonText');
+
+            console.log('confirmDeleteDatBan called for id', window.currentDeleteDatBanId);
+
+            if (!window.currentDeleteDatBanId) {
+                if (typeof showAlert === 'function') {
+                    showAlert('error', 'Không tìm thấy thông tin đặt bàn cần xóa.');
+                }
+                closeDeleteDatBanModal();
+                return;
+            }
+
+            if (confirmBtn && buttonText) {
+                confirmBtn.disabled = true;
+                buttonText.textContent = 'Đang xóa...';
+                confirmBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+
+            var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            var token = tokenInput ? tokenInput.value : '';
+            var deleteUrl = '@Url.Action("Delete", "DatBan", new { area = "Admin_65133141" })/' + window.currentDeleteDatBanId;
+
+            console.log('Sending delete request to', deleteUrl);
+
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: '__RequestVerificationToken=' + encodeURIComponent(token),
+                credentials: 'same-origin'
+            })
+                .then(function (res) {
+                    var contentType = res.headers.get('content-type') || '';
+                    if (!res.ok) {
+                        return res.text().then(function (t) {
+                            throw new Error('Server error ' + res.status);
+                        });
+                    }
+                    if (contentType.indexOf('application/json') !== -1) {
+                        return res.json();
+                    }
+                    return res.text().then(function () {
+                        throw new Error('Phản hồi không đúng định dạng JSON.');
+                    });
+                })
+                .then(function (data) {
+                    console.log('Delete DatBan response', data);
+                    if (data && data.success) {
+                        if (typeof showAlert === 'function') {
+                            showAlert('success', data.message || 'Xóa đặt bàn thành công!');
+                        }
+                        setTimeout(function () { window.location.reload(); }, 800);
+                    } else {
+                        if (typeof showAlert === 'function') {
+                            showAlert('error', (data && data.message) || 'Không thể xóa đặt bàn.');
+                        }
+                        if (confirmBtn && buttonText) {
+                            confirmBtn.disabled = false;
+                            buttonText.textContent = 'Xóa đặt bàn';
+                            confirmBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                        }
+                    }
+                })
+                .catch(function (err) {
+                    console.error('Delete DatBan error:', err);
+                    if (typeof showAlert === 'function') {
+                        showAlert('error', 'Lỗi kết nối server. Vui lòng thử lại.');
+                    }
+                    if (confirmBtn && buttonText) {
+                        confirmBtn.disabled = false;
+                        buttonText.textContent = 'Xóa đặt bàn';
+                        confirmBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    }
+                });
+        };
+
+        // Checkbox hiện chỉ mang tính thông tin, không chặn nút xóa
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeDeleteDatBanModal();
+            }
+        });
+
+        var modalElement = document.getElementById('deleteDatBanModal');
+        if (modalElement) {
+            modalElement.addEventListener('click', function (e) {
+                if (e.target === this) {
+                    closeDeleteDatBanModal();
+                }
+            });
+        }
+    }
+</script>

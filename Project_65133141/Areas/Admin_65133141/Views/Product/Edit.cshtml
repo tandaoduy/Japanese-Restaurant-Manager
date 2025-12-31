@@ -6,11 +6,11 @@
     var categories = ViewBag.Categories as List<Project_65133141.Models.DanhMuc>;
 }
 
-<div class="container mx-auto px-4 py-6">
-    <!-- Header -->
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Sửa thông tin món ăn</h1>
-        <p class="text-gray-600 mt-1">Cập nhật thông tin món ăn trong thực đơn</p>
+<div class="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
+    <!-- Header - Responsive -->
+    <div class="mb-4 sm:mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Sửa thông tin món ăn</h1>
+        <p class="text-gray-600 text-sm sm:text-base mt-1">Cập nhật thông tin món ăn trong thực đơn</p>
     </div>
 
     <!-- Alert Messages -->
@@ -32,17 +32,17 @@
         @Html.Partial("~/Views/Components/_Alert.cshtml", TempData["ErrorMessage"].ToString())
     }
 
-    <!-- Form Card -->
+    <!-- Form Card - Responsive -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden max-w-4xl mx-auto">
-        @using (Html.BeginForm("Edit", "Product", new { area = "Admin_65133141" }, FormMethod.Post, new { @class = "p-6", enctype = "multipart/form-data" }))
+        @using (Html.BeginForm("Edit", "Product", new { area = "Admin_65133141" }, FormMethod.Post, new { @class = "p-4 sm:p-6", enctype = "multipart/form-data" }))
         {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.MonAnID)
             @Html.HiddenFor(m => m.HinhAnh)
             @Html.HiddenFor(m => m.NgayTao)
-            @Html.ValidationSummary(true, "", new { @class = "text-red-600 mb-4" })
+            @Html.ValidationSummary(true, "", new { @class = "text-red-600 mb-4 text-sm" })
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <!-- Tên món -->
                 <div>
                     <div class="flex items-center mb-1">
@@ -152,15 +152,15 @@
                 </div>
             </div>
 
-            <!-- Buttons -->
-            <div class="mt-6 flex items-center justify-end space-x-4">
+            <!-- Buttons - Responsive: Stack on mobile, row on tablet+ -->
+            <div class="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:space-x-4">
                 <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141" })" 
-                   class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                   class="px-4 sm:px-6 py-2.5 sm:py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-center sm:text-left w-full sm:w-auto">
                     Hủy
                 </a>
                 <button type="submit" 
-                        class="px-6 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-lg transition-colors shadow-md hover:shadow-lg">
-                    <span class="flex items-center">
+                        class="px-4 sm:px-6 py-2.5 sm:py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-lg transition-colors shadow-md hover:shadow-lg w-full sm:w-auto">
+                    <span class="flex items-center justify-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>

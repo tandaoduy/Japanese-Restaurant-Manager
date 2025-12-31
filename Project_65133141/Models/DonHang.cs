@@ -29,6 +29,7 @@ namespace Project_65133141.Models
         public decimal TongTien { get; set; }
         public string TrangThai { get; set; }
         public string GhiChu { get; set; }
+        public string SoDienThoai { get; set; }
     
         public virtual BanAn BanAn { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

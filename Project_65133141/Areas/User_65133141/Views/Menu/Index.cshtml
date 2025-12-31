@@ -1,0 +1,189 @@
+@model IEnumerable<Project_65133141.Models.MonAn>
+
+@{
+    ViewBag.Title = "Thực đơn";
+    Layout = "~/Areas/User_65133141/Views/Shared/_Layout.cshtml";
+    var categories = ViewBag.Categories as List<Project_65133141.Models.DanhMuc> ?? new List<Project_65133141.Models.DanhMuc>();
+    var categoryDict = ViewBag.CategoryDict as Dictionary<long, string> ?? new Dictionary<long, string>();
+    var selectedCategoryId = ViewBag.SelectedCategoryId as long?;
+    var searchString = ViewBag.SearchString as string ?? "";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8 text-center">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Thực đơn nhà hàng</h1>
+        <p class="text-gray-600">Khám phá các món ăn đặc trưng của chúng tôi</p>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="category-scroll-container mb-12">
+        <a href="@Url.Action("Index", "Menu", new { area = "User_65133141" })" class="category-pill @(!selectedCategoryId.HasValue ? "category-pill-active" : "")">
+            <div class="category-pill-icon">
+                <img src="@Url.Content("~/Images/intro_0.png")" alt="All" style="width: 40px; height: 40px; object-fit: contain;" />
+            </div>
+            <span>Tất cả</span>
+        </a>
+        @foreach (var category in categories)
+        {
+            var upperName = (category.TenDanhMuc ?? "").ToUpperInvariant();
+            string iconImg = "icon_monkhac.png"; // Default
+
+            if (upperName.Contains("SUSHI") || upperName.Contains("SHUSHI")) { iconImg = "icon_shushi.png"; }
+            else if (upperName.Contains("CƠM") || upperName.Contains("MÌ")) { iconImg = "icon_MiCom.png"; }
+            else if (upperName.Contains("UỐNG") || upperName.Contains("NƯỚC")) { iconImg = "icon_douong.png"; }
+            
+            <a href="@Url.Action("Index", "Menu", new { area = "User_65133141", categoryId = category.DanhMucID })" 
+               class="category-pill @(selectedCategoryId == category.DanhMucID ? "category-pill-active" : "")">
+                <div class="category-pill-icon">
+                     <img src="@Url.Content("~/Images/" + iconImg)" alt="@category.TenDanhMuc" style="width: 40px; height: 40px; object-fit: contain;" />
+                </div>
+                <span>@category.TenDanhMuc</span>
+            </a>
+        }
+    </div>
+
+    <style>
+        .category-scroll-container {
+            display: flex;
+            gap: 1.5rem;
+            padding: 1rem 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .category-scroll-container::-webkit-scrollbar { display: none; }
+
+        .category-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 80px;
+            text-decoration: none !important;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-pill-icon {
+            width: 68px;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 20px; /* Squircleish */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-pill span {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .category-pill-active .category-pill-icon {
+            background: #F59E0B; /* Amber-500 equivalent */
+            box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .category-pill-active span {
+            color: #F59E0B;
+        }
+
+        .category-pill:hover:not(.category-pill-active) .category-pill-icon {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+        
+        .product-card-redesign {
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .product-card-redesign:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-4px);
+        }
+    </style>
+
+    <!-- Menu Items Grid -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            @foreach (var item in Model)
+            {
+                <div class="product-card-redesign">
+                    <div class="relative h-56 overflow-hidden bg-gray-100">
+                        @if (!string.IsNullOrEmpty(item.HinhAnh))
+                        {
+                            <img src="@Url.Content("~/Images/" + item.HinhAnh)" 
+                                 alt="@item.TenMon" 
+                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                        }
+                        else
+                        {
+                            <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                <span class="text-4xl">🍽️</span>
+                            </div>
+                        }
+                        
+                         @if (item.GiaGiam.HasValue && item.GiaGiam.Value < item.GiaGoc)
+                        {
+                            var discount = Math.Round((1 - (item.GiaGiam.Value / item.GiaGoc)) * 100);
+                            <div class="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+                                -@discount%
+                            </div>
+                        }
+                    </div>
+                    
+                    <div class="p-4">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1 truncate">@item.TenMon</h3>
+                        <p class="text-xs text-gray-500 mb-4">Món ăn đặc sắc</p> <!-- Static text as per design request, or dynamic description -->
+                        
+                        <div class="flex items-baseline gap-2">
+                             @if (item.GiaGiam.HasValue && item.GiaGiam.Value < item.GiaGoc)
+                            {
+                                <span class="text-xl font-bold text-red-600">@string.Format("{0:#,##0}đ", item.GiaGiam)</span>
+                                <span class="text-sm text-gray-400 line-through">@string.Format("{0:#,##0}đ", item.GiaGoc)</span>
+                            }
+                            else
+                            {
+                                <span class="text-xl font-bold text-red-600">@string.Format("{0:#,##0}đ", item.Gia)</span>
+                            }
+                        </div>
+                    </div>
+                    
+                    <!-- Optional: Add to Cart button could go here, floating or bottom right -->
+                     <div class="absolute bottom-4 right-4 bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 cursor-pointer transition-colors" onclick="location.href='@Url.Action("Details", "Product", new { area = "User_65133141", id = item.MonAnID })'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-12">
+            <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-gray-600 text-lg">Không tìm thấy món ăn nào</p>
+            @if (!string.IsNullOrEmpty(searchString))
+            {
+                <p class="text-gray-500 mt-2">Thử tìm kiếm với từ khóa khác</p>
+            }
+        </div>
+    }
+</div>
+
+

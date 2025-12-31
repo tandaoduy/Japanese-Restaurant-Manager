@@ -45,5 +45,9 @@ namespace Project_65133141.Models.Form
         [Required(ErrorMessage = "Vui lòng chọn vai trò")]
         [Display(Name = "Vai trò")]
         public long RoleId { get; set; }
+
+        [Required(ErrorMessage = "Mã CAPTCHA là bắt buộc")]
+        [Display(Name = "Mã CAPTCHA")]
+        public string CaptchaCode { get; set; }
     }
 }

@@ -1,0 +1,950 @@
+@model IEnumerable<Project_65133141.Models.BanAn>
+
+@{
+    ViewBag.Title = "Trạng thái bàn";
+    Layout = "~/Areas/Employee_65133141/Views/Shared/_Layout.cshtml";
+    var groupedTables = ViewBag.GroupedTables as IEnumerable<IGrouping<string, Project_65133141.Models.BanAn>>;
+    var statusFilter = ViewBag.StatusFilter as string ?? "all";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid px-4 py-6">
+    <div id="alertContainer" class="fixed top-16 right-4 z-[10000] space-y-2 max-w-md"></div>
+    @Html.AntiForgeryToken()
+    
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Sơ đồ bàn nhà hàng</h1>
+            <p class="text-gray-600">Quản lý trạng thái và sắp xếp bàn ăn</p>
+        </div>
+        <div>
+            <button onclick="openCreateModel()" 
+               class="px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-lg shadow-lg hover:from-teal-700 hover:to-teal-800 transition-all font-medium flex items-center gap-2 transform hover:-translate-y-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Thêm bàn mới
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded shadow-sm flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- Status Summary -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-green-100 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="filterStatus('Trống')">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Bàn Trống</p>
+                <p class="text-2xl font-bold text-green-600">@ViewBag.TrongCount</p>
+            </div>
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-yellow-100 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="filterStatus('Đã đặt')">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Đã Đặt</p>
+                <p class="text-2xl font-bold text-yellow-600">@ViewBag.DaDatCount</p>
+            </div>
+            <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-red-100 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="filterStatus('Đang phục vụ')">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Đang Phục Vụ</p>
+                <p class="text-2xl font-bold text-red-600">@ViewBag.DangPhucVuCount</p>
+            </div>
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-blue-100 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="filterStatus('all')">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Tổng Số Bàn</p>
+                <p class="text-2xl font-bold text-blue-600">@ViewBag.TotalCount</p>
+            </div>
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Search Form for Filters -->
+    <form id="filterForm" method="get" action="@Url.Action("Index")" class="hidden">
+        <input type="hidden" name="statusFilter" id="statusFilterInput" value="@statusFilter" />
+    </form>
+
+    <!-- Tables Map -->
+    @if (groupedTables != null && groupedTables.Any())
+    {
+        foreach (var group in groupedTables)
+        {
+            <div class="mb-10 animate-fade-in-up">
+                <div class="flex items-center mb-4">
+                    <div class="w-1 h-8 bg-red-600 rounded-full mr-3"></div>
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        @group.Key
+                        <span class="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">@group.Count() bàn</span>
+                    </h2>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    @foreach (var table in group)
+                    {
+                        var statusConfig = new { Class = "bg-gray-50 border-gray-200", Text = "text-gray-600", Icon = "❔", Dot = "bg-gray-400" };
+                        
+                        // Define status styles
+                        if (table.TrangThai == "Trống") {
+                            statusConfig = new { Class = "bg-white border-green-200 hover:border-green-400", Text = "text-green-600", Icon = "trống", Dot = "bg-green-500" };
+                        } else if (table.TrangThai == "Đã đặt") {
+                            statusConfig = new { Class = "bg-yellow-50 border-yellow-200 hover:border-yellow-400", Text = "text-yellow-600", Icon = "đã đặt", Dot = "bg-yellow-500" };
+                        } else if (table.TrangThai == "Đang phục vụ") {
+                            statusConfig = new { Class = "bg-red-50 border-red-200 hover:border-red-400", Text = "text-red-600", Icon = "phục vụ", Dot = "bg-red-500" };
+                        }
+
+                        <div class="relative group rounded-xl border-2 @statusConfig.Class shadow-sm hover:shadow-lg transition-all duration-300 p-5 flex flex-col justify-between min-h-[180px] cursor-pointer" onclick="openTableDetails(@table.BanID)">
+                            <!-- Header -->
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-xl text-gray-800">@table.TenBan</h3>
+                                <div class="cursor-pointer p-1 rounded-full hover:bg-gray-100 relative group/status" onclick="event.stopPropagation();">
+                                    <span class="w-3 h-3 rounded-full @statusConfig.Dot block"></span>
+                                    <!-- Tooltip handled by native title or custom if needed -->
+                                </div>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="text-sm text-gray-500 mb-4 flex items-center">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                @(table.SucChua ?? 0) ghế
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="mt-auto space-y-2" onclick="event.stopPropagation();">
+                                <!-- Status Badge -->
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 rounded-full @statusConfig.Dot mr-2"></span>
+                                    <span class="text-sm font-semibold @statusConfig.Text">@table.TrangThai</span>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                @if (table.TrangThai == "Đang phục vụ" || table.TrangThai == "Đang sử dụng")
+                                {
+                                    <a href="@Url.Action("SelectTable", "Order", new { area = "Employee_65133141", banId = table.BanID })" 
+                                       class="block w-full text-center text-xs bg-red-600 text-white py-1.5 rounded hover:bg-red-700 transition-colors font-semibold shadow-sm">
+                                        🍽️ Gọi món
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-dashed border-gray-300">
+            <div class="mb-4">
+                <svg class="mx-auto h-20 w-20 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-900">Chưa có dữ liệu bàn</h3>
+            <p class="text-gray-500 mt-2 mb-6 max-w-sm mx-auto">Hệ thống chưa có bàn nào. Hãy tạo bàn mới để bắt đầu quản lý nhà hàng.</p>
+            <button onclick="openCreateModel()" class="px-6 py-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 shadow-lg font-medium transition-all transform hover:scale-105">
+                + Thêm bàn đầu tiên
+            </button>
+        </div>
+    }
+</div>
+
+<!-- Modal thêm bàn mới - style giống modal thêm món ăn -->
+<div id="createTableModal" class="auth-modal-overlay" style="display: none;">
+    <div class="auth-modal-container auth-modal-large" style="max-width: 500px;">
+        <button type="button" class="auth-close-btn" onclick="closeCreateTableModal()">&times;</button>
+
+        <div class="auth-modal-header">
+            <div class="auth-logo">
+                <svg class="w-full h-full p-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+            </div>
+            <h2 class="auth-modal-title">Thêm bàn mới</h2>
+            <p class="auth-modal-subtitle">Thêm bàn hoặc phòng mới vào hệ thống</p>
+        </div>
+
+        <div class="auth-modal-body">
+            @using (Html.BeginForm("Create", "BanAn", new { area = "Employee_65133141" }, FormMethod.Post, new { id = "createTableForm" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="auth-form-group">
+                    <label class="auth-form-label">
+                        Tên bàn <span class="auth-required">*</span>
+                    </label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" name="TenBan" class="auth-form-control" placeholder="Ví dụ: Bàn 1, Phòng VIP 1" required />
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-form-label">
+                        Vị trí
+                    </label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" name="ViTri" class="auth-form-control" placeholder="Ví dụ: Tầng trệt, Tầng 1, Phòng VIP, Phòng đôi" />
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-form-label">
+                        Sức chứa
+                    </label>
+                    <div class="auth-input-wrapper">
+                        <input type="number" name="SucChua" min="1" class="auth-form-control" placeholder="Số lượng người" />
+                    </div>
+                </div>
+
+                <div class="auth-btn-group">
+                    <button type="button" class="auth-btn auth-btn-cancel" onclick="closeCreateTableModal()">Hủy</button>
+                    <button type="submit" class="auth-btn auth-btn-submit">Thêm bàn</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- BanAn Details Modal -->
+<div id="banAnDetailsModal" class="auth-modal-overlay" style="display: none;">
+    <div class="auth-modal-container auth-modal-large" style="max-width: 800px; padding: 0;">
+        <button type="button" class="auth-close-btn" onclick="closeBanAnDetailsModal()" style="top: 15px; right: 15px; background: white; border-radius: 50%; width: 32px; height: 32px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">&times;</button>
+        
+        <div class="flex flex-col md:flex-row h-full">
+            <!-- Left: Info Card -->
+            <div class="w-full md:w-1/2 bg-gradient-to-br from-blue-50 to-sky-50 flex items-center justify-center p-6" style="min-height: 400px;">
+                <div class="w-full max-w-sm">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="text-center mb-4">
+                            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900" id="detailBanAnId">#000000</h3>
+                            <p class="text-sm text-gray-500 mt-1">Mã bàn</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Trạng thái</span>
+                                <span id="detailBanAnStatus" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase">-</span>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Sức chứa</span>
+                                <span class="text-sm font-semibold text-gray-800" id="detailBanAnSucChua">-</span>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Vị trí</span>
+                                <span class="text-sm font-semibold text-gray-800" id="detailBanAnViTri">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Details -->
+            <div class="w-full md:w-1/2 p-8 flex flex-col justify-between">
+                <div>
+                   <!-- Header -> Title & Badges -->
+                   <div class="flex items-start justify-between mb-4">
+                       <div>
+                           <h2 class="text-2xl font-bold text-gray-900 mb-2 leading-tight" id="detailBanAnTenBan">-</h2>
+                           <div class="flex gap-2">
+                               <span id="detailBanAnStatusBadge" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold uppercase tracking-wide">-</span>
+                           </div>
+                       </div>
+                   </div>
+
+                   <!-- Details Grid -->
+                   <div class="grid grid-cols-1 gap-y-6 mb-8">
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Vị trí</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailBanAnViTriFull">-</span>
+                       </div>
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Sức chứa</span>
+                           <span class="block text-sm font-semibold text-gray-800" id="detailBanAnSucChuaFull">-</span>
+                       </div>
+                       <div>
+                           <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Trạng thái</span>
+                           <select id="detailBanAnTrangThaiSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                               <option value="Trống">Trống</option>
+                               <option value="Đã đặt">Đã đặt</option>
+                               <option value="Đang phục vụ">Đang phục vụ</option>
+                           </select>
+                       </div>
+                   </div>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="flex items-center gap-3 mt-auto">
+                    <button type="button" onclick="openConfirmDeleteTableModal()" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg active:shadow-md transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Xóa bàn
+                    </button>
+                    <button type="button" id="btn-save-status" class="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg active:shadow-md transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Lưu trạng thái
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xác nhận xóa bàn -->
+<div id="confirmDeleteTableModal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-[9999] p-4" style="display: none;">
+    <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full mx-auto transform transition-all">
+        <div class="p-4 sm:p-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-3 sm:ml-4 flex-1 min-w-0">
+                    <h3 id="confirmDeleteTableTitle" class="text-base sm:text-lg font-bold text-gray-900">Xóa bàn</h3>
+                    <p id="confirmDeleteTableMessage" class="mt-2 text-sm text-gray-600 break-words">Bạn có chắc chắn muốn xóa bàn này không? Hành động này không thể hoàn tác.</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 rounded-b-xl sm:rounded-b-2xl flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+            <button type="button" id="cancelDeleteTableBtn" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-700 rounded-lg font-semibold text-sm border border-gray-300 shadow-sm hover:shadow-md active:shadow-sm transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto">Hủy</button>
+            <button type="button" id="confirmDeleteTableBtn" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg active:shadow-md transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto">Xóa</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle Modal
+    function openCreateModel() {
+        var modal = document.getElementById('createTableModal');
+        if (!modal) return;
+
+        var form = document.getElementById('createTableForm');
+        if (form) {
+            form.reset();
+        }
+
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCreateTableModal() {
+        var modal = document.getElementById('createTableModal');
+        if (!modal) return;
+
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal on specific key press
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            closeCreateTableModal();
+        }
+    });
+
+    // Filter Helper
+    function filterStatus(status) {
+        document.getElementById('statusFilterInput').value = status;
+        document.getElementById('filterForm').submit();
+    }
+
+    // Alert notification function (giống Admin)
+    function showAlert(type, message) {
+        var container = document.getElementById('alertContainer');
+        if (!container) return;
+
+        var alertId = 'alert-' + Date.now();
+
+        var config = {
+            success: {
+                bg: 'bg-green-100 border border-green-200 text-green-900',
+                iconBg: 'bg-green-500 text-white',
+                title: 'Thành công!',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+            },
+            error: {
+                bg: 'bg-red-100 border border-red-200 text-red-900',
+                iconBg: 'bg-red-500 text-white',
+                title: 'Lỗi!',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14"></path><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+            },
+            warning: {
+                bg: 'bg-amber-100 border border-amber-200 text-amber-900',
+                iconBg: 'bg-amber-500 text-white',
+                title: 'Cảnh báo!',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01M10.29 4.21l-6.6 11.45A1 1 0 004.53 18h14.94a1 1 0 00.86-1.5l-6.6-11.45a1 1 0 00-1.74 0z"/></svg>'
+            },
+            info: {
+                bg: 'bg-sky-100 border border-sky-200 text-sky-900',
+                iconBg: 'bg-sky-500 text-white',
+                title: 'Thông tin',
+                icon: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01" /><circle cx="12" cy="12" r="9" stroke-width="2" fill="none"></circle></svg>'
+            }
+        };
+
+        var cfg = config[type] || config.info;
+
+        var html = `
+        <div id="${alertId}" class="${cfg.bg} px-3 py-2 rounded-lg shadow-md flex items-center gap-2 max-w-md transition-all duration-300 translate-x-full bg-opacity-95 border border-white/60">
+            <div class="w-7 h-7 rounded-full ${cfg.iconBg} flex items-center justify-center flex-shrink-0">
+                ${cfg.icon}
+            </div>
+            <div class="flex-1">
+                <div class="font-semibold text-sm mb-0.5">${cfg.title}</div>
+                <div class="text-sm leading-snug">${message}</div>
+            </div>
+            <button type="button" class="ml-2 text-current/70 hover:text-current" aria-label="Đóng thông báo"
+                    onclick="(function(){ var el = document.getElementById('${alertId}'); if(el){ el.classList.add('translate-x-full'); setTimeout(function(){ el.remove(); }, 250); } })()">
+                &#10005;
+            </button>
+        </div>`;
+
+        container.insertAdjacentHTML('beforeend', html);
+
+        setTimeout(function () {
+            var el = document.getElementById(alertId);
+            if (el) el.classList.remove('translate-x-full');
+        }, 10);
+
+        setTimeout(function () {
+            var el = document.getElementById(alertId);
+            if (el) {
+                el.classList.add('translate-x-full');
+                setTimeout(function () { el.remove(); }, 250);
+            }
+        }, 4000);
+    }
+
+    var currentTableId = null;
+
+    function openTableDetails(id) {
+        currentTableId = id;
+        const modal = document.getElementById('banAnDetailsModal');
+        
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Reset and Load
+        document.getElementById('detailBanAnTenBan').textContent = 'Đang tải...';
+
+        fetch('@Url.Action("GetTable", "BanAn", new { area = "Employee_65133141" })' + '?id=' + encodeURIComponent(id), {
+            method: 'GET',
+            headers: { 
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+            .then(function (res) {
+                // Kiểm tra content-type trước khi parse JSON
+                var contentType = res.headers.get('content-type') || '';
+                if (!res.ok) {
+                    return res.text().then(function(text) {
+                        throw new Error('Server error: ' + res.status + ' - ' + text.substring(0, 100));
+                    });
+                }
+                if (contentType.indexOf('application/json') === -1) {
+                    return res.text().then(function(text) {
+                        throw new Error('Invalid response format. Expected JSON but got: ' + contentType);
+                    });
+                }
+                return res.json();
+            })
+            .then(function (data) {
+                if (!data || !data.success) {
+                    if (typeof showAlert === 'function') {
+                        showAlert('error', (data && data.message) || 'Không thể tải thông tin bàn.');
+                    }
+                    closeBanAnDetailsModal();
+                    return;
+                }
+
+                populateBanAnDetails(data.data || {});
+            })
+            .catch(function (err) {
+                console.error('Get table error', err);
+                if (typeof showAlert === 'function') {
+                    var errorMsg = 'Lỗi kết nối server. Vui lòng thử lại.';
+                    if (err.message && err.message.indexOf('Invalid response format') !== -1) {
+                        errorMsg = 'Lỗi: Server trả về định dạng không đúng. Có thể do session hết hạn.';
+                    }
+                    showAlert('error', errorMsg);
+                }
+                closeBanAnDetailsModal();
+            });
+    }
+
+    function populateBanAnDetails(table) {
+        // ID Formatting (#000000)
+        document.getElementById('detailBanAnId').textContent = '#' + (table.BanID || 0).toString().padStart(6, '0');
+        
+        document.getElementById('detailBanAnTenBan').textContent = table.TenBan || 'N/A';
+        document.getElementById('detailBanAnViTri').textContent = table.ViTri || 'N/A';
+        document.getElementById('detailBanAnViTriFull').textContent = table.ViTri || 'N/A';
+        document.getElementById('detailBanAnSucChua').textContent = (table.SucChua || 0) + ' người';
+        document.getElementById('detailBanAnSucChuaFull').textContent = (table.SucChua || 0) + ' người';
+        
+        // Status Logic
+        const statusEl = document.getElementById('detailBanAnStatus');
+        const statusBadge = document.getElementById('detailBanAnStatusBadge');
+        const statusSelect = document.getElementById('detailBanAnTrangThaiSelect');
+        let statusText = table.TrangThai || 'Trống';
+        
+        statusEl.textContent = statusText;
+        statusBadge.textContent = statusText;
+        if (statusSelect) {
+            statusSelect.value = statusText;
+        }
+        
+        // Status classes
+        let statusClasses = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ';
+        if (statusText === 'Trống') {
+            statusClasses += 'bg-green-100 text-green-700';
+        } else if (statusText === 'Đã đặt') {
+            statusClasses += 'bg-yellow-100 text-yellow-700';
+        } else if (statusText === 'Đang phục vụ') {
+            statusClasses += 'bg-red-100 text-red-700';
+        } else {
+            statusClasses += 'bg-gray-100 text-gray-700';
+        }
+        statusEl.className = statusClasses;
+        statusBadge.className = statusClasses;
+    }
+
+    function closeBanAnDetailsModal() {
+        const modal = document.getElementById('banAnDetailsModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+    
+    // Close on ESC
+    document.addEventListener('keydown', function(e) {
+        if(e.key === 'Escape') {
+            const modal = document.getElementById('banAnDetailsModal');
+            if(modal && modal.style.display === 'flex') {
+                closeBanAnDetailsModal();
+            }
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('banAnDetailsModal');
+        if(modal && e.target === modal) {
+            closeBanAnDetailsModal();
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var saveBtn = document.getElementById('btn-save-status');
+        if (!saveBtn) return;
+
+        saveBtn.addEventListener('click', function () {
+            if (!currentTableId) {
+                if (typeof showAlert === 'function') {
+                    showAlert('error', 'Không xác định được bàn cần cập nhật.');
+                }
+                return;
+            }
+
+            var statusSelect = document.getElementById('detailBanAnTrangThaiSelect');
+            var newStatus = statusSelect ? statusSelect.value : '';
+
+            var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            var token = tokenInput ? tokenInput.value : '';
+
+            fetch('@Url.Action("UpdateStatus", "BanAn", new { area = "Employee_65133141" })', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: '__RequestVerificationToken=' + encodeURIComponent(token)
+                    + '&id=' + encodeURIComponent(currentTableId)
+                    + '&trangThai=' + encodeURIComponent(newStatus)
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (!data || !data.success) {
+                        if (typeof showAlert === 'function') {
+                            showAlert('error', (data && data.message) || 'Không thể cập nhật trạng thái bàn.');
+                        }
+                        return;
+                    }
+
+                    if (typeof showAlert === 'function') {
+                        showAlert('success', data.message || 'Cập nhật trạng thái bàn thành công.');
+                    }
+                    closeBanAnDetailsModal();
+
+                    // Refresh page to cập nhật số liệu và màu thẻ
+                    setTimeout(function () { window.location.reload(); }, 600);
+                })
+                .catch(function (err) {
+                    console.error('Update status error', err);
+                    if (typeof showAlert === 'function') {
+                        showAlert('error', 'Lỗi kết nối server. Vui lòng thử lại.');
+                    }
+                });
+        });
+    });
+
+    (function () {
+        var success = '@(TempData["SuccessMessage"] as string ?? "")';
+        if (success && success.length > 0) {
+            setTimeout(function () {
+                showAlert('success', success);
+            }, 200);
+        }
+    })();
+
+    // Delete Table Functions
+    var currentTableIdForDelete = null;
+
+    var cancelDeleteTableBtn = document.getElementById('cancelDeleteTableBtn');
+    var confirmDeleteTableBtn = document.getElementById('confirmDeleteTableBtn');
+
+    if (cancelDeleteTableBtn) {
+        cancelDeleteTableBtn.onclick = closeConfirmDeleteTableModal;
+    }
+
+    if (confirmDeleteTableBtn) {
+        confirmDeleteTableBtn.onclick = function () {
+            if (currentTableIdForDelete) {
+                performDeleteTable(currentTableIdForDelete);
+            } else {
+                showAlert('error', 'Không xác định được bàn cần xóa.');
+                closeConfirmDeleteTableModal();
+            }
+        };
+    }
+
+    function openConfirmDeleteTableModal() {
+        if (!currentTableId) {
+            showAlert('error', 'Không xác định được bàn cần xóa.');
+            return;
+        }
+
+        currentTableIdForDelete = currentTableId;
+        var modal = document.getElementById('confirmDeleteTableModal');
+        var titleEl = document.getElementById('confirmDeleteTableTitle');
+        var msgEl = document.getElementById('confirmDeleteTableMessage');
+
+        if (!modal || !titleEl || !msgEl) return;
+
+        var displayName = document.getElementById('detailBanAnTenBan') ? 
+            document.getElementById('detailBanAnTenBan').textContent : 'bàn này';
+
+        if (titleEl) titleEl.textContent = 'Xóa bàn';
+        if (msgEl) {
+            msgEl.textContent = 'Bạn có chắc chắn muốn xóa "' + displayName + '" không? Hành động này không thể hoàn tác.';
+        }
+
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeConfirmDeleteTableModal() {
+        var modal = document.getElementById('confirmDeleteTableModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        currentTableIdForDelete = null;
+    }
+
+    function performDeleteTable(id) {
+        var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+        var token = tokenInput ? tokenInput.value : '';
+
+        fetch('@Url.Action("Delete", "BanAn", new { area = "Employee_65133141" })', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: '__RequestVerificationToken=' + encodeURIComponent(token) + '&id=' + encodeURIComponent(id),
+            credentials: 'same-origin'
+        })
+            .then(function (res) {
+                var contentType = res.headers.get('content-type') || '';
+                if (!res.ok) {
+                    return res.text().then(function () { throw new Error('Server error ' + res.status); });
+                }
+                if (contentType.indexOf('application/json') !== -1) {
+                    return res.json();
+                }
+                return res.text().then(function () { throw new Error('Invalid response format'); });
+            })
+            .then(function (data) {
+                if (data && data.success) {
+                    showAlert('success', data.message || 'Xóa bàn thành công!');
+                    setTimeout(function () { window.location.reload(); }, 800);
+                } else {
+                    showAlert('error', (data && data.message) || 'Không thể xóa bàn.');
+                }
+            })
+            .catch(function (err) {
+                console.error('Delete table error', err);
+                showAlert('error', 'Lỗi kết nối server. Vui lòng thử lại.');
+            })
+            .finally(function () {
+                closeConfirmDeleteTableModal();
+                closeBanAnDetailsModal();
+            });
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            closeConfirmDeleteTableModal();
+        }
+    });
+</script>
+
+<style>
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Auth Modal Styles */
+    .auth-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+    }
+
+    .auth-modal-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+        animation: authSlideIn 0.5s ease-out;
+        max-height: 90vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(128, 128, 128, 0.3) transparent;
+    }
+
+    .auth-modal-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .auth-modal-container::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 10px;
+    }
+
+    .auth-modal-container::-webkit-scrollbar-thumb {
+        background: rgba(128, 128, 128, 0.3);
+        border-radius: 10px;
+        transition: background 0.3s ease;
+    }
+
+    .auth-modal-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(128, 128, 128, 0.5);
+    }
+
+    .auth-modal-large {
+        max-width: 700px;
+    }
+
+    @@keyframes authSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .auth-close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: white;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border: none;
+        font-size: 24px;
+        line-height: 1;
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        transition: all 0.2s;
+    }
+
+    .auth-close-btn:hover {
+        background: #f0f0f0;
+        color: #333;
+        transform: scale(1.1);
+    }
+
+    .auth-modal-header {
+        text-align: center;
+        padding: 30px 30px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .auth-logo {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 15px;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ef4444;
+    }
+
+    .auth-modal-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .auth-modal-subtitle {
+        font-size: 14px;
+        color: #888;
+    }
+
+    .auth-modal-body {
+        padding: 30px;
+        position: relative;
+    }
+
+    .auth-form-group {
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    .auth-form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 8px;
+    }
+
+    .auth-required {
+        color: #dc2626;
+        margin-left: 3px;
+    }
+
+    .auth-input-wrapper {
+        position: relative;
+    }
+
+    .auth-form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+        background: #f9fafb;
+        box-sizing: border-box;
+    }
+
+    .auth-form-control:focus {
+        background: white;
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        outline: none;
+    }
+
+    .auth-btn-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .auth-btn {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        border: none;
+    }
+
+    .auth-btn-cancel {
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+
+    .auth-btn-cancel:hover {
+        background: #e5e7eb;
+    }
+
+    .auth-btn-submit {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+    }
+
+    .auth-btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(220, 38, 38, 0.4);
+    }
+</style>
+

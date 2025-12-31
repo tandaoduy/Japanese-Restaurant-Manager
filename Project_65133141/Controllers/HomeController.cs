@@ -15,6 +15,32 @@ namespace Project_65133141.Controllers
 
         public ActionResult Index()
         {
+            // Clear all cart sessions when accessing home page
+            try
+            {
+                if (Session != null)
+                {
+                    var keysToRemove = new List<string>();
+                    foreach (string key in Session.Keys)
+                    {
+                        if (key != null && (key.StartsWith("Cart_Pending_") || key.StartsWith("Cart_Confirmed_")))
+                        {
+                            keysToRemove.Add(key);
+                        }
+                    }
+                    
+                    foreach (var key in keysToRemove)
+                    {
+                        Session.Remove(key);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but continue
+                System.Diagnostics.Debug.WriteLine("Error clearing cart sessions: " + ex.Message);
+            }
+            
             // Nếu còn đăng nhập, xử lý tuỳ theo vai trò
             if (User.Identity.IsAuthenticated)
             {
@@ -31,14 +57,15 @@ namespace Project_65133141.Controllers
                         return RedirectToAction("Index", "Home", new { area = "User_65133141" });
                     }
 
-                    // Nếu là admin hoặc nhân viên -> đăng xuất, xoá session để không hiển thị dropdown như đã đăng nhập
-                    if (roleLower == "admin" || roleLower.Contains("admin") || roleLower == "administrator" ||
-                        roleLower == "nhân viên" || roleLower == "nhan vien" || roleLower == "employee" ||
+                    // Nếu là admin hoặc nhân viên -> redirect về area tương ứng của họ
+                    if (roleLower == "admin" || roleLower.Contains("admin") || roleLower == "administrator")
+                    {
+                        return RedirectToAction("Index", "Home", new { area = "Admin_65133141" });
+                    }
+                    else if (roleLower == "nhân viên" || roleLower == "nhan vien" || roleLower == "employee" ||
                         roleLower.Contains("nhân viên") || roleLower.Contains("nhan vien"))
                     {
-                        FormsAuthentication.SignOut();
-                        Session.Clear();
-                        Session.Abandon();
+                        return RedirectToAction("Index", "Home", new { area = "Employee_65133141" });
                     }
                 }
             }
