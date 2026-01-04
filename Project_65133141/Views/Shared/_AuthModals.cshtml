@@ -229,7 +229,7 @@
                             <svg class="auth-input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                             </svg>
-                            <input type="tel" name="PhoneNumber" id="registerPhoneNumber" class="auth-form-control" placeholder="0123456789" autocomplete="tel" pattern="[0-9]*" inputmode="numeric" />
+                            <input type="tel" name="PhoneNumber" id="registerPhoneNumber" class="auth-form-control" placeholder="0123456789" autocomplete="tel" pattern="[0-9]*" inputmode="numeric" maxlength="10" minlength="10" />
                         </div>
                         <span class="auth-error-message" data-valmsg-for="PhoneNumber" data-valmsg-replace="true"></span>
                     </div>
@@ -912,6 +912,7 @@
         // Setup phone number validation
         setTimeout(function() {
             setupPhoneNumberValidation();
+            setupStrictInputMasking();
             if (typeof initPasswordStrengthCheckerModal === 'function') {
                 initPasswordStrengthCheckerModal();
             }
@@ -1035,14 +1036,37 @@
             special: document.getElementById('req-special-modal')
         };
 
-        // Remove existing listener if any
-        const newPasswordInput = passwordInput.cloneNode(true);
-        passwordInput.parentNode.replaceChild(newPasswordInput, passwordInput);
+        // Use a flag to prevent multiple event listeners on the same element
+        if (passwordInput.dataset.hasStrengthListener === "true") {
+             // Listener already attached, just trigger it once to update UI
+             passwordInput.dispatchEvent(new Event('input'));
+             return;
+        }
 
-        newPasswordInput.addEventListener('input', function() {
+        // Attach new listener
+        passwordInput.addEventListener('input', checkPasswordStrength);
+        passwordInput.addEventListener('focus', checkPasswordStrength); // Show on focus
+        passwordInput.addEventListener('blur', function() {
+             if (this.value.length === 0 && strengthContainer) {
+                 strengthContainer.style.display = 'none';
+             }
+        });
+        passwordInput.dataset.hasStrengthListener = "true";
+
+        // Initial check
+        checkPasswordStrength.call(passwordInput);
+
+        function checkPasswordStrength() {
             const password = this.value;
             
-            if (password.length > 0 && strengthContainer) {
+            // Clear error message when typing
+            const errorMsg = this.closest('.auth-form-group').querySelector('.auth-error-message');
+            if (errorMsg) {
+                errorMsg.style.display = 'none';
+            }
+
+            // Show if not empty OR if focused (to show requirements immediately)
+            if ((password.length > 0 || document.activeElement === this) && strengthContainer) {
                 strengthContainer.style.display = 'block';
             } else {
                 if (strengthContainer) strengthContainer.style.display = 'none';
@@ -1055,7 +1079,7 @@
                 upper: /[A-Z]/.test(password),
                 lower: /[a-z]/.test(password),
                 number: /[0-9]/.test(password),
-                special: /[\x40\x24!%*#?&]/.test(password)
+                special: /[!\x40#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
             };
 
             // Update requirement indicators
@@ -1092,7 +1116,7 @@
                     if (strengthFill) strengthFill.style.background = '#88ff00';
                 }
             }
-        });
+        }
     }
 
     // Disable client-side validation for modals
@@ -1149,6 +1173,12 @@
         registerForm.parentNode.replaceChild(newRegisterForm, registerForm);
         const newForgotForm = forgotForm.cloneNode(true);
         forgotForm.parentNode.replaceChild(newForgotForm, forgotForm);
+        
+        // Fix: Remove 'data-has-strength-listener' from cloned password input so it can be re-initialized
+        const clonedPasswordInput = newRegisterForm.querySelector('#registerPasswordModal');
+        if (clonedPasswordInput) {
+            delete clonedPasswordInput.dataset.hasStrengthListener;
+        }
         
         // Get fresh references
         const freshLoginForm = document.getElementById('loginFormModal');
@@ -1365,13 +1395,14 @@
                 let isValid = true;
                 const errors = {};
 
-                // 1. Name Validation (Letters only)
+                // 1. Name Validation (Letters only - Vietnamese supported)
                 const nameInput = freshRegisterForm.querySelector('input[name="FullName"]');
                 if (nameInput) {
-                    const nameRegex = /^[a-zA-Z\sÀ-ỹ]+$/;
+                    // Regex: Allow letters, spaces, Vietnamese characters. No numbers or special symbols.
+                    const nameRegex = /^[a-zA-Z\sÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ]+$/;
                     if (!nameRegex.test(nameInput.value.trim())) {
                         isValid = false;
-                        errors['FullName'] = 'Họ tên chỉ được phép chứa chữ cái.';
+                        errors['FullName'] = 'Họ tên chỉ được phép chứa chữ cái, không được chứa số hoặc ký tự đặc biệt.';
                     }
                 }
 
@@ -1388,21 +1419,30 @@
                 // 3. Email Validation
                 const emailInput = freshRegisterForm.querySelector('input[name="Email"]');
                 if (emailInput) {
-                    // Razor requires escaping at-sign as @@ in .cshtml files
+                    // Basic format check
                     const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                    // Check for invalid chars (like ! # $ % ^ & * ( ) due to strict requirement "only allow  _ - .")
+                    // Note: Technically email local part allows many special chars, but user requested strict "Email only allow specific special chars".
+                    // Allowed characters: letter, numbers, at-sign, underscore, dash, dot.
+                    const strictEmailCharRegex = /^[a-zA-Z0-9\x40._-]+$/;
+
                     if (!emailRegex.test(emailInput.value.trim())) {
                         isValid = false;
-                        errors['Email'] = 'Địa chỉ email không hợp lệ.';
+                        errors['Email'] = 'Địa chỉ email không đúng định dạng.';
+                    } else if (!strictEmailCharRegex.test(emailInput.value.trim())) {
+                        isValid = false;
+                        errors['Email'] = 'Email chứa ký tự không hợp lệ. Chỉ cho phép chữ, số và \x40 _ - .';
                     }
                 }
 
-                // 4. Address Validation (No special chars except , . / -)
+                // 4. Address Validation (Letters, Numbers, and , . / -)
                 const addressInput = freshRegisterForm.querySelector('input[name="Address"]');
                 if (addressInput && addressInput.value.trim() !== '') {
-                    const addressRegex = /^[a-zA-Z0-9\sÀ-ỹ,.\/\-]+$/;
+                    // Allowed: a-z A-Z 0-9 space Vietnamese , . / -
+                    const addressRegex = /^[a-zA-Z0-9\sÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ,.\/\-]+$/;
                     if (!addressRegex.test(addressInput.value.trim())) {
                         isValid = false;
-                        errors['Address'] = 'Địa chỉ không được chứa ký tự đặc biệt (trừ , . / -).';
+                        errors['Address'] = 'Địa chỉ chứa ký tự không hợp lệ. Chỉ cho phép chữ, số và , . / -';
                     }
                 }
 
@@ -1617,15 +1657,81 @@
         });
     }
 
+    // Strict Input Masking - Ngăn chặn nhập ký tự đặc biệt ngay khi gõ
+    function setupStrictInputMasking() {
+        const registerForm = document.getElementById('registerFormModal');
+        if (!registerForm) return;
+
+        // Helper to handle IME (Vietnamese Input) correctly
+        function attachMask(input, invalidRegex) {
+            let isComposing = false;
+
+            input.addEventListener('compositionstart', function() {
+                isComposing = true;
+            });
+
+            input.addEventListener('compositionend', function() {
+                isComposing = false;
+                // Run mask immediately after composition ends
+                const val = this.value;
+                const sanitized = val.replace(invalidRegex, '');
+                if (val !== sanitized) this.value = sanitized;
+            });
+
+            input.addEventListener('input', function() {
+                if (isComposing) return; // Skip masking while typing a composite character
+                
+                const val = this.value;
+                const sanitized = val.replace(invalidRegex, '');
+                if (val !== sanitized) this.value = sanitized;
+            });
+
+            input.addEventListener('paste', function() {
+                setTimeout(() => {
+                    const val = this.value;
+                    const sanitized = val.replace(invalidRegex, '');
+                    if (val !== sanitized) this.value = sanitized;
+                }, 0);
+            });
+        }
+
+        // 1. Name Masking (Letters + Space only)
+        const nameInput = registerForm.querySelector('input[name="FullName"]');
+        if (nameInput) {
+            // Regex matches anything that is NOT a letter (EN+VN) or space
+            attachMask(nameInput, /[^a-zA-Z\sÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ]/g);
+        }
+
+        // 2. Email Masking
+        const emailInput = registerForm.querySelector('input[name="Email"]');
+        if (emailInput) {
+             attachMask(emailInput, /[^a-zA-Z0-9\x40._-]/g);
+        }
+
+        // 3. Address Masking (Letters, Numbers, Space, comma, dot, slash, dash)
+        const addressInput = registerForm.querySelector('input[name="Address"]');
+        if (addressInput) {
+             // Allow letters (EN+VN), numbers, space, , . / -
+             attachMask(addressInput, /[^a-zA-Z0-9\sÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ,.\/\-]/g);
+        }
+    }
+
     // Initialize form handlers when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             initializeFormHandlers();
             setupPhoneNumberValidation();
+            setupStrictInputMasking();
         });
     } else {
         initializeFormHandlers();
         setupPhoneNumberValidation();
+        setupStrictInputMasking();
+        
+        // Ensure strength checker is initialized
+        if (typeof initPasswordStrengthCheckerModal === 'function') {
+            initPasswordStrengthCheckerModal();
+        }
     }
 
     // Check login before ordering
