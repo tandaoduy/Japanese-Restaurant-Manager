@@ -8,7 +8,7 @@ using Project_65133141.Filters;
 
 namespace Project_65133141.Areas.Employee_65133141.Controllers
 {
-    [RoleAuthorize("employee", "admin")]
+    [RoleAuthorize("employee")]
     public class DatBanController : Controller
     {
         private QuanLyNhaHangNhat_65133141Entities6 db = new QuanLyNhaHangNhat_65133141Entities6();
@@ -84,6 +84,74 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
             if (banAn != null)
             {
                 banAn.TrangThai = GetTableStatusFromDatBan(banID);
+            }
+        }
+
+        // POST: Employee_65133141/DatBan/Create (Offline Reservation)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(string customerName, string customerPhone, string customerEmail, DatBan datBan)
+        {
+            if (string.IsNullOrEmpty(customerName) || string.IsNullOrEmpty(customerPhone))
+            {
+                TempData["ErrorMessage"] = "Tên khách hàng và số điện thoại là bắt buộc.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                // DatBan model stores customer info directly (no KhachHangID)
+                datBan.HoTenKhach = customerName;
+                datBan.SDTKhach = customerPhone;
+                datBan.TrangThai = "Đã xác nhận"; // Auto-confirm for offline reservations
+                datBan.NgayTao = DateTime.Now;
+                datBan.UserID = null; // Offline reservations don't have UserID
+
+                db.DatBans.Add(datBan);
+
+                // Update table status if table was selected
+                if (datBan.BanID.HasValue)
+                {
+                    UpdateTableStatusFromDatBan(datBan.BanID.Value);
+                }
+
+                db.SaveChanges();
+
+                TempData["SuccessMessage"] = "Đặt bàn offline thành công!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Lỗi khi đặt bàn: " + ex.Message;
+                return RedirectToAction("Index");
+            }
+        }
+
+        // AJAX: Get available tables (only empty tables)
+        [HttpGet]
+        public JsonResult GetAvailableTables(DateTime arrivalTime, int? excludeReservationId = null)
+        {
+            try
+            {
+                // Simply return all tables with status "Trống" (Empty)
+                var availableTables = db.BanAns
+                    .Where(b => b.TrangThai == "Trống")
+                    .OrderBy(b => b.TenBan)
+                    .Select(b => new { 
+                        BanID = b.BanID, 
+                        TenBan = b.TenBan,
+                        ViTri = b.ViTri ?? "N/A",
+                        SucChua = b.SucChua ?? 0
+                    })
+                    .ToList();
+
+                return Json(availableTables, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Log error and return empty array
+                System.Diagnostics.Debug.WriteLine("GetAvailableTables Error: " + ex.Message);
+                return Json(new object[] { }, JsonRequestBehavior.AllowGet);
             }
         }
 

@@ -1,0 +1,484 @@
+@model Project_65133141.Models.AdminReportViewModel
+@{
+    ViewBag.Title = "Thống kê";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+
+    var fromDate = Model.FromDate?.ToString("yyyy-MM-dd") ?? "";
+    var toDate = Model.ToDate?.ToString("yyyy-MM-dd") ?? "";
+}
+
+<div class="min-h-screen bg-gray-50 py-6">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">Thống kê</h1>
+            <p class="text-sm text-gray-600 mt-1">Tổng hợp doanh thu, món bán chạy và hiệu suất nhân viên</p>
+        </div>
+
+        <div class="mb-6">
+            <form id="filterForm" method="get" action="@Url.Action("Index", "BaoCao", new { area = "Admin_65133141" })" class="space-y-4">
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Từ ngày</label>
+                        <input type="date" name="fromDate" value="@fromDate" max="@DateTime.Now.ToString("yyyy-MM-dd")"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Đến ngày</label>
+                        <input type="date" name="toDate" value="@toDate" max="@DateTime.Now.ToString("yyyy-MM-dd")"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" />
+                        <span id="dateError" class="text-red-500 text-xs mt-1 block @(ViewBag.ErrorMessage != null ? "" : "hidden")">
+                            @(ViewBag.ErrorMessage ?? "Ngày bắt đầu không được lớn hơn ngày kết thúc!")
+                        </span>
+                    </div>
+
+                    <div class="flex items-end justify-start md:justify-end gap-3">
+                        <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-all">
+                            Lọc
+                        </button>
+                        <a href="@Url.Action("Index", "BaoCao", new { area = "Admin_65133141" })"
+                           class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all">
+                            Xóa bộ lọc
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-5 flex flex-col justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Tổng doanh thu</p>
+                    <p class="mt-2 text-2xl font-bold text-red-600">@Model.TotalRevenue.ToString("N0") ₫</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-5">
+                <p class="text-sm text-gray-500">Số món thống kê</p>
+                <p class="mt-2 text-2xl font-bold text-gray-900">@Model.TopDishes.Count</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-5">
+                <p class="text-sm text-gray-500">Số nhân viên có doanh thu</p>
+                <p class="mt-2 text-2xl font-bold text-gray-900">@Model.EmployeeStats.Count</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Biểu đồ thống kê</h2>
+            <div class="flex gap-3">
+                <a href="@Url.Action("ExportPDF", "BaoCao", new { area = "Admin_65133141", fromDate = Model.FromDate?.ToString("yyyy-MM-dd"), toDate = Model.ToDate?.ToString("yyyy-MM-dd"), groupByMonth = Model.GroupByMonth })" target="_blank"
+                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium flex items-center gap-2">
+                    Xuất PDF
+                </a>
+                <a href="@Url.Action("ExportExcel", "BaoCao", new { area = "Admin_65133141", fromDate = Model.FromDate?.ToString("yyyy-MM-dd"), toDate = Model.ToDate?.ToString("yyyy-MM-dd"), groupByMonth = Model.GroupByMonth })"
+                   class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm font-medium flex items-center gap-2">
+                    Xuất Excel
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm font-semibold text-gray-800 mb-3">📊 Biểu đồ doanh thu @(Model.GroupByMonth ? "theo tháng" : "theo ngày")</h3>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm font-semibold text-gray-800 mb-3">🍽️ Biểu đồ món bán chạy (theo số lượng)</h3>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="dishChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm font-semibold text-gray-800 mb-3">👨‍💼 Biểu đồ hiệu suất nhân viên</h3>
+                <div style="position: relative; height: 350px; width: 100%;">
+                    <canvas id="employeeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-gray-800">Bảng doanh thu</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kỳ</th>
+                                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @if (Model.RevenuePoints != null && Model.RevenuePoints.Count > 0)
+                            {
+                                foreach (var r in Model.RevenuePoints)
+                                {
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm text-gray-800">@r.Label</td>
+                                        <td class="px-4 py-2 text-sm text-gray-900 text-right">@r.Total.ToString("N0") ₫</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="2" class="px-4 py-4 text-center text-sm text-gray-500">Chưa có dữ liệu doanh thu.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-gray-800">Món bán chạy</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Món</th>
+                                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Số lượng</th>
+                                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @if (Model.TopDishes != null && Model.TopDishes.Count > 0)
+                            {
+                                foreach (var d in Model.TopDishes)
+                                {
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm text-gray-800">@d.TenMon</td>
+                                        <td class="px-4 py-2 text-sm text-gray-900 text-right">@d.SoLuong</td>
+                                        <td class="px-4 py-2 text-sm text-gray-900 text-right">@d.DoanhThu.ToString("N0") ₫</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">Chưa có dữ liệu món bán chạy.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-800">Hiệu suất nhân viên</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nhân viên</th>
+                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Số hóa đơn</th>
+                            <th class="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Doanh thu</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @if (Model.EmployeeStats != null && Model.EmployeeStats.Count > 0)
+                        {
+                            foreach (var e in Model.EmployeeStats)
+                            {
+                                var name = string.IsNullOrEmpty(e.TenNhanVien) ? "Không rõ" : e.TenNhanVien;
+                                <tr>
+                                    <td class="px-4 py-2 text-sm text-gray-800">@name</td>
+                                    <td class="px-4 py-2 text-sm text-gray-900 text-right">@e.SoHoaDon</td>
+                                    <td class="px-4 py-2 text-sm text-gray-900 text-right">@e.TongDoanhThu.ToString("N0") ₫</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">Chưa có dữ liệu nhân viên.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script>
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            var fromDates = document.getElementsByName('fromDate');
+            var toDates = document.getElementsByName('toDate');
+            
+            if (fromDates.length > 0 && toDates.length > 0) {
+                var fromValue = fromDates[0].value;
+                var toValue = toDates[0].value;
+                
+                if (fromValue && toValue) {
+                    if (new Date(fromValue) > new Date(toValue)) {
+                        e.preventDefault();
+                        // Show error below input
+                        var errorSpan = document.getElementById('dateError');
+                        if (errorSpan) {
+                            errorSpan.classList.remove('hidden');
+                        }
+                    } else {
+                        // Hide error if valid
+                        var errorSpan = document.getElementById('dateError');
+                        if (errorSpan) {
+                            errorSpan.classList.add('hidden');
+                        }
+                    }
+                }
+            }
+        });
+
+        (function () {
+            // Revenue Chart Data
+            var revenueLabels = @Html.Raw("[" + string.Join(",", (Model.RevenuePoints ?? new List<Project_65133141.Models.RevenuePoint>()).Select(r => "\"" + (r.Label ?? "").Replace("\"", "\\\"") + "\"")) + "]");
+            var revenueData = @Html.Raw("[" + string.Join(",", (Model.RevenuePoints ?? new List<Project_65133141.Models.RevenuePoint>()).Select(r => r.Total.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "]");
+
+            // Dish Chart Data
+            var dishLabels = @Html.Raw("[" + string.Join(",", (Model.TopDishes ?? new List<Project_65133141.Models.TopDishReport>()).Select(d => "\"" + (d.TenMon ?? "").Replace("\"", "\\\"") + "\"")) + "]");
+            var dishQuantityData = @Html.Raw("[" + string.Join(",", (Model.TopDishes ?? new List<Project_65133141.Models.TopDishReport>()).Select(d => d.SoLuong.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "]");
+
+            // Employee Chart Data
+            var employeeLabels = @Html.Raw("[" + string.Join(",", (Model.EmployeeStats ?? new List<Project_65133141.Models.EmployeePerformanceReport>()).Select(e => "\"" + ((e.TenNhanVien ?? "Không rõ").Replace("\"", "\\\"")) + "\"")) + "]");
+            var employeeInvoiceData = @Html.Raw("[" + string.Join(",", (Model.EmployeeStats ?? new List<Project_65133141.Models.EmployeePerformanceReport>()).Select(e => e.SoHoaDon.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "]");
+            var employeeRevenueData = @Html.Raw("[" + string.Join(",", (Model.EmployeeStats ?? new List<Project_65133141.Models.EmployeePerformanceReport>()).Select(e => e.TongDoanhThu.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "]");
+
+            // Color palette for bar charts
+            var revenueColors = revenueData.map((_, i) => {
+                var hue = 0; // Red hue
+                var lightness = 45 + (i % 3) * 10;
+                return 'hsl(' + hue + ', 75%, ' + lightness + '%)';
+            });
+
+            var dishColors = [
+                'rgba(239, 68, 68, 0.85)',   // Red
+                'rgba(249, 115, 22, 0.85)',  // Orange
+                'rgba(234, 179, 8, 0.85)',   // Yellow
+                'rgba(34, 197, 94, 0.85)',   // Green
+                'rgba(59, 130, 246, 0.85)',  // Blue
+                'rgba(139, 92, 246, 0.85)',  // Purple
+                'rgba(236, 72, 153, 0.85)',  // Pink
+                'rgba(20, 184, 166, 0.85)',  // Teal
+                'rgba(99, 102, 241, 0.85)',  // Indigo
+                'rgba(168, 85, 247, 0.85)'   // Violet
+            ];
+
+            // 1. Revenue Bar Chart
+            var ctxRevenue = document.getElementById('revenueChart');
+            if (ctxRevenue && revenueLabels.length > 0) {
+                new Chart(ctxRevenue, {
+                    type: 'bar',
+                    data: {
+                        labels: revenueLabels,
+                        datasets: [{
+                            label: 'Doanh thu (₫)',
+                            data: revenueData,
+                            backgroundColor: revenueColors,
+                            borderColor: 'rgba(185, 28, 28, 1)',
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y.toLocaleString('vi-VN') + ' ₫';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+                                        if (value >= 1000) return (value / 1000).toFixed(0) + 'K';
+                                        return value;
+                                    }
+                                },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. Top Dishes Pie Chart
+            var ctxDish = document.getElementById('dishChart');
+            if (ctxDish && dishLabels.length > 0) {
+                new Chart(ctxDish, {
+                    type: 'pie',
+                    plugins: [ChartDataLabels],
+                    data: {
+                        labels: dishLabels,
+                        datasets: [{
+                            data: dishQuantityData,
+                            backgroundColor: dishColors.slice(0, dishLabels.length),
+                            borderColor: '#ffffff',
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    font: { size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        var percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return context.label + ': ' + context.parsed + ' món (' + percentage + '%)';
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                color: '#ffffff',
+                                font: {
+                                    weight: 'bold',
+                                    size: 13
+                                },
+                                formatter: function(value, context) {
+                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    var percentage = ((value / total) * 100).toFixed(1);
+                                    return percentage + '%';
+                                },
+                                anchor: 'center',
+                                align: 'center',
+                                display: function(context) {
+                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    var percentage = (context.dataset.data[context.dataIndex] / total) * 100;
+                                    return percentage > 5; // Chỉ hiển thị nếu > 5%
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 3. Employee Performance Bar Chart
+            var ctxEmployee = document.getElementById('employeeChart');
+            if (ctxEmployee && employeeLabels.length > 0) {
+                new Chart(ctxEmployee, {
+                    type: 'bar',
+                    data: {
+                        labels: employeeLabels,
+                        datasets: [
+                            {
+                                label: 'Số hóa đơn',
+                                data: employeeInvoiceData,
+                                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                yAxisID: 'y1',
+                            },
+                            {
+                                label: 'Doanh thu (₫)',
+                                data: employeeRevenueData,
+                                backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                                borderColor: 'rgba(239, 68, 68, 1)',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                yAxisID: 'y2',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.dataset.yAxisID === 'y2') {
+                                            return context.dataset.label + ': ' + context.parsed.y.toLocaleString('vi-VN') + ' ₫';
+                                        }
+                                        return context.dataset.label + ': ' + context.parsed.y;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y1: {
+                                type: 'linear',
+                                position: 'left',
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Số hóa đơn',
+                                    color: 'rgba(59, 130, 246, 1)'
+                                },
+                                ticks: { color: 'rgba(59, 130, 246, 1)' },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            y2: {
+                                type: 'linear',
+                                position: 'right',
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Doanh thu',
+                                    color: 'rgba(239, 68, 68, 1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(239, 68, 68, 1)',
+                                    callback: function(value) {
+                                        if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+                                        if (value >= 1000) return (value / 1000).toFixed(0) + 'K';
+                                        return value;
+                                    }
+                                },
+                                grid: { display: false }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        })();
+    </script>
+}

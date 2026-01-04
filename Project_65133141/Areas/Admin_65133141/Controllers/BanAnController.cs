@@ -16,6 +16,12 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         // GET: Admin_65133141/BanAn
         public ActionResult Index(string statusFilter = null)
         {
+            // Calculate GLOBAL statistics (from ALL tables, not filtered)
+            ViewBag.TrongCount = db.BanAns.Count(b => b.TrangThai == "Trống");
+            ViewBag.DaDatCount = db.BanAns.Count(b => b.TrangThai == "Đã đặt");
+            ViewBag.DangPhucVuCount = db.BanAns.Count(b => b.TrangThai == "Đang phục vụ");
+            ViewBag.TotalCount = db.BanAns.Count();
+
             var query = db.BanAns.AsQueryable();
 
             if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "all")
@@ -35,11 +41,6 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
 
             ViewBag.StatusFilter = statusFilter;
             ViewBag.GroupedTables = groupedTables;
-
-            ViewBag.TrongCount = tables.Count(b => b.TrangThai == "Trống");
-            ViewBag.DaDatCount = tables.Count(b => b.TrangThai == "Đã đặt");
-            ViewBag.DangPhucVuCount = tables.Count(b => b.TrangThai == "Đang phục vụ");
-            ViewBag.TotalCount = tables.Count;
 
             return View(tables);
         }
@@ -194,14 +195,14 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
 
             try
             {
-                // Kiểm tra xem bàn có đang được sử dụng không
+                // Chỉ chặn xóa nếu bàn ĐANG CÓ KHÁCH (Đang phục vụ/Đang sử dụng)
+                // Các trạng thái "Đã đặt", "Đã xác nhận" (tương lai) vẫn cho xóa -> sẽ bị xóa theo cascade bên dưới
                 var hasActiveReservations = db.DatBans.Any(d => d.BanID == id && 
-                    (d.TrangThai == "Đang phục vụ" || d.TrangThai == "Đang sử dụng" || 
-                     d.TrangThai == "Đã xác nhận" || d.TrangThai == "Đã đặt"));
+                    (d.TrangThai == "Đang phục vụ" || d.TrangThai == "Đang sử dụng"));
                 
                 if (hasActiveReservations)
                 {
-                    return Json(new { success = false, message = "Không thể xóa bàn đang được sử dụng hoặc đã được đặt." });
+                    return Json(new { success = false, message = "Không thể xóa bàn đang có khách ngồi (Đang phục vụ)." });
                 }
 
                 // Kiểm tra xem bàn có đơn hàng đang xử lý không
@@ -213,6 +214,31 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                     return Json(new { success = false, message = "Không thể xóa bàn có đơn hàng đang xử lý." });
                 }
 
+                // Xóa tất cả lịch sử đặt bàn liên quan (cancelled/completed)
+                var allReservations = db.DatBans.Where(d => d.BanID == id).ToList();
+                if (allReservations.Any())
+                {
+                    db.DatBans.RemoveRange(allReservations);
+                }
+
+                // Xóa tất cả đơn hàng cũ và chi tiết đơn hàng liên quan
+                var allOrders = db.DonHangs.Where(d => d.BanID == id).ToList();
+                foreach (var order in allOrders)
+                {
+                    // Xóa chi tiết đơn hàng trước
+                    var orderDetails = db.ChiTietDonHangs.Where(ct => ct.DonHangID == order.DonHangID).ToList();
+                    if (orderDetails.Any())
+                    {
+                        db.ChiTietDonHangs.RemoveRange(orderDetails);
+                    }
+                }
+                // Xóa đơn hàng
+                if (allOrders.Any())
+                {
+                    db.DonHangs.RemoveRange(allOrders);
+                }
+
+                // Cuối cùng xóa bàn
                 db.BanAns.Remove(table);
                 db.SaveChanges();
 

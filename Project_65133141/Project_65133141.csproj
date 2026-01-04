@@ -132,6 +132,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin_65133141\Admin_65133141AreaRegistration.cs" />
+    <Compile Include="Areas\Admin_65133141\Controllers\BaoCaoController.cs" />
     <Compile Include="Areas\Admin_65133141\Controllers\CustomerController.cs" />
     <Compile Include="Areas\Admin_65133141\Controllers\DatBanController.cs" />
     <Compile Include="Areas\Admin_65133141\Controllers\DonHangController.cs" />
@@ -237,6 +238,7 @@
       <DependentUpon>Model_65133141.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\vai_tro.cs" />
+    <Compile Include="Models\AdminReportViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\EmailService.cs" />
   </ItemGroup>
@@ -360,6 +362,12 @@
     <Content Include="Areas\Employee_65133141\Views\Account\ChangePassword.cshtml" />
     <Content Include="Areas\Employee_65133141\Views\Account\Index.cshtml" />
     <Content Include="Areas\Employee_65133141\Views\Account\Profile.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\DonHang\Details.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\DonHang\Index.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\BaoCao\Index.cshtml" />
+    <Content Include="Areas\User_65133141\Views\TinTuc\Index.cshtml" />
+    <Content Include="Areas\User_65133141\Views\TinTuc\Details.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\Components\_EditEmployeeModal.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />

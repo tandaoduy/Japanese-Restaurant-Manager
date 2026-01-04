@@ -388,7 +388,6 @@
         max-width: 500px;
         width: 90%;
         position: relative;
-        animation: authSlideIn 0.3s ease-out;
         max-height: 90vh;
         overflow-y: auto;
         overflow-x: hidden;
@@ -418,52 +417,6 @@
 
     .auth-modal-large {
         max-width: 500px;
-    }
-
-    @@keyframes authSlideIn {
-        from {
-            transform: translateY(-50px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    function openForgotPasswordModal() {
-        const modal = document.getElementById('forgotPasswordModal');
-        if (!modal) return;
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-
-        const form = document.getElementById('forgotPasswordFormModal');
-        if (form) {
-            // Clear messages and inputs (except email, to keep from login if needed later)
-            const errorBox = document.getElementById('forgotPasswordGeneralError');
-            const successBox = document.getElementById('forgotPasswordGeneralSuccess');
-            if (errorBox) { errorBox.textContent = ''; errorBox.style.display = 'none'; }
-            if (successBox) { successBox.textContent = ''; successBox.style.display = 'none'; }
-
-            const passwordInputs = form.querySelectorAll('input[type="password"], input[name="CaptchaCode"]');
-            passwordInputs.forEach(i => i.value = '');
-        }
-
-        setTimeout(refreshForgotPasswordCaptcha, 100);
-    }
-
-    function closeForgotPasswordModal() {
-        const modal = document.getElementById('forgotPasswordModal');
-        if (!modal) return;
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    function backToLoginFromForgot() {
-        closeForgotPasswordModal();
-        setTimeout(() => {
-            openLoginModal();
-        }, 300);
     }
 
     .auth-modal-header {
@@ -569,9 +522,9 @@
 
     .auth-form-control:focus {
         outline: none;
-        border-color: #2563eb;
+        border-color: #dc2626;
         background: white;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
     }
 
     .auth-error-message {
@@ -600,21 +553,21 @@
     }
 
     .auth-forgot-password a {
-        color: #2563eb;
+        color: #dc2626;
         font-size: 13px;
         text-decoration: none;
         transition: color 0.3s;
     }
 
     .auth-forgot-password a:hover {
-        color: #1d4ed8;
+        color: #b91c1c;
         text-decoration: underline;
     }
 
     .auth-btn-submit {
         width: 100%;
         padding: 14px;
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
         color: white;
         border: none;
         border-radius: 8px;
@@ -622,13 +575,13 @@
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.35);
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .auth-btn-submit:hover {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);
     }
 
     .auth-btn-submit:active {
@@ -644,14 +597,14 @@
     }
 
     .auth-register-link a, .auth-login-link a {
-        color: #2563eb;
+        color: #dc2626;
         font-weight: 600;
         text-decoration: none;
         transition: color 0.3s;
     }
 
     .auth-register-link a:hover, .auth-login-link a:hover {
-        color: #1d4ed8;
+        color: #b91c1c;
     }
 
     .auth-close-btn {
@@ -674,8 +627,8 @@
     }
 
     .auth-close-btn:hover {
-        background: rgba(37, 99, 235, 0.12);
-        color: #2563eb;
+        background: rgba(220, 38, 38, 0.12);
+        color: #dc2626;
         transform: scale(1.1);
     }
 
@@ -1041,6 +994,31 @@
         }
     });
 
+    // Auto-open auth modals based on URL hash (e.g. #openLoginModal, #openRegisterModal)
+    (function () {
+        function handleAuthHash() {
+            if (!window.location || !window.location.hash) return;
+
+            var hash = window.location.hash.toLowerCase();
+            if (hash === '#openloginmodal') {
+                openLoginModal();
+            } else if (hash === '#openregistermodal') {
+                openRegisterModal();
+            }
+
+            // Clean hash so it doesn't keep reopening on refresh/back
+            if (history && history.replaceState) {
+                history.replaceState(null, document.title, window.location.pathname + window.location.search);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', handleAuthHash);
+        } else {
+            handleAuthHash();
+        }
+    })();
+
     // Password Strength Checker for Modal
     function initPasswordStrengthCheckerModal() {
         const passwordInput = document.getElementById('registerPasswordModal');
@@ -1382,6 +1360,77 @@
                 
                 // Clear previous validation messages
                 clearValidationMessages();
+
+                // Client-side Validation
+                let isValid = true;
+                const errors = {};
+
+                // 1. Name Validation (Letters only)
+                const nameInput = freshRegisterForm.querySelector('input[name="FullName"]');
+                if (nameInput) {
+                    const nameRegex = /^[a-zA-Z\sÀ-ỹ]+$/;
+                    if (!nameRegex.test(nameInput.value.trim())) {
+                        isValid = false;
+                        errors['FullName'] = 'Họ tên chỉ được phép chứa chữ cái.';
+                    }
+                }
+
+                // 2. Phone Validation (Exactly 10 digits)
+                const phoneInput = freshRegisterForm.querySelector('input[name="PhoneNumber"]');
+                if (phoneInput) {
+                    const phoneRegex = /^\d{10}$/;
+                    if (!phoneRegex.test(phoneInput.value.trim())) {
+                        isValid = false;
+                        errors['PhoneNumber'] = 'Số điện thoại phải bao gồm đúng 10 chữ số.';
+                    }
+                }
+
+                // 3. Email Validation
+                const emailInput = freshRegisterForm.querySelector('input[name="Email"]');
+                if (emailInput) {
+                    // Razor requires escaping at-sign as @@ in .cshtml files
+                    const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                    if (!emailRegex.test(emailInput.value.trim())) {
+                        isValid = false;
+                        errors['Email'] = 'Địa chỉ email không hợp lệ.';
+                    }
+                }
+
+                // 4. Address Validation (No special chars except , . / -)
+                const addressInput = freshRegisterForm.querySelector('input[name="Address"]');
+                if (addressInput && addressInput.value.trim() !== '') {
+                    const addressRegex = /^[a-zA-Z0-9\sÀ-ỹ,.\/\-]+$/;
+                    if (!addressRegex.test(addressInput.value.trim())) {
+                        isValid = false;
+                        errors['Address'] = 'Địa chỉ không được chứa ký tự đặc biệt (trừ , . / -).';
+                    }
+                }
+
+                if (!isValid) {
+                    console.log('Client-side validation failed:', errors);
+                    Object.keys(errors).forEach(key => {
+                        const input = freshRegisterForm.querySelector(`input[name="${key}"]`);
+                        if (input) {
+                            let errorContainer = input.parentElement.parentElement.querySelector('.auth-error-message');
+                            if (!errorContainer) {
+                                errorContainer = input.closest('.auth-form-group').querySelector('.auth-error-message');
+                            }
+                            if (errorContainer) {
+                                errorContainer.textContent = errors[key];
+                                errorContainer.style.display = 'block';
+                            }
+                        }
+                    });
+                    
+                    // Re-enable button
+                     const submitBtn = document.getElementById('registerSubmitBtn');
+                     if (submitBtn) {
+                         submitBtn.disabled = false;
+                         submitBtn.innerHTML = 'Đăng ký';
+                         submitBtn.style.opacity = '1';
+                     }
+                    return; // Stop submission
+                }
                 
                 const formData = new FormData(freshRegisterForm);
                 console.log('Register form data collected');
@@ -1392,7 +1441,6 @@
                 
                 console.log('Register - Token found:', !!token);
                 console.log('Register - Form action:', freshRegisterForm.action);
-                console.log('Register - Form data keys:', Array.from(formData.keys()));
                 
                 // Log all form data values (except password)
                 formData.forEach((value, key) => {
@@ -1452,6 +1500,19 @@
                             msg.style.display = 'none';
                         });
                         
+                        // Check if Captcha error exists and refresh if so
+                        if (data.errors['CaptchaCode'] || data.errors['captcha']) {
+                            console.log('Captcha error detected, refreshing...');
+                            if (typeof refreshRegisterCaptcha === 'function') {
+                                refreshRegisterCaptcha();
+                            }
+                        } else {
+                            // Even if not captcha error, it's good practice to refresh captcha on fail to prevent reuse token issues
+                             if (typeof refreshRegisterCaptcha === 'function') {
+                                refreshRegisterCaptcha();
+                            }
+                        }
+
                         // Display new errors
                         Object.keys(data.errors).forEach(key => {
                             const fieldName = key.split('.').pop(); // Get field name after '.'
@@ -1549,8 +1610,7 @@
 
         // Ngăn chặn nhập ký tự không phải số từ bàn phím
         phoneInput.addEventListener('keypress', function(e) {
-            const char = String.fromCharCode(e.which);
-            if (!/[0-9]/.test(char)) {
+            if (!/[0-9]/.test(e.key)) {
                 e.preventDefault();
                 return false;
             }
@@ -1570,7 +1630,7 @@
 
     // Check login before ordering
     function checkLoginAndOrder(itemName, price) {
-        var isAuthenticated = @(User.Identity.IsAuthenticated ? "true" : "false");
+        var isAuthenticated = '@User.Identity.IsAuthenticated' === 'True';
         var userRole = '@(Session["UserRole"] as string ?? "")';
         
         if (isAuthenticated && userRole !== '') {

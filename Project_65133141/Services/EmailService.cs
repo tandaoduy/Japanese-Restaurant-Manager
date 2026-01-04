@@ -37,16 +37,22 @@ namespace Project_65133141.Services
                 // Validate email
                 if (string.IsNullOrEmpty(recipientEmail) || !recipientEmail.Contains("@"))
                 {
-                    System.Diagnostics.Debug.WriteLine("Invalid recipient email");
+                    System.Diagnostics.Debug.WriteLine("[EmailService] Invalid recipient email: " + (recipientEmail ?? "null"));
                     return false;
                 }
 
                 // Validate SMTP password
                 if (string.IsNullOrEmpty(_smtpPassword))
                 {
-                    System.Diagnostics.Debug.WriteLine("SMTP password not configured. Please set SmtpPassword in Web.config");
+                    System.Diagnostics.Debug.WriteLine("[EmailService] WARNING: SMTP password not configured. Please set SmtpPassword in Web.config appSettings.");
+                    System.Diagnostics.Debug.WriteLine("[EmailService] For Gmail, you need to create an App Password at: https://myaccount.google.com/apppasswords");
+                    System.Diagnostics.Debug.WriteLine("[EmailService] Email will NOT be sent until SmtpPassword is configured.");
                     return false;
                 }
+
+                System.Diagnostics.Debug.WriteLine($"[EmailService] Preparing to send email to: {recipientEmail}");
+                System.Diagnostics.Debug.WriteLine($"[EmailService] SMTP Server: {_smtpServer}:{_smtpPort}");
+                System.Diagnostics.Debug.WriteLine($"[EmailService] From: {_fromEmail}");
 
                 // Load related data
                 var db = new QuanLyNhaHangNhat_65133141Entities6();
@@ -79,16 +85,31 @@ namespace Project_65133141.Services
                         smtpClient.Timeout = 30000; // 30 seconds
 
                         // Send email
+                        System.Diagnostics.Debug.WriteLine("[EmailService] Sending email...");
                         smtpClient.Send(message);
+                        System.Diagnostics.Debug.WriteLine("[EmailService] Email sent successfully!");
                     }
                 }
 
                 return true;
             }
+            catch (SmtpException smtpEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"[EmailService] SMTP Error: {smtpEx.Message}");
+                System.Diagnostics.Debug.WriteLine($"[EmailService] SMTP Status Code: {smtpEx.StatusCode}");
+                if (smtpEx.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[EmailService] Inner Exception: {smtpEx.InnerException.Message}");
+                }
+                return false;
+            }
             catch (Exception ex)
             {
-                // Log error (you can add logging here)
-                System.Diagnostics.Debug.WriteLine($"Error sending email: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[EmailService] Error sending email: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[EmailService] Inner Exception: {ex.InnerException.Message}");
+                }
                 return false;
             }
         }

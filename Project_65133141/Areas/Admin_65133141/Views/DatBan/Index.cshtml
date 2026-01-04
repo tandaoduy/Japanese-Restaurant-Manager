@@ -22,15 +22,36 @@
     <div class="mb-6 flex flex-wrap items-end gap-3 justify-end">
         @using (Html.BeginForm("Index", "DatBan", new { area = "Admin_65133141" }, FormMethod.Get, new { @class = "flex flex-wrap items-end gap-3" }))
         {
-            <div class="relative">
-                <select name="statusFilter" onchange="this.form.submit()" 
-                        class="px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition-all text-sm font-medium text-gray-700">
-                    <option value="all" @(string.IsNullOrEmpty(statusFilter) || statusFilter == "all" ? "selected" : "")>Tất cả trạng thái</option>
+            <!-- Filter Icon Button -->
+            <div class="relative group">
+                <input type="hidden" name="statusFilter" id="statusFilterInput" value="@(string.IsNullOrEmpty(statusFilter) ? "all" : statusFilter)" />
+                
+                <button type="button" id="filterBtn" onclick="toggleFilterDropdown()"
+                        class="p-2.5 rounded-xl border-2 border-gray-200 hover:border-orange-400 hover:text-orange-500 transition-all text-gray-500 bg-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="filterDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1">
+                    <div class="px-4 py-2 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Lọc theo trạng thái
+                    </div>
+                    
+                    <a href="javascript:void(0)" onclick="selectStatus('all')" 
+                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors @(string.IsNullOrEmpty(statusFilter) || statusFilter == "all" ? "bg-orange-50 text-orange-600 font-medium" : "")">
+                        Tất cả trạng thái
+                    </a>
+                    
                     @foreach (var status in statuses)
                     {
-                        <option value="@status" @(statusFilter == status ? "selected" : "")>@status</option>
+                        <a href="javascript:void(0)" onclick="selectStatus('@status')" 
+                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors @(statusFilter == status ? "bg-orange-50 text-orange-600 font-medium" : "")">
+                            @status
+                        </a>
                     }
-                </select>
+                </div>
             </div>
 
             <div class="relative">
@@ -42,6 +63,34 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
             </div>
+            
+            <script>
+                function toggleFilterDropdown() {
+                    var dropdown = document.getElementById('filterDropdown');
+                    if (dropdown.classList.contains('hidden')) {
+                        dropdown.classList.remove('hidden');
+                    } else {
+                        dropdown.classList.add('hidden');
+                    }
+                }
+                
+                function selectStatus(status) {
+                    document.getElementById('statusFilterInput').value = status;
+                    document.getElementById('filterDropdown').classList.add('hidden');
+                    document.forms[0].submit();
+                }
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(event) {
+                    var isClickInside = document.getElementById('filterBtn').contains(event.target) || 
+                                      document.getElementById('filterDropdown').contains(event.target);
+                    var dropdown = document.getElementById('filterDropdown');
+                    
+                    if (!isClickInside && !dropdown.classList.contains('hidden')) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+            </script>
         }
     </div>
 
@@ -150,37 +199,13 @@
     </div>
 
     <!-- Pagination -->
-    @if (totalPages > 1)
+    @Html.Partial("~/Views/Components/_Pagination.cshtml", new ViewDataDictionary
     {
-        <div class="mt-6 flex items-center justify-between">
-            <div class="text-sm text-gray-700">
-                Trang @currentPage / @totalPages
-            </div>
-            <div class="flex gap-2">
-                @if (currentPage > 1)
-                {
-                    <a href="@Url.Action("Index", "DatBan", new { area = "Admin_65133141", page = currentPage - 1, searchString = searchString, statusFilter = statusFilter })" 
-                       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                        Trước
-                    </a>
-                }
-                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
-                {
-                    <a href="@Url.Action("Index", "DatBan", new { area = "Admin_65133141", page = i, searchString = searchString, statusFilter = statusFilter })" 
-                       class="px-4 py-2 @(i == currentPage ? "bg-red-600 text-white" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50") rounded-lg">
-                        @i
-                    </a>
-                }
-                @if (currentPage < totalPages)
-                {
-                    <a href="@Url.Action("Index", "DatBan", new { area = "Admin_65133141", page = currentPage + 1, searchString = searchString, statusFilter = statusFilter })" 
-                       class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                        Sau
-                    </a>
-                }
-            </div>
-        </div>
-    }
+        { "BaseUrl", ViewBag.BaseUrl },
+        { "PageParam", "page" },
+        { "CurrentPage", currentPage },
+        { "TotalPages", totalPages }
+    })
 </div>
 
 @* Include Modals *@

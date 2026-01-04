@@ -91,7 +91,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         // GET: Admin_65133141/DatBan
         public ActionResult Index(string searchString, string statusFilter = null, int page = 1)
         {
-            const int pageSize = 10;
+            const int pageSize = 5;
             
             var query = db.DatBans.AsQueryable();
 
@@ -114,10 +114,9 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
             // Get total count before pagination
             var totalCount = query.Count();
 
-            // Order by date descending
+            // Order by DatBanID descending (newest first)
             var datBans = query
-                .OrderByDescending(d => d.ThoiGianDen)
-                .ThenByDescending(d => d.DatBanID)
+                .OrderByDescending(d => d.DatBanID)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -152,6 +151,13 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 .OrderBy(s => s)
                 .ToList();
             ViewBag.Statuses = statuses;
+
+            ViewBag.BaseUrl = Url.Action("Index", "DatBan", new
+            {
+                area = "Admin_65133141",
+                searchString = searchString,
+                statusFilter = statusFilter
+            });
 
             return View(datBans);
         }

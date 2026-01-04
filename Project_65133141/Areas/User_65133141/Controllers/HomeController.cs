@@ -4,11 +4,13 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Project_65133141.Models;
+using Project_65133141.Filters;
 
 namespace Project_65133141.Areas.User_65133141.Controllers
 {
-    [Authorize]
-    public class HomeController : Controller
+    // TEMPORARILY DISABLED FOR TESTING - TODO: re-enable after fixing redirect loop
+    // [RoleAuthorize("Khách hàng", "khach hang", "user", "customer")]
+    public class HomeController : BaseAreaController
     {
         private QuanLyNhaHangNhat_65133141Entities6 db = new QuanLyNhaHangNhat_65133141Entities6();
 

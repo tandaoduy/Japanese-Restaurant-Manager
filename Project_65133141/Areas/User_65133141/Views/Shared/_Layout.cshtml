@@ -236,6 +236,30 @@
         #search-clear-btn:hover {
             background-color: rgba(0, 0, 0, 0.05) !important;
         }
+
+        /* Mobile - hide search completely, optimize header */
+        @@media (max-width: 767px) {
+            /* Hide search on mobile */
+            .search-container,
+            #search-submit-btn {
+                display: none !important;
+            }
+            
+            #main-nav .h-20 {
+                min-height: 70px !important;
+            }
+            
+            .japanese-navbar {
+                top: 70px;
+                z-index: 60 !important;
+                background: linear-gradient(to right, #dc2626, #991b1b); /* Ensure background is visible */
+            }
+            
+            /* Smaller spacer */
+            .h-36 {
+                height: 8rem !important;
+            }
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -290,7 +314,8 @@
                 </div>
 
                 <!-- Header Icons and Actions -->
-                <div class="hidden lg:flex items-center space-x-3 flex-shrink-0">
+                <!-- Header Icons and Actions - Visible on Mobile too -->
+                <div class="flex items-center space-x-3 flex-shrink-0">
 
                     <!-- Thông báo -->
                     <a href="#" class="relative p-2 text-gray-600 hover:text-red-600 hover:bg-gray-100 rounded-lg transition" title="Thông báo">
@@ -390,12 +415,7 @@
                     }
                 </div>
 
-                <!-- Mobile menu button -->
-                <button type="button" class="lg:hidden text-gray-700 hover:text-red-600 p-2" id="mobile-menu-button">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
+                <!-- Mobile menu button REMOVED (using Red Bar button instead) -->
             </div>
         </div>
     </nav>
@@ -471,8 +491,49 @@
                     </svg>
                     <span>TIN TỨC</span>
                 </a>
+
+                <!-- Auth Links for Mobile -->
+                <div class="border-t border-white/20 mt-2 pt-2">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        var mUserName = Session["UserName"] as string ?? User.Identity.Name;
+                        <div class="japanese-mobile-link text-yellow-500">
+                            <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span>Xin chào, @mUserName</span>
+                        </div>
+                         <!-- Account Settings Link -->
+                         <a href="#" class="japanese-mobile-link">
+                            <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>Cài đặt tài khoản</span>
+                        </a>
+                        <a href="@Url.Action("Logout", "Account", new { area = "" })" class="japanese-mobile-link text-red-300 hover:text-red-100">
+                            <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span>Đăng xuất</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="javascript:void(0)" onclick="openLoginModal()" class="japanese-mobile-link">
+                            <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span>Đăng nhập</span>
+                        </a>
+                        <a href="javascript:void(0)" onclick="openRegisterModal()" class="japanese-mobile-link">
+                            <svg class="mobile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                            </svg>
+                            <span>Đăng ký</span>
+                        </a>
+                    }
                 </div>
-            </div>
     </nav>
     
     <!-- Spacer for fixed header + red navbar -->
@@ -627,26 +688,37 @@
             }
             
             // Mobile menu toggle functionality
+            // Mobile menu toggle functionality
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             const hamburgerIcon = document.getElementById('hamburger-icon');
             const closeIcon = document.getElementById('close-icon');
             
             if (mobileMenuButton && mobileMenu) {
-                mobileMenuButton.addEventListener('click', function() {
+                // Better: just add the listener, assuming only one runs.
+                mobileMenuButton.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Mobile menu clicked');
+                    
                     // Toggle menu visibility
                     if (mobileMenu.classList.contains('mobile-menu-hidden')) {
                         mobileMenu.classList.remove('mobile-menu-hidden');
                         mobileMenu.classList.add('mobile-menu-visible');
-                        hamburgerIcon.classList.add('hidden');
-                        closeIcon.classList.remove('hidden');
+                        
+                        if (hamburgerIcon) hamburgerIcon.classList.add('hidden');
+                        if (closeIcon) closeIcon.classList.remove('hidden');
                     } else {
                         mobileMenu.classList.add('mobile-menu-hidden');
                         mobileMenu.classList.remove('mobile-menu-visible');
-                        hamburgerIcon.classList.remove('hidden');
-                        closeIcon.classList.add('hidden');
+                         
+                        if (hamburgerIcon) hamburgerIcon.classList.remove('hidden');
+                        if (closeIcon) closeIcon.classList.add('hidden');
                     }
-                });
+                };
+            } else {
+                console.error('Mobile menu elements not found', { btn: mobileMenuButton, menu: mobileMenu });
+            }
                 
                 // Close mobile menu when clicking on a link
                 mobileNavLinks.forEach(link => {
@@ -1079,8 +1151,28 @@
             </svg>
         </button>
     </footer>
+
+    @* Include Auth Modals (Login and Register) so login/register buttons work *@
+    @Html.Partial("_AuthModals")
     
     <script>
+        // Ensure global functions always open the modals on this page
+        window.openLoginModal = function () {
+            var modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        };
+        window.openRegisterModal = function () {
+            var modal = document.getElementById('registerModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        
         // Scroll to top functionality
         const scrollToTopBtn = document.getElementById('scroll-to-top');
         

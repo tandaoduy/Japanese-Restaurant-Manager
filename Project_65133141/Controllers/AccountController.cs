@@ -24,11 +24,23 @@ namespace Project_65133141.Controllers
         // GET: Account/Login
         public ActionResult Login()
         {
+            // Check if user was just signed out (to prevent redirect loop)
+            var signedOut = Request.QueryString["signedOut"];
+            if (!string.IsNullOrEmpty(signedOut))
+            {
+                // User was just signed out, show login page instead of redirecting
+                return View();
+            }
+            
             // If user is already authenticated, redirect to appropriate area based on role
             if (User.Identity.IsAuthenticated)
             {
                 var userRole = Session["UserRole"] as string;
-                return RedirectToRoleArea(userRole);
+                if (!string.IsNullOrEmpty(userRole))
+                {
+                    return RedirectToRoleArea(userRole);
+                }
+                // If authenticated but no role in session, just show login page (edge case)
             }
             return View();
         }
@@ -61,7 +73,104 @@ namespace Project_65133141.Controllers
 
             if (ModelState.IsValid)
             {
-                // Try to find customer in Users table first
+                // IMPORTANT: Check admin/employee in nhan_vien table FIRST
+                var adminUser = db.nhan_vien.FirstOrDefault(u => u.Email == model.Email);
+                
+                if (adminUser != null)
+                {
+                    // Verify password - check both MatKhau and SDT for backward compatibility
+                    bool isPasswordValid = false;
+                    if (!string.IsNullOrEmpty(adminUser.MatKhau))
+                    {
+                        isPasswordValid = VerifyPassword(model.Password, adminUser.MatKhau);
+                    }
+                    else if (!string.IsNullOrEmpty(adminUser.SDT))
+                    {
+                        // Backward compatibility: check if password was stored in SDT
+                        isPasswordValid = VerifyPassword(model.Password, adminUser.SDT);
+                    }
+
+                    if (isPasswordValid)
+                    {
+                        // Check if account is disabled
+                        if (adminUser.TrangThai == "Vô hiệu hóa")
+                        {
+                            ModelState.AddModelError("", "Tài khoản đã bị vô hiệu hoá");
+                            
+                            if (isAjaxRequest)
+                            {
+                                var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
+                                    .ToDictionary(
+                                        kvp => kvp.Key,
+                                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                                    );
+                                return Json(new { success = false, errors = errors });
+                            }
+                            
+                            return View(model);
+                        }
+
+                        // Determine user role
+                        var userRole = adminUser.VaiTro?.TenVaiTro;
+                        var roleLower = userRole?.ToLower().Trim() ?? "";
+                        bool isAdminOrEmployee = roleLower == "admin" || roleLower.Contains("admin") || 
+                                                 roleLower == "administrator" ||
+                                                 roleLower == "nhân viên" || roleLower == "nhan vien" || 
+                                                 roleLower == "employee" || roleLower.Contains("nhân viên") || 
+                                                 roleLower.Contains("nhan vien");
+
+                        // Set authentication cookie
+                        var ticket = new FormsAuthenticationTicket(
+                            1,
+                            adminUser.Email,
+                            DateTime.Now,
+                            DateTime.Now.AddMinutes(60), // 60 minutes timeout
+                            false, // NOT persistent - session cookie
+                            userRole,
+                            FormsAuthentication.FormsCookiePath
+                        );
+                        var encryptedTicket = FormsAuthentication.Encrypt(ticket);
+                        var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket)
+                        {
+                            HttpOnly = true,
+                            Secure = false,
+                            Path = FormsAuthentication.FormsCookiePath
+                        };
+                        Response.Cookies.Add(cookie);
+                        
+                        // Set session timeout to 60 minutes
+                        Session.Timeout = 60;
+
+                        // Store user info in session
+                        Session["UserId"] = adminUser.NhanVienID;
+                        Session["UserName"] = adminUser.HoTen;
+                        Session["UserEmail"] = adminUser.Email;
+                        Session["UserRole"] = userRole;
+                        Session["IsAdminOrEmployee"] = isAdminOrEmployee;
+                        Session["SessionStartTime"] = DateTime.Now;
+                        Session["SessionExpiryTime"] = DateTime.Now.AddMinutes(60);
+
+                        // Redirect to return URL or based on role
+                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                        {
+                            if (isAjaxRequest)
+                            {
+                                return Json(new { success = true, redirectUrl = returnUrl });
+                            }
+                            return Redirect(returnUrl);
+                        }
+                        
+                        // Redirect based on user role
+                        var redirectUrl = GetRedirectUrlForRole(adminUser.VaiTro?.TenVaiTro);
+                        if (isAjaxRequest)
+                        {
+                            return Json(new { success = true, redirectUrl = redirectUrl });
+                        }
+                        return RedirectToRoleArea(adminUser.VaiTro?.TenVaiTro);
+                    }
+                }
+                
+                // If not admin/employee or password wrong, try to find customer in Users table
                 var customerUser = db.Users.FirstOrDefault(u => u.Email == model.Email);
                 
                 if (customerUser != null)
@@ -140,135 +249,6 @@ namespace Project_65133141.Controllers
                         return RedirectToAction("Index", "Home");
                     }
                 }
-                else
-                {
-                    // Try to find admin/employee in nhan_vien table
-                    var user = db.nhan_vien.FirstOrDefault(u => u.Email == model.Email);
-
-                    if (user != null)
-                    {
-                        // Verify password - check both MatKhau and SDT for backward compatibility
-                        bool isPasswordValid = false;
-                        if (!string.IsNullOrEmpty(user.MatKhau))
-                        {
-                            isPasswordValid = VerifyPassword(model.Password, user.MatKhau);
-                        }
-                        else if (!string.IsNullOrEmpty(user.SDT))
-                        {
-                            // Backward compatibility: check if password was stored in SDT
-                            isPasswordValid = VerifyPassword(model.Password, user.SDT);
-                        }
-
-                        if (isPasswordValid)
-                        {
-                            // Check if account is disabled
-                            if (user.TrangThai == "Vô hiệu hóa")
-                            {
-                                ModelState.AddModelError("", "Tài khoản đã bị vô hiệu hoá");
-                                
-                                if (isAjaxRequest)
-                                {
-                                    var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
-                                        .ToDictionary(
-                                            kvp => kvp.Key,
-                                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                                        );
-                                    return Json(new { success = false, errors = errors });
-                                }
-                                
-                                return View(model);
-                            }
-
-                            // Determine user role
-                            var userRole = user.VaiTro?.TenVaiTro;
-                            var roleLower = userRole?.ToLower().Trim() ?? "";
-                            bool isAdminOrEmployee = roleLower == "admin" || roleLower.Contains("admin") || 
-                                                     roleLower == "administrator" ||
-                                                     roleLower == "nhân viên" || roleLower == "nhan vien" || 
-                                                     roleLower == "employee" || roleLower.Contains("nhân viên") || 
-                                                     roleLower.Contains("nhan vien");
-
-                            // Set authentication cookie with different settings for admin/employee vs user
-                            if (isAdminOrEmployee)
-                            {
-                                // Admin/Employee: Session cookie (no persistent cookie, expires when browser closes)
-                                // Set timeout to 1 minute
-                                var ticket = new FormsAuthenticationTicket(
-                                    1,
-                                    user.Email,
-                                    DateTime.Now,
-                                    DateTime.Now.AddMinutes(60), // 60 minutes timeout
-                                    false, // NOT persistent - session cookie
-                                    userRole,
-                                    FormsAuthentication.FormsCookiePath
-                                );
-                                var encryptedTicket = FormsAuthentication.Encrypt(ticket);
-                                var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket)
-                                {
-                                    HttpOnly = true,
-                                    Secure = false,
-                                    Path = FormsAuthentication.FormsCookiePath
-                                };
-                                Response.Cookies.Add(cookie);
-                                
-                                // Set session timeout to 60 minutes
-                                Session.Timeout = 60;
-                            }
-                            else
-                            {
-                                // User/Customer: Session cookie (no persistent cookie, expires when browser closes)
-                                // Set timeout to 1 minute
-                                var ticket = new FormsAuthenticationTicket(
-                                    1,
-                                    user.Email,
-                                    DateTime.Now,
-                                    DateTime.Now.AddMinutes(60), // 60 minutes timeout
-                                    false, // NOT persistent - session cookie
-                                    userRole,
-                                    FormsAuthentication.FormsCookiePath
-                                );
-                                var encryptedTicket = FormsAuthentication.Encrypt(ticket);
-                                var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket)
-                                {
-                                    HttpOnly = true,
-                                    Secure = false,
-                                    Path = FormsAuthentication.FormsCookiePath
-                                };
-                                Response.Cookies.Add(cookie);
-                                
-                                // Set session timeout to 60 minutes
-                                Session.Timeout = 60;
-                            }
-
-                            // Store user info in session
-                            Session["UserId"] = user.NhanVienID;
-                            Session["UserName"] = user.HoTen;
-                            Session["UserEmail"] = user.Email;
-                            Session["UserRole"] = userRole;
-                            Session["IsAdminOrEmployee"] = isAdminOrEmployee;
-                            Session["SessionStartTime"] = DateTime.Now;
-                            Session["SessionExpiryTime"] = DateTime.Now.AddMinutes(60);
-
-                            // Redirect to return URL or based on role
-                            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                            {
-                                if (isAjaxRequest)
-                                {
-                                    return Json(new { success = true, redirectUrl = returnUrl });
-                                }
-                                return Redirect(returnUrl);
-                            }
-                            
-                            // Redirect based on user role
-                            var redirectUrl = GetRedirectUrlForRole(user.VaiTro?.TenVaiTro);
-                            if (isAjaxRequest)
-                            {
-                                return Json(new { success = true, redirectUrl = redirectUrl });
-                            }
-                            return RedirectToRoleArea(user.VaiTro?.TenVaiTro);
-                        }
-                    }
-                }
 
                 ModelState.AddModelError("", "Email hoặc mật khẩu không đúng");
             }
@@ -290,11 +270,32 @@ namespace Project_65133141.Controllers
         // GET: Account/Register
         public ActionResult Register()
         {
+            // Check if user was just signed out (to prevent redirect loop)
+            var signedOut = Request.QueryString["signedOut"];
+            if (!string.IsNullOrEmpty(signedOut))
+            {
+                // User was just signed out, show register page
+                var defaultRole = db.vai_tro
+                    .FirstOrDefault(r => r.TenVaiTro.ToLower() == "khách hàng" || 
+                                        r.TenVaiTro.ToLower() == "khach hang" || 
+                                        r.TenVaiTro.ToLower() == "user" || 
+                                        r.TenVaiTro.ToLower() == "customer");
+                if (defaultRole != null)
+                {
+                    ViewBag.DefaultUserRoleId = defaultRole.VaiTroID;
+                }
+                return View();
+            }
+            
             // If user is already authenticated, redirect to appropriate area based on role
             if (User.Identity.IsAuthenticated)
             {
                 var userRole = Session["UserRole"] as string;
-                return RedirectToRoleArea(userRole);
+                if (!string.IsNullOrEmpty(userRole))
+                {
+                    return RedirectToRoleArea(userRole);
+                }
+                // If authenticated but no role in session, show register page (edge case)
             }
 
             // Get default user role (customer/user) for registration

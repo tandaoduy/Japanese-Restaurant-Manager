@@ -90,7 +90,44 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
             ViewBag.ViewType = effectiveViewType;
             ViewBag.SortBy = sortBy;
 
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_EmployeeList", accountList);
+            }
+
             return View(accountList);
+        }
+
+        // GET: Admin_65133141/Employee/GetSearchSuggestions
+        public JsonResult GetSearchSuggestions(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+            {
+                return Json(new List<object>(), JsonRequestBehavior.AllowGet);
+            }
+
+            // Exclude Admin and Customer roles
+            var suggestions = db.nhan_vien
+                .Where(a => 
+                    (a.HoTen.Contains(term) || a.Email.Contains(term) || a.SDT.Contains(term)) &&
+                    // Exclude Admins
+                    !a.VaiTro.TenVaiTro.Contains("Admin") && 
+                    !a.VaiTro.TenVaiTro.Contains("Quản trị") &&
+                    // Exclude Customers
+                    !a.VaiTro.TenVaiTro.Contains("Khách hàng") &&
+                    !a.VaiTro.TenVaiTro.Contains("Customer") &&
+                    !a.VaiTro.TenVaiTro.Contains("User")
+                )
+                .Select(e => new { 
+                    label = e.HoTen, 
+                    value = e.HoTen, 
+                    desc = e.Email,
+                    avatar = !string.IsNullOrEmpty(e.HoTen) ? e.HoTen.Substring(0, 1).ToUpper() : "?"
+                })
+                .Take(5)
+                .ToList();
+
+            return Json(suggestions, JsonRequestBehavior.AllowGet);
         }
 
         // GET: Admin_65133141/Employee/Create
@@ -638,7 +675,10 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 employee.ho_ten = model.FullName;
                 employee.email = model.Email;
                 employee.so_dien_thoai = model.PhoneNumber;
-                employee.vai_tro_id = model.RoleId;
+                if (model.RoleId > 0)
+                {
+                    employee.vai_tro_id = model.RoleId;
+                }
                 employee.ngay_vao_lam = model.StartDate;
                 employee.trang_thai = model.Status;
                 employee.DiaChi = !string.IsNullOrEmpty(model.Address) ? model.Address : null;

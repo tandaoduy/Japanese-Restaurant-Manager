@@ -75,17 +75,26 @@
                 </div>
             </div>
 
-            <div class="w-full md:w-auto md:min-w-[220px] max-w-xs">
-                <div class="flex items-stretch">
-                    <input type="text" name="searchString" value="@searchString"
-                           placeholder="Nhập tên, email hoặc SĐT..."
+            <div class="w-full md:w-auto md:min-w-[300px] max-w-md relative" style="position: relative;">
+                <div class="flex items-stretch relative">
+                    <input type="text" id="searchInput" name="searchString" value="@searchString"
+                           placeholder="Nhập tên, email hoặc SĐT..." autocomplete="off"
                            class="flex-1 px-4 py-2.5 text-sm border border-gray-300 border-r-0 rounded-l-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none" />
                     <button type="submit" class="px-5 flex items-center justify-center bg-red-600 hover:bg-red-700 text-white rounded-r-lg transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </button>
+                    <!-- Loading Indicator -->
+                    <div id="searchLoading" class="hidden absolute right-16 top-1/2 transform -translate-y-1/2">
+                        <svg class="animate-spin h-4 w-4 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
                 </div>
+                <!-- Suggestions Dropdown -->
+                <div id="searchSuggestions" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-20 max-h-60 overflow-y-auto"></div>
             </div>
         }
     </div>
@@ -109,270 +118,10 @@
         </div>
     </div>
 
-    <!-- Card View -->
-    <div id="card-view" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        @{
-            var patterns = new[] { "hexagon", "circles", "triangles", "waves" };
-            var colorSchemes = new[] {
-                new { bg = "bg-pink-500", text = "text-pink-600" },
-                new { bg = "bg-blue-500", text = "text-blue-600" },
-                new { bg = "bg-green-500", text = "text-green-600" },
-                new { bg = "bg-purple-500", text = "text-purple-600" },
-                new { bg = "bg-orange-500", text = "text-orange-600" },
-                new { bg = "bg-red-500", text = "text-red-600" },
-                new { bg = "bg-teal-500", text = "text-teal-600" },
-                new { bg = "bg-indigo-500", text = "text-indigo-600" }
-            };
-
-            int cardIndex = 0;
-            foreach (var item in Model)
-            {
-                var colorScheme = colorSchemes[cardIndex % colorSchemes.Length];
-                var pattern = patterns[cardIndex % patterns.Length];
-                var avatarInitial = !string.IsNullOrEmpty(item.HoTen) ? item.HoTen.Substring(0, 1).ToUpper() : "?";
-
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-shadow text-sm">
-                    <div class="h-20 @colorScheme.bg relative overflow-hidden">
-                        @if (pattern == "hexagon")
-                        {
-                            <div class="absolute inset-0 opacity-20">
-                                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                        <pattern id="hexagon-@cardIndex" x="0" y="0" width="56" height="100" patternUnits="userSpaceOnUse">
-                                            <polygon points="28,0 56,17 56,51 28,68 0,51 0,17" fill="white" fill-opacity="0.3" />
-                                        </pattern>
-                                    </defs>
-                                    <rect width="100%" height="100%" fill="url(#hexagon-@cardIndex)" />
-                                </svg>
-                            </div>
-                        }
-                        else if (pattern == "circles")
-                        {
-                            <div class="absolute inset-0 opacity-20">
-                                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                        <pattern id="circles-@cardIndex" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                                            <circle cx="20" cy="20" r="15" fill="white" fill-opacity="0.3" />
-                                        </pattern>
-                                    </defs>
-                                    <rect width="100%" height="100%" fill="url(#circles-@cardIndex)" />
-                                </svg>
-                            </div>
-                        }
-                        else if (pattern == "triangles")
-                        {
-                            <div class="absolute inset-0 opacity-20">
-                                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                        <pattern id="triangles-@cardIndex" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-                                            <polygon points="30,0 60,60 0,60" fill="white" fill-opacity="0.3" />
-                                        </pattern>
-                                    </defs>
-                                    <rect width="100%" height="100%" fill="url(#triangles-@cardIndex)" />
-                                </svg>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="absolute inset-0 opacity-20">
-                                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                    <defs>
-                                        <pattern id="waves-@cardIndex" x="0" y="0" width="100" height="20" patternUnits="userSpaceOnUse">
-                                            <path d="M0 10 Q 25 0, 50 10 T 100 10" stroke="white" stroke-width="2" fill="none" opacity="0.3" />
-                                        </pattern>
-                                    </defs>
-                                    <rect width="100%" height="100%" fill="url(#waves-@cardIndex)" />
-                                </svg>
-                            </div>
-                        }
-                    </div>
-
-                    <div class="relative px-4 pb-4">
-                        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
-                            <div class="w-14 h-14 md:w-16 md:h-16 rounded-full @colorScheme.bg flex items-center justify-center text-white font-bold text-xl md:text-2xl border-4 border-white shadow-lg">
-                                @avatarInitial
-                            </div>
-                        </div>
-                        <div class="pt-10 text-center">
-                            <h3 class="text-base font-semibold text-gray-900 mb-0.5">@(item.HoTen ?? "-")</h3>
-                            <p class="text-xs text-gray-600 mb-3">@(item.Email ?? "-")</p>
-                            <div class="flex items-center justify-center gap-2 pt-3 border-t border-gray-100">
-                                <button type="button" onclick="openEmployeeDetailsModal(@item.NhanVienID)"
-                                   class="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full inline-flex items-center justify-center transition-colors"
-                                   title="Chi tiết">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                </button>
-                                <button type="button" onclick="openEditEmployeeModal(@item.NhanVienID)"
-                                   class="w-9 h-9 bg-orange-500 hover:bg-orange-600 text-white rounded-full inline-flex items-center justify-center transition-colors"
-                                   title="Sửa">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                <button type="button" onclick="showConfirmDeleteEmployee(@item.NhanVienID, '@(item.HoTen ?? "Nhân viên")')"
-                                        class="w-9 h-9 rounded-full bg-gray-500 hover:bg-gray-600 text-white inline-flex items-center justify-center transition-colors"
-                                        title="Xóa">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                cardIndex++;
-            }
-        }
+    <!-- Employee List Container (Updates via AJAX) -->
+    <div id="employee-list-container">
+        @Html.Partial("_EmployeeList", Model)
     </div>
-
-    <!-- Table View -->
-    <div id="table-view" class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="overflow-hidden">
-            <table class="w-full table-fixed divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 5%;">STT</th>
-                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Mã NV</th>
-                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 8%;">Avatar</th>
-                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 18%;">Tên nhân viên</th>
-                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 24%;">Chức vụ</th>
-                        <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase" style="width: 15%;">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @if (Model != null && Model.Any())
-                    {
-                        var pageSizeLocal = ViewBag.PageSize as int? ?? 5;
-                        int stt = ((ViewBag.CurrentPage as int? ?? 1) - 1) * pageSizeLocal + 1;
-                        foreach (var item in Model)
-                        {
-                            var avatarInitial = !string.IsNullOrEmpty(item.HoTen) ? item.HoTen.Substring(0, 1).ToUpper() : "?";
-                            <tr>
-                                <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-700">@stt</td>
-                                <td class="px-2 py-3 whitespace-nowrap text-sm font-semibold text-blue-600">NV@(item.NhanVienID.ToString("D5"))</td>
-                                <td class="px-2 py-3 whitespace-nowrap">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                                        @avatarInitial
-                                    </div>
-                                </td>
-                                <td class="px-2 py-3 text-sm text-gray-900 truncate" title="@(item.HoTen ?? "-")">@(item.HoTen ?? "-")</td>
-                                <td class="px-2 py-3 text-sm text-gray-900 truncate" title="@(item.VaiTro?.TenVaiTro ?? "-")">@(item.VaiTro?.TenVaiTro ?? "-")</td>
-                                <td class="px-2 py-3 whitespace-nowrap text-center text-sm">
-                                    <div class="inline-flex items-center gap-2">
-                                        <button type="button" onclick="openEmployeeDetailsModal(@item.NhanVienID)"
-                                           class="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors"
-                                           title="Chi tiết">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                            </svg>
-                                        </button>
-                                        <button type="button" onclick="openEditEmployeeModal(@item.NhanVienID)"
-                                           class="w-8 h-8 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center transition-colors"
-                                           title="Sửa">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                            </svg>
-                                        </button>
-                                        <button type="button" onclick="showConfirmDeleteEmployee(@item.NhanVienID, '@(item.HoTen ?? "Nhân viên")')"
-                                                class="w-8 h-8 rounded-full bg-gray-500 hover:bg-gray-600 text-white flex items-center justify-center transition-colors"
-                                                title="Xóa">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            stt++;
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500">
-                                Không có dữ liệu để hiển thị
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    @helper RenderPagination()
-    {
-        var totalPages = ViewBag.TotalPages as int? ?? 1;
-        var currentPage = ViewBag.CurrentPage ?? 1;
-        var viewType = ViewBag.ViewType ?? "table";
-        var searchString = ViewBag.SearchString as string;
-        var sortBy = ViewBag.SortBy as string;
-
-        if (totalPages > 1)
-        {
-            <div class="px-6 py-4 border-t border-gray-200 bg-white rounded-b-lg">
-                <div class="flex items-center justify-center gap-2">
-                    <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = 1 })"
-                       class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
-                    </a>
-
-                    <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = currentPage - 1 })"
-                       class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </a>
-
-                    @{
-                        int startPage = Math.Max(1, currentPage - 2);
-                        int endPage = Math.Min(totalPages, currentPage + 2);
-
-                        if (startPage > 1)
-                        {
-                            <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = 1 })"
-                               class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">1</a>
-                            if (startPage > 2)
-                            {
-                                <span class="px-2 text-gray-500">...</span>
-                            }
-                        }
-
-                        for (int i = startPage; i <= endPage; i++)
-                        {
-                            <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = i })"
-                               class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium @(i == currentPage ? "bg-red-600 text-white" : "border border-gray-300 hover:bg-gray-50")">@i</a>
-                        }
-
-                        if (endPage < totalPages)
-                        {
-                            if (endPage < totalPages - 1)
-                            {
-                                <span class="px-2 text-gray-500">...</span>
-                            }
-                            <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = totalPages })"
-                               class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">@totalPages</a>
-                        }
-                    }
-
-                    <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, sortBy = sortBy, page = currentPage + 1 })"
-                       class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </a>
-
-                    <a href="@Url.Action("Index", "Employee", new { viewType = viewType, searchString = searchString, page = totalPages })"
-                       class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
-                    </a>
-                </div>
-                <div class="text-center mt-3 text-sm text-gray-600">Trang @currentPage / @totalPages</div>
-            </div>
-        }
-    }
-
-    @RenderPagination()
 </div>
 
 <!-- Modal xác nhận xóa nhân viên (giống Product) -->
@@ -401,7 +150,124 @@
 </div>
 
 <script>
-    // --- Sort (Employee) giống Customer ---
+    // --- Search & Autocomplete ---
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsBox = document.getElementById('searchSuggestions');
+    const searchLoading = document.getElementById('searchLoading');
+    const filterForm = document.getElementById('employeeFilterForm');
+    const employeeListContainer = document.getElementById('employee-list-container');
+    let searchDebounceTimer;
+    let suggestionsDebounceTimer;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const term = e.target.value.trim();
+
+            // Clear existing timers
+            clearTimeout(searchDebounceTimer);
+            clearTimeout(suggestionsDebounceTimer);
+
+            // 1. Live Search (Update Table)
+            if (searchLoading) searchLoading.classList.remove('hidden');
+            searchDebounceTimer = setTimeout(() => {
+                performLiveSearch(term);
+            }, 300);
+
+            // 2. Suggestions (Autocomplete)
+            if (term.length >= 1) {
+                suggestionsDebounceTimer = setTimeout(() => {
+                    fetchSuggestions(term);
+                }, 200);
+            } else {
+                if (suggestionsBox) suggestionsBox.classList.add('hidden');
+            }
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (suggestionsBox && !suggestionsBox.contains(e.target) && e.target !== searchInput) {
+                suggestionsBox.classList.add('hidden');
+            }
+        });
+        
+        // Focus on input shows suggestions if term exists
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length >= 1 && suggestionsBox && suggestionsBox.children.length > 0) {
+                suggestionsBox.classList.remove('hidden');
+            }
+        });
+    }
+
+    function performLiveSearch(term) {
+        // Collect form data (including viewType, sortBy etc.)
+        const formData = new FormData(filterForm);
+        // Ensure searchString is updated from input (if form wasn't updated yet)
+        formData.set('searchString', term);
+        
+        const params = new URLSearchParams(formData);
+
+        fetch('@Url.Action("Index", "Employee", new { area = "Admin_65133141" })?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(html => {
+            if (employeeListContainer) {
+                employeeListContainer.innerHTML = html;
+                // Re-initialize any JS plugins if needed (e.g., tooltips, though currently none)
+            }
+        })
+        .catch(error => {
+            console.error('Error updating employee list:', error);
+        })
+        .finally(() => {
+             if (searchLoading) searchLoading.classList.add('hidden');
+        });
+    }
+
+    function fetchSuggestions(term) {
+        fetch('@Url.Action("GetSearchSuggestions", "Employee", new { area = "Admin_65133141" })?term=' + encodeURIComponent(term))
+            .then(res => res.json())
+            .then(data => {
+                if (!suggestionsBox) return;
+                
+                if (data.length === 0) {
+                    suggestionsBox.classList.add('hidden');
+                    return;
+                }
+
+                let html = '';
+                data.forEach(item => {
+                    html += `
+                        <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-3 transition-colors" onclick="selectSuggestion('${item.value}')">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                                ${item.avatar || '?'}
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-gray-900">${item.label}</div>
+                                <div class="text-xs text-gray-500">${item.desc || ''}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                suggestionsBox.innerHTML = html;
+                suggestionsBox.classList.remove('hidden');
+            })
+            .catch(err => console.error('Error fetching suggestions:', err));
+    }
+
+    function selectSuggestion(value) {
+        if (searchInput) {
+            searchInput.value = value;
+            suggestionsBox.classList.add('hidden');
+            // Trigger search immediately
+            performLiveSearch(value);
+        }
+    }
+
     function toggleEmployeeSortPanel() {
         var panel = document.getElementById('employeeSortPanel');
         if (!panel) return;

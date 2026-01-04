@@ -213,10 +213,163 @@
         document.body.style.overflow = 'auto';
     }
 
+    // Validation functions (matching create modal)
+    function validateFullName(value) {
+        if (!value || value.trim() === '') {
+            return 'Vui lòng nhập họ tên';
+        }
+        const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/;
+        if (!nameRegex.test(value.trim())) {
+            return 'Họ tên chỉ được chứa chữ cái';
+        }
+        return null;
+    }
+
+    function validatePhoneNumber(value) {
+        if (!value || value.trim() === '') {
+            return 'Vui lòng nhập số điện thoại';
+        }
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(value.trim())) {
+            return 'Số điện thoại phải có đúng 10 chữ số';
+        }
+        return null;
+    }
+
+    function validateEmail(value) {
+        if (!value || value.trim() === '') {
+            return 'Vui lòng nhập email';
+        }
+        const emailRegex = /^[a-zA-Z0-9._-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(value.trim())) {
+            return 'Email không hợp lệ (chỉ cho phép chữ, số, dấu chấm, gạch ngang, gạch dưới và @@)';
+        }
+        return null;
+    }
+
+    function validateAddress(value) {
+        if (!value || value.trim() === '') {
+            return null; // Address is optional
+        }
+        const addressRegex = /^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s,.\/-]+$/;
+        if (!addressRegex.test(value.trim())) {
+            return 'Địa chỉ chỉ được chứa chữ, số và các ký tự: , . / -';
+        }
+        return null;
+    }
+
     // Handle form submission
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('editEmployeeForm');
         if (form) {
+            // Real-time validation
+            const fullNameInput = document.getElementById('editFullName');
+            const phoneNumberInput = document.getElementById('editPhoneNumber');
+            const emailInput = document.getElementById('editEmail');
+            const addressInput = document.getElementById('editAddress');
+
+            if (fullNameInput) {
+                fullNameInput.addEventListener('input', function(e) {
+                    const error = validateFullName(e.target.value);
+                    const errorEl = document.getElementById('error-edit-FullName');
+                    if (errorEl) {
+                        errorEl.textContent = error || '';
+                        errorEl.style.display = error ? 'block' : 'none';
+                    }
+                });
+
+                fullNameInput.addEventListener('keypress', function(e) {
+                    // Use e.key to check the character directly
+                    const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]$/;
+                    if (!nameRegex.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            if (phoneNumberInput) {
+                phoneNumberInput.addEventListener('input', function(e) {
+                    const error = validatePhoneNumber(e.target.value);
+                    const errorEl = document.getElementById('error-edit-PhoneNumber');
+                    if (errorEl) {
+                        errorEl.textContent = error || '';
+                        errorEl.style.display = error ? 'block' : 'none';
+                    }
+                });
+
+                phoneNumberInput.addEventListener('keypress', function(e) {
+                    if (!/^[0-9]$/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+
+                phoneNumberInput.addEventListener('input', function(e) {
+                    if (e.target.value.length > 10) {
+                        e.target.value = e.target.value.slice(0, 10);
+                    }
+                });
+            }
+
+            if (emailInput) {
+                // Prevent invalid characters in email
+                // Prevent invalid characters in email
+                emailInput.addEventListener('keypress', function(e) {
+                    // Allow letters, numbers, dot, underscore, hyphen, and at sign
+                    const emailAllowedRegex = /^[a-zA-Z0-9.\-_\x40]$/;
+                    if (!emailAllowedRegex.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+
+                emailInput.addEventListener('blur', function(e) {
+                    const error = validateEmail(e.target.value);
+                    const errorEl = document.getElementById('error-edit-Email');
+                    if (errorEl) {
+                        errorEl.textContent = error || '';
+                        errorEl.style.display = error ? 'block' : 'none';
+                    }
+                });
+            }
+
+            // Helper to enforce year limit on date inputs
+            function enforceYearLimit(inputElement) {
+                inputElement.setAttribute('max', '9999-12-31');
+                inputElement.addEventListener('input', function(e) {
+                    const value = e.target.value;
+                    if (value) {
+                        const dateParts = value.split('-');
+                        if (dateParts.length > 0 && dateParts[0].length > 4) {
+                            // If year is more than 4 digits, slice it
+                            dateParts[0] = dateParts[0].slice(0, 4);
+                            e.target.value = dateParts.join('-');
+                        }
+                    }
+                });
+            }
+
+            const editDobInput = document.getElementById('editDateOfBirth');
+            const editStartInput = document.getElementById('editStartDate');
+            if (editDobInput) enforceYearLimit(editDobInput);
+            if (editStartInput) enforceYearLimit(editStartInput);
+
+            if (addressInput) {
+                addressInput.addEventListener('input', function(e) {
+                    const error = validateAddress(e.target.value);
+                    const errorEl = document.getElementById('error-edit-Address');
+                    if (errorEl) {
+                        errorEl.textContent = error || '';
+                        errorEl.style.display = error ? 'block' : 'none';
+                    }
+                });
+
+                addressInput.addEventListener('keypress', function(e) {
+                    const addressRegex = /^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s,.\/-]$/;
+                    if (!addressRegex.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
@@ -232,11 +385,43 @@
                 
                 const fullName = document.getElementById('editFullName').value.trim();
                 const email = document.getElementById('editEmail').value.trim();
+                const phoneNumber = document.getElementById('editPhoneNumber').value.trim();
+                const address = document.getElementById('editAddress').value.trim();
+                const dateOfBirth = document.getElementById('editDateOfBirth').value;
+                const startDate = document.getElementById('editStartDate').value;
                 const password = document.getElementById('editPassword').value;
                 const confirmPassword = document.getElementById('editConfirmPassword').value;
 
-                if (!fullName) { errors['edit-FullName'] = 'Vui lòng nhập họ tên'; hasErrors = true; }
-                if (!email) { errors['edit-Email'] = 'Vui lòng nhập email'; hasErrors = true; }
+                // Validate with validation functions
+                const fullNameError = validateFullName(fullName);
+                if (fullNameError) { errors['edit-FullName'] = fullNameError; hasErrors = true; }
+
+                const emailError = validateEmail(email);
+                if (emailError) { errors['edit-Email'] = emailError; hasErrors = true; }
+
+                const phoneError = validatePhoneNumber(phoneNumber);
+                if (phoneError) { errors['edit-PhoneNumber'] = phoneError; hasErrors = true; }
+
+                const addressError = validateAddress(address);
+                if (addressError) { errors['edit-Address'] = addressError; hasErrors = true; }
+
+                // Validate Year ranges specially
+                if (dateOfBirth) {
+                    const year = new Date(dateOfBirth).getFullYear();
+                    if (year > 9999 || year < 1900) {
+                         errors['edit-DateOfBirth'] = 'Năm sinh không hợp lệ (phải có 4 số)';
+                         hasErrors = true;
+                    }
+                }
+
+                if (startDate) {
+                    const year = new Date(startDate).getFullYear();
+                    if (year > 9999 || year < 1900) {
+                         errors['edit-StartDate'] = 'Năm vào làm không hợp lệ (phải có 4 số)';
+                         hasErrors = true;
+                    }
+                }
+
                 if (password && password !== confirmPassword) {
                     errors['edit-ConfirmPassword'] = 'Mật khẩu xác nhận không khớp';
                     hasErrors = true;
@@ -259,11 +444,10 @@
                 submitBtn.textContent = 'Đang xử lý...';
 
                 // Prepare form data
+                // Prepare form data
                 const formData = new FormData(form);
-                const token = document.querySelector('input[name="__RequestVerificationToken"]');
-                if (token) {
-                    formData.append('__RequestVerificationToken', token.value);
-                }
+                // Token is already included in FormData from the form input
+                
 
                 // Submit via AJAX
                 fetch('@Url.Action("EditEmployeeAjax", "Employee", new { area = "Admin_65133141" })', {

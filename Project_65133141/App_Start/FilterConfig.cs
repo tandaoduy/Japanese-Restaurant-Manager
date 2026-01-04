@@ -8,8 +8,8 @@ namespace Project_65133141
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
-            // Use custom area error handler instead of default
-            filters.Add(new AreaErrorHandlerAttribute());
+            // TEMPORARILY DISABLED - global error handler was contributing to redirect loop
+            // filters.Add(new AreaErrorHandlerAttribute());
         }
     }
 }

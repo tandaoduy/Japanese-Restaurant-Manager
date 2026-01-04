@@ -5,7 +5,7 @@ using Project_65133141.Filters;
 
 namespace Project_65133141.Areas.Employee_65133141.Controllers
 {
-    [RoleAuthorize("employee", "admin")]
+    [RoleAuthorize("employee")]
     public class SessionController : Controller
     {
         // POST: Employee_65133141/Session/Extend

@@ -8,7 +8,7 @@ using Project_65133141.Filters;
 
 namespace Project_65133141.Areas.Employee_65133141.Controllers
 {
-    [RoleAuthorize("employee", "admin")]
+    [RoleAuthorize("employee")]
     public class HomeController : Controller
     {
         private QuanLyNhaHangNhat_65133141Entities6 db = new QuanLyNhaHangNhat_65133141Entities6();

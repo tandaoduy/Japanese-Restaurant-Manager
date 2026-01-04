@@ -37,43 +37,65 @@
         </div>
     }
 
-    <!-- Status Summary -->
+    <!-- Statistics Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-green-100 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="filterStatus('Trống')">
+        <div class="bg-white rounded-xl shadow-sm p-4 border-2 border-green-200 flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium text-gray-500">Bàn Trống</p>
-                <p class="text-2xl font-bold text-green-600">@ViewBag.TrongCount</p>
+                <p class="text-sm font-medium text-gray-500">Trống</p>
+                <p class="text-2xl font-bold text-green-600">@((ViewBag.TrongCount ?? 0).ToString("N0"))</p>
             </div>
             <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-yellow-100 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="filterStatus('Đã đặt')">
+        <div class="bg-yellow-50 rounded-xl shadow-sm p-4 border-2 border-yellow-200 flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium text-gray-500">Đã Đặt</p>
-                <p class="text-2xl font-bold text-yellow-600">@ViewBag.DaDatCount</p>
+                <p class="text-sm font-medium text-gray-500">Đã đặt</p>
+                <p class="text-2xl font-bold text-yellow-600">@((ViewBag.DaDatCount ?? 0).ToString("N0"))</p>
             </div>
             <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-red-100 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="filterStatus('Đang phục vụ')">
+        <div class="bg-red-50 rounded-xl shadow-sm p-4 border-2 border-red-200 flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium text-gray-500">Đang Phục Vụ</p>
-                <p class="text-2xl font-bold text-red-600">@ViewBag.DangPhucVuCount</p>
+                <p class="text-sm font-medium text-gray-500">Đang phục vụ</p>
+                <p class="text-2xl font-bold text-red-600">@((ViewBag.DangPhucVuCount ?? 0).ToString("N0"))</p>
             </div>
             <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-blue-100 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="filterStatus('all')">
+        <div class="bg-blue-50 rounded-xl shadow-sm p-4 border-2 border-blue-200 flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium text-gray-500">Tổng Số Bàn</p>
-                <p class="text-2xl font-bold text-blue-600">@ViewBag.TotalCount</p>
+                <p class="text-sm font-medium text-gray-500">Tổng số</p>
+                <p class="text-2xl font-bold text-blue-600">@((ViewBag.TotalCount ?? 0).ToString("N0"))</p>
             </div>
             <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
             </div>
+        </div>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="mb-6">
+        <div class="flex flex-wrap gap-3">
+            <a href="@Url.Action("Index", "BanAn", new { area = "Employee_65133141", statusFilter = "all" })" 
+               class="px-4 py-2 rounded-lg transition-colors @(statusFilter == "all" ? "bg-red-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300")">
+                Tất cả
+            </a>
+            <a href="@Url.Action("Index", "BanAn", new { area = "Employee_65133141", statusFilter = "Trống" })" 
+               class="px-4 py-2 rounded-lg transition-colors @(statusFilter == "Trống" ? "bg-green-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300")">
+                Trống
+            </a>
+            <a href="@Url.Action("Index", "BanAn", new { area = "Employee_65133141", statusFilter = "Đã đặt" })" 
+               class="px-4 py-2 rounded-lg transition-colors @(statusFilter == "Đã đặt" ? "bg-yellow-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300")">
+                Đã đặt
+            </a>
+            <a href="@Url.Action("Index", "BanAn", new { area = "Employee_65133141", statusFilter = "Đang phục vụ" })" 
+               class="px-4 py-2 rounded-lg transition-colors @(statusFilter == "Đang phục vụ" ? "bg-red-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300")">
+                Đang phục vụ
+            </a>
         </div>
     </div>
 

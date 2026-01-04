@@ -1,6 +1,7 @@
 using System;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Routing;
 
 namespace Project_65133141.Filters
 {
@@ -80,29 +81,35 @@ namespace Project_65133141.Filters
 
         protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)
         {
-            // Get user role to determine redirect URL
-            var userRole = filterContext.HttpContext.Session["UserRole"] as string;
-            string redirectUrl = "~/Home/Index"; // Default redirect to home
+            // Prevent caching of this response
+            filterContext.HttpContext.Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
+            filterContext.HttpContext.Response.Cache.SetNoStore();
+            
+            // Khi truy cập sai role hoặc chưa đăng nhập, luôn đăng xuất và đưa về Home/Index
+            System.Web.Security.FormsAuthentication.SignOut();
 
-            if (!string.IsNullOrEmpty(userRole))
+            var session = filterContext.HttpContext.Session;
+            if (session != null)
             {
-                string roleLower = userRole.ToLower().Trim();
-                if (roleLower == "admin")
-                {
-                    redirectUrl = "~/Admin_65133141/Home/Index";
-                }
-                else if (roleLower == "nhân viên" || roleLower == "nhan vien" || roleLower == "employee")
-                {
-                    redirectUrl = "~/Employee_65133141/Home/Index";
-                }
-                else if (roleLower == "khách hàng" || roleLower == "khach hang" || roleLower == "user")
-                {
-                    redirectUrl = "~/User_65133141/Home/Index";
-                }
+                session.Clear();
+                session.Abandon();
             }
 
-            // Redirect directly to home page without alert
-            filterContext.Result = new RedirectResult(redirectUrl);
+            // Xoá cookie xác thực nếu có
+            var authCookieName = System.Web.Security.FormsAuthentication.FormsCookieName;
+            if (filterContext.HttpContext.Request.Cookies[authCookieName] != null)
+            {
+                var cookie = new HttpCookie(authCookieName)
+                {
+                    Expires = DateTime.Now.AddDays(-1),
+                    Value = string.Empty
+                };
+                filterContext.HttpContext.Response.Cookies.Add(cookie);
+            }
+
+            // Use direct URL redirect to avoid routing issues
+            var homeUrl = System.Web.VirtualPathUtility.ToAbsolute("~/Home/Index") + "?signedOut=1";
+            filterContext.Result = new RedirectResult(homeUrl, permanent: false);
         }
     }
 }

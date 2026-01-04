@@ -42,7 +42,9 @@ namespace Project_65133141.Controllers
             }
             
             // Nếu còn đăng nhập, xử lý tuỳ theo vai trò
-            if (User.Identity.IsAuthenticated)
+            // Skip redirect if user was just signed out (to prevent redirect loop)
+            var signedOut = Request.QueryString["signedOut"];
+            if (User.Identity.IsAuthenticated && string.IsNullOrEmpty(signedOut))
             {
                 var role = Session["UserRole"] as string;
                 if (!string.IsNullOrEmpty(role))

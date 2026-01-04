@@ -150,6 +150,56 @@
         }
     };
 
+    // Validation functions
+    function validateFullName(value) {
+        if (!value || value.trim() === '') {
+            return 'Vui lòng nhập họ tên';
+        }
+        // Only Vietnamese letters and spaces (no numbers or special characters)
+        const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/;
+        if (!nameRegex.test(value.trim())) {
+            return 'Họ tên chỉ được chứa chữ cái';
+        }
+        return null;
+    }
+
+    function validatePhoneNumber(value) {
+        if (!value || value.trim() === '') {
+            return 'Vui lòng nhập số điện thoại';
+        }
+        // Exactly 10 digits
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(value.trim())) {
+            return 'Số điện thoại phải có đúng 10 chữ số';
+        }
+        return null;
+    }
+
+    function validateEmail(value) {
+        if (!value || value.trim() === '') {
+            return 'Vui lòng nhập email';
+        }
+        // Standard email format - only alphanumeric, dot, hyphen, underscore before @@, and standard domain after
+        const emailRegex = /^[a-zA-Z0-9._-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(value.trim())) {
+            return 'Email không hợp lệ (chỉ cho phép chữ, số, dấu chấm, gạch ngang, gạch dưới và @@)';
+        }
+        return null;
+    }
+
+    function validateAddress(value) {
+        // Address is optional
+        if (!value || value.trim() === '') {
+            return null;
+        }
+        // Letters, numbers, and only allowed special characters: , . / -
+        const addressRegex = /^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s,.\/-]+$/;
+        if (!addressRegex.test(value.trim())) {
+            return 'Địa chỉ chỉ được chứa chữ, số và các ký tự: , . / -';
+        }
+        return null;
+    }
+
     // Handle form submission
     (function initCreateEmployeeForm() {
         const form = document.getElementById('createEmployeeForm');
@@ -157,6 +207,119 @@
             // Retry if form not found yet
             setTimeout(initCreateEmployeeForm, 100);
             return;
+        }
+
+        // Real-time validation
+        const fullNameInput = document.getElementById('createFullName');
+        const phoneNumberInput = document.getElementById('createPhoneNumber');
+        const emailInput = document.getElementById('createEmail');
+        const addressInput = document.getElementById('createAddress');
+
+        if (fullNameInput) {
+            fullNameInput.addEventListener('input', function(e) {
+                const error = validateFullName(e.target.value);
+                const errorEl = document.getElementById('error-create-FullName');
+                if (errorEl) {
+                    errorEl.textContent = error || '';
+                    errorEl.style.display = error ? 'block' : 'none';
+                }
+            });
+
+            // Prevent non-letter characters from being typed
+            fullNameInput.addEventListener('keypress', function(e) {
+                // Use e.key to check the character directly
+                const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]$/;
+                if (!nameRegex.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        if (phoneNumberInput) {
+            phoneNumberInput.addEventListener('input', function(e) {
+                const error = validatePhoneNumber(e.target.value);
+                const errorEl = document.getElementById('error-create-PhoneNumber');
+                if (errorEl) {
+                    errorEl.textContent = error || '';
+                    errorEl.style.display = error ? 'block' : 'none';
+                }
+            });
+
+            // Prevent non-digit characters and limit to 10 digits
+            // Prevent non-digit characters and limit to 10 digits
+            phoneNumberInput.addEventListener('keypress', function(e) {
+                if (!/^[0-9]$/.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+
+            phoneNumberInput.addEventListener('input', function(e) {
+                if (e.target.value.length > 10) {
+                    e.target.value = e.target.value.slice(0, 10);
+                }
+            });
+        }
+
+        if (emailInput) {
+            // Prevent invalid characters in email
+            // Prevent invalid characters in email
+            emailInput.addEventListener('keypress', function(e) {
+                // Allow letters, numbers, dot, underscore, hyphen, and at sign
+                const emailAllowedRegex = /^[a-zA-Z0-9.\-_\x40]$/;
+                if (!emailAllowedRegex.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+
+            emailInput.addEventListener('blur', function(e) {
+                const error = validateEmail(e.target.value);
+                const errorEl = document.getElementById('error-create-Email');
+                if (errorEl) {
+                    errorEl.textContent = error || '';
+                    errorEl.style.display = error ? 'block' : 'none';
+                }
+            });
+        }
+
+        // Helper to enforce year limit on date inputs
+        function enforceYearLimit(inputElement) {
+            inputElement.setAttribute('max', '9999-12-31');
+            inputElement.addEventListener('input', function(e) {
+                const value = e.target.value;
+                if (value) {
+                    const dateParts = value.split('-');
+                    if (dateParts.length > 0 && dateParts[0].length > 4) {
+                        // If year is more than 4 digits, slice it
+                        dateParts[0] = dateParts[0].slice(0, 4);
+                        e.target.value = dateParts.join('-');
+                    }
+                }
+            });
+        }
+
+        const dobInput = document.getElementById('createDateOfBirth');
+        const startInput = document.getElementById('createStartDate');
+        if (dobInput) enforceYearLimit(dobInput);
+        if (startInput) enforceYearLimit(startInput);
+
+        if (addressInput) {
+            addressInput.addEventListener('input', function(e) {
+                const error = validateAddress(e.target.value);
+                const errorEl = document.getElementById('error-create-Address');
+                if (errorEl) {
+                    errorEl.textContent = error || '';
+                    errorEl.style.display = error ? 'block' : 'none';
+                }
+            });
+
+            // Prevent invalid characters
+            // Prevent invalid characters
+            addressInput.addEventListener('keypress', function(e) {
+                const addressRegex = /^[a-zA-Z0-9ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s,.\/-]$/;
+                if (!addressRegex.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
         }
 
         form.addEventListener('submit', function(e) {
@@ -175,16 +338,48 @@
             const fullName = document.getElementById('createFullName')?.value.trim() || '';
             const email = document.getElementById('createEmail')?.value.trim() || '';
             const phoneNumber = document.getElementById('createPhoneNumber')?.value.trim() || '';
+            const address = document.getElementById('createAddress')?.value.trim() || '';
             const dateOfBirth = document.getElementById('createDateOfBirth')?.value || '';
             const startDate = document.getElementById('createStartDate')?.value || '';
             const password = document.getElementById('createPassword')?.value || '';
             const confirmPassword = document.getElementById('createConfirmPassword')?.value || '';
 
-            if (!fullName) { errors['create-FullName'] = 'Vui lòng nhập họ tên'; hasErrors = true; }
-            if (!email) { errors['create-Email'] = 'Vui lòng nhập email'; hasErrors = true; }
-            if (!phoneNumber) { errors['create-PhoneNumber'] = 'Vui lòng nhập số điện thoại'; hasErrors = true; }
-            if (!dateOfBirth) { errors['create-DateOfBirth'] = 'Vui lòng chọn ngày sinh'; hasErrors = true; }
-            if (!startDate) { errors['create-StartDate'] = 'Vui lòng chọn ngày vào làm'; hasErrors = true; }
+            // Validate with new validation functions
+            const fullNameError = validateFullName(fullName);
+            if (fullNameError) { errors['create-FullName'] = fullNameError; hasErrors = true; }
+
+            const emailError = validateEmail(email);
+            if (emailError) { errors['create-Email'] = emailError; hasErrors = true; }
+
+            const phoneError = validatePhoneNumber(phoneNumber);
+            if (phoneError) { errors['create-PhoneNumber'] = phoneError; hasErrors = true; }
+
+            const addressError = validateAddress(address);
+            if (addressError) { errors['create-Address'] = addressError; hasErrors = true; }
+
+            // Validate Year ranges specially
+            if (dateOfBirth) {
+                const year = new Date(dateOfBirth).getFullYear();
+                if (year > 9999 || year < 1900) {
+                     errors['create-DateOfBirth'] = 'Năm sinh không hợp lệ (phải có 4 số)';
+                     hasErrors = true;
+                }
+            } else {
+                 errors['create-DateOfBirth'] = 'Vui lòng chọn ngày sinh';
+                 hasErrors = true;
+            }
+
+            if (startDate) {
+                const year = new Date(startDate).getFullYear();
+                if (year > 9999 || year < 1900) {
+                     errors['create-StartDate'] = 'Năm vào làm không hợp lệ (phải có 4 số)';
+                     hasErrors = true;
+                }
+            } else {
+                 errors['create-StartDate'] = 'Vui lòng chọn ngày vào làm';
+                 hasErrors = true;
+            }
+
             if (!password) { errors['create-Password'] = 'Vui lòng nhập mật khẩu'; hasErrors = true; }
             if (!confirmPassword) { errors['create-ConfirmPassword'] = 'Vui lòng xác nhận mật khẩu'; hasErrors = true; }
             if (password && confirmPassword && password !== confirmPassword) {
