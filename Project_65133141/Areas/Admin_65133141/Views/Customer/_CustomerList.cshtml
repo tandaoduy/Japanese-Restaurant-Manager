@@ -1,0 +1,352 @@
+@model IEnumerable<Project_65133141.Models.User>
+
+@{
+    var viewType = ViewBag.ViewType as string ?? "table";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var pageSize = ViewBag.PageSize ?? 5;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var searchString = ViewBag.SearchString as string;
+    var statusFilter = ViewBag.StatusFilter as string;
+    var sortBy = ViewBag.SortBy as string;
+}
+
+@if (viewType == "table")
+{
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-hidden">
+            <table class="w-full table-fixed divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 5%;">STT</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Mã KH</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 8%;">Avatar</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 15%;">Tên KH</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 13%;">SĐT</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 20%;">Email</th>
+                        <th class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase" style="width: 14%;">Trạng thái</th>
+                        <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase" style="width: 15%;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @if (Model != null && Model.Any())
+                    {
+                        var rowIndex = 0;
+                        foreach (var item in Model)
+                        {
+                            rowIndex++;
+                            var stt = ((currentPage - 1) * pageSize) + rowIndex;
+                            var isActive = item.TrangThai ?? true;
+                            var status = isActive ? "Hoạt động" : "Vô hiệu hóa";
+                            var statusClass = isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+                            var customerCode = "KH" + item.UserID.ToString("D5");
+                            var avatarLetter = !string.IsNullOrEmpty(item.HoTen) ? item.HoTen.Substring(0, 1).ToUpper() : "?";
+
+                            // Bảo vệ chuỗi JavaScript (Sửa lỗi TS1135)
+                            var safeName = HttpUtility.JavaScriptStringEncode(item.HoTen ?? item.Email ?? "khách hàng");
+
+                            <tr>
+                                <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-700">@stt</td>
+                                <td class="px-2 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">@customerCode</td>
+                                <td class="px-2 py-3 whitespace-nowrap">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                                        @avatarLetter
+                                    </div>
+                                </td>
+                                <td class="px-2 py-3 text-sm text-gray-900 truncate" title="@(item.HoTen ?? "-")">@(item.HoTen ?? "-")</td>
+                                <td class="px-2 py-3 text-sm text-gray-600 truncate" title="@(item.SDT ?? "-")">@(item.SDT ?? "-")</td>
+                                <td class="px-2 py-3 text-sm text-gray-600 truncate" title="@(item.Email ?? "-")">@(item.Email ?? "-")</td>
+                                <td class="px-2 py-3 whitespace-nowrap">
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold @statusClass">@status</span>
+                                </td>
+                                <td class="px-2 py-3 whitespace-nowrap text-center text-sm">
+                                    <div class="inline-flex items-center gap-2">
+                                        <button type="button"
+                                                onclick="openCustomerDetailsModal(@item.UserID)"
+                                                class="w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                                title="Xem chi tiết">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                        </button>
+
+                                        <button type="button"
+                                                data-status="@status"
+                                                onclick="toggleStatus(this, @item.UserID, '@safeName')"
+                                                class="status-toggle-btn w-8 h-8 @(status == "Hoạt động" ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700") text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                                title="@(status == "Hoạt động" ? "Vô hiệu hóa" : "Kích hoạt")">
+                                            @if (status == "Hoạt động")
+                                            {
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.93 4.93l14.14 14.14"></path></svg>
+                                            }
+                                            else
+                                            {
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            }
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="8" class="px-6 py-10 text-center text-gray-500">Không có khách hàng nào.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @RenderPagination()
+    </div>
+}
+else
+{
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                var isActive = item.TrangThai ?? true;
+                var status = isActive ? "Hoạt động" : "Vô hiệu hóa";
+                var statusClass = isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+                var avatarLetter = !string.IsNullOrEmpty(item.HoTen) ? item.HoTen.Substring(0, 1).ToUpper() : "?";
+                var safeName = HttpUtility.JavaScriptStringEncode(item.HoTen ?? item.Email ?? "khách hàng");
+
+                // Chọn màu nền và hoạ tiết dựa trên ID (theo thiết kế mới)
+                var cardIndex = Math.Abs(item.UserID) % 20;
+                string colorClass = "";
+                string patternStyle = "";
+                string patternColor = "";
+                
+                switch (cardIndex)
+                {
+                    case 0: // Xanh lá - Triangle/Diamond pattern
+                        colorClass = "bg-green-500";
+                        patternColor = "rgba(255,255,255,0.15)";
+                        patternStyle = "background-image: linear-gradient(135deg, " + patternColor + " 25%, transparent 25%), linear-gradient(225deg, " + patternColor + " 25%, transparent 25%), linear-gradient(45deg, " + patternColor + " 25%, transparent 25%), linear-gradient(315deg, " + patternColor + " 25%, transparent 25%); background-size: 36px 36px; background-position: 0 0, 18px 0, 18px -18px, 0px 18px;";
+                        break;
+                    case 1: // Xanh lá - Triangle/Diamond pattern (variation)
+                        colorClass = "bg-green-500";
+                        patternColor = "rgba(255,255,255,0.12)";
+                        patternStyle = "background-image: linear-gradient(135deg, " + patternColor + " 25%, transparent 25%), linear-gradient(225deg, " + patternColor + " 25%, transparent 25%), linear-gradient(45deg, " + patternColor + " 25%, transparent 25%), linear-gradient(315deg, " + patternColor + " 25%, transparent 25%); background-size: 40px 40px; background-position: 0 0, 20px 0, 20px -20px, 0px 20px;";
+                        break;
+                    case 2: // Xanh dương - Dots pattern
+                        colorClass = "bg-blue-500";
+                        patternColor = "rgba(255,255,255,0.18)";
+                        patternStyle = "background-image: radial-gradient(circle, " + patternColor + " 2px, transparent 2px); background-size: 18px 18px;";
+                        break;
+                    case 3: // Tím oải hương - Solid (no pattern)
+                        colorClass = "bg-purple-300";
+                        patternStyle = "";
+                        break;
+                    case 4: // Tím - Low-poly triangles
+                        colorClass = "bg-purple-500";
+                        patternColor = "rgba(255,255,255,0.12)";
+                        patternStyle = "background-image: linear-gradient(60deg, " + patternColor + " 25%, transparent 25%), linear-gradient(120deg, " + patternColor + " 25%, transparent 25%), linear-gradient(240deg, " + patternColor + " 25%, transparent 25%), linear-gradient(300deg, " + patternColor + " 25%, transparent 25%); background-size: 30px 30px;";
+                        break;
+                    case 5: // Hồng - Grid squares
+                        colorClass = "bg-pink-500";
+                        patternColor = "rgba(255,255,255,0.16)";
+                        patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 20px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 20px); background-size: 20px 20px;";
+                        break;
+                    case 6: // Turquoise - Octagons
+                        colorClass = "bg-teal-400";
+                        patternColor = "rgba(255,255,255,0.14)";
+                        patternStyle = "background-image: repeating-linear-gradient(0deg, transparent 0, transparent 24px, " + patternColor + " 24px, " + patternColor + " 25px), repeating-linear-gradient(90deg, transparent 0, transparent 24px, " + patternColor + " 24px, " + patternColor + " 25px); background-size: 25px 25px;";
+                        break;
+                    case 7: // Turquoise - Concentric circles
+                        colorClass = "bg-teal-400";
+                        patternColor = "rgba(255,255,255,0.2)";
+                        patternStyle = "background-image: radial-gradient(circle at 20% 30%, " + patternColor + " 8%, transparent 8%), radial-gradient(circle at 70% 50%, " + patternColor + " 10%, transparent 10%), radial-gradient(circle at 50% 80%, " + patternColor + " 7%, transparent 7%), radial-gradient(circle at 80% 20%, " + patternColor + " 9%, transparent 9%);";
+                        break;
+                    case 8: // Vàng - Overlapping circles
+                        colorClass = "bg-yellow-400";
+                        patternColor = "rgba(255,255,255,0.18)";
+                        patternStyle = "background-image: radial-gradient(circle at 25% 25%, " + patternColor + " 15%, transparent 15%), radial-gradient(circle at 75% 75%, " + patternColor + " 18%, transparent 18%), radial-gradient(circle at 50% 50%, " + patternColor + " 12%, transparent 12%);";
+                        break;
+                    case 9: // Xám - Checkerboard
+                        colorClass = "bg-gray-300";
+                        patternColor = "rgba(255,255,255,0.3)";
+                        patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 12px, transparent 12px, transparent 24px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 12px, transparent 12px, transparent 24px); background-size: 24px 24px;";
+                        break;
+                    case 10: // Hồng - Tessellating octagons
+                        colorClass = "bg-pink-500";
+                        patternColor = "rgba(255,255,255,0.15)";
+                        patternStyle = "background-image: repeating-linear-gradient(45deg, transparent 0, transparent 16px, " + patternColor + " 16px, " + patternColor + " 18px), repeating-linear-gradient(-45deg, transparent 0, transparent 16px, " + patternColor + " 16px, " + patternColor + " 18px); background-size: 32px 32px;";
+                        break;
+                    case 11: // Turquoise - Plaid
+                        colorClass = "bg-cyan-400";
+                        patternColor = "rgba(255,255,255,0.2)";
+                        patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 2px, transparent 2px, transparent 28px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 2px, transparent 2px, transparent 28px); background-size: 28px 28px;";
+                        break;
+                    case 12: // Xanh dương - Concentric circles
+                        colorClass = "bg-blue-500";
+                        patternColor = "rgba(255,255,255,0.22)";
+                        patternStyle = "background-image: radial-gradient(circle at 30% 40%, " + patternColor + " 12%, transparent 12%), radial-gradient(circle at 60% 70%, " + patternColor + " 15%, transparent 15%), radial-gradient(circle at 80% 30%, " + patternColor + " 10%, transparent 10%);";
+                        break;
+                    case 13: // Vàng - Circles and dots
+                        colorClass = "bg-yellow-400";
+                        patternColor = "rgba(255,255,255,0.2)";
+                        patternStyle = "background-image: radial-gradient(circle at 15% 25%, " + patternColor + " 6%, transparent 6%), radial-gradient(circle at 85% 75%, " + patternColor + " 8%, transparent 8%), radial-gradient(circle at 50% 50%, " + patternColor + " 5%, transparent 5%), radial-gradient(circle, " + patternColor + " 1.5px, transparent 1.5px); background-size: 20px 20px, 25px 25px, 30px 30px, 15px 15px;";
+                        break;
+                    case 14: // Tím - Plaid
+                        colorClass = "bg-purple-400";
+                        patternColor = "rgba(255,255,255,0.18)";
+                        patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 1.5px, transparent 1.5px, transparent 22px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 1.5px, transparent 1.5px, transparent 22px); background-size: 22px 22px;";
+                        break;
+                    case 15: // Xanh dương - Low-poly geometric
+                        colorClass = "bg-blue-600";
+                        patternColor = "rgba(255,255,255,0.14)";
+                        patternStyle = "background-image: linear-gradient(135deg, " + patternColor + " 25%, transparent 25%), linear-gradient(225deg, " + patternColor + " 25%, transparent 25%), linear-gradient(45deg, " + patternColor + " 25%, transparent 25%), linear-gradient(315deg, " + patternColor + " 25%, transparent 25%); background-size: 28px 28px; background-position: 0 0, 14px 0, 14px -14px, 0px 14px;";
+                        break;
+                    case 16: // Teal - Wave pattern
+                        colorClass = "bg-teal-500";
+                        patternColor = "rgba(255,255,255,0.16)";
+                        patternStyle = "background-image: repeating-linear-gradient(0deg, transparent 0, transparent 8px, " + patternColor + " 8px, " + patternColor + " 10px), repeating-linear-gradient(0deg, transparent 4px, " + patternColor + " 4px, " + patternColor + " 6px, transparent 6px); background-size: 100% 20px;";
+                        break;
+                    case 17: // Hồng - Octagons scattered
+                        colorClass = "bg-pink-500";
+                        patternColor = "rgba(255,255,255,0.18)";
+                        patternStyle = "background-image: repeating-linear-gradient(45deg, transparent 0, transparent 20px, " + patternColor + " 20px, " + patternColor + " 22px), repeating-linear-gradient(-45deg, transparent 0, transparent 20px, " + patternColor + " 20px, " + patternColor + " 22px); background-size: 40px 40px;";
+                        break;
+                    case 18: // Xanh dương - Pixelated blocks
+                        colorClass = "bg-blue-600";
+                        patternColor = "rgba(255,255,255,0.12)";
+                        patternStyle = "background-image: repeating-linear-gradient(0deg, " + patternColor + " 0, " + patternColor + " 8px, transparent 8px, transparent 16px), repeating-linear-gradient(90deg, " + patternColor + " 0, " + patternColor + " 8px, transparent 8px, transparent 16px); background-size: 16px 16px;";
+                        break;
+                    case 19: // Xám - Diamond pattern
+                        colorClass = "bg-gray-400";
+                        patternColor = "rgba(255,255,255,0.25)";
+                        patternStyle = "background-image: repeating-linear-gradient(45deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 14px), repeating-linear-gradient(-45deg, " + patternColor + " 0, " + patternColor + " 1px, transparent 1px, transparent 14px); background-size: 14px 14px;";
+                        break;
+                }
+
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-shadow text-sm">
+                    <div class="h-20 @colorClass relative overflow-hidden">
+                        @if (!string.IsNullOrEmpty(patternStyle))
+                        {
+                            <div style="@patternStyle position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.85;"></div>
+                        }
+                    </div>
+                    <div class="relative px-4 pb-4">
+                        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2">
+                            <div class="w-14 h-14 md:w-16 md:h-16 rounded-full @colorClass flex items-center justify-center text-white font-bold text-xl md:text-2xl border-4 border-white shadow-lg">
+                                @avatarLetter
+                            </div>
+                        </div>
+                        <div class="pt-10 text-center">
+                            <h3 class="text-base font-semibold text-gray-900 mb-0.5">@(item.HoTen ?? "-")</h3>
+                            <p class="text-xs text-gray-600 mb-2">@(item.Email ?? "-")</p>
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold @statusClass mb-3">@status</span>
+                            <div class="flex items-center justify-center gap-2 pt-3 border-t border-gray-100">
+                                <button type="button"
+                                        onclick="openCustomerDetailsModal(@item.UserID)"
+                                        class="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                        title="Xem chi tiết">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+
+                                <button type="button"
+                                        data-status="@status"
+                                        onclick="toggleStatus(this, @item.UserID, '@safeName')"
+                                        class="status-toggle-btn w-9 h-9 @(status == "Hoạt động" ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700") text-white rounded-full inline-flex items-center justify-center transition-colors"
+                                        title="@(status == "Hoạt động" ? "Vô hiệu hóa" : "Kích hoạt")">
+                                    @if (status == "Hoạt động")
+                                    {
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.93 4.93l14.14 14.14"></path>
+                                        </svg>
+                                    }
+                                    else
+                                    {
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-span-full text-center py-10 text-gray-500">Không có khách hàng nào.</div>
+        }
+    </div>
+    @RenderPagination()
+}
+
+@helper RenderPagination()
+{
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var viewType = ViewBag.ViewType ?? "table";
+    var searchString = ViewBag.SearchString as string;
+    var statusFilter = ViewBag.StatusFilter as string;
+    var sortBy = ViewBag.SortBy as string;
+
+    if (totalPages > 1)
+    {
+        <div class="px-6 py-4 border-t border-gray-200 bg-white rounded-b-lg">
+            <div class="flex items-center justify-center gap-2">
+                <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = 1 })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+                </a>
+
+                <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = currentPage - 1 })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == 1 ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </a>
+
+                @{
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+
+                    if (startPage > 1)
+                    {
+                        <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = 1 })"
+                           class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">1</a>
+                        if (startPage > 2)
+                        {
+                            <span class="px-2 text-gray-500">...</span>
+                        }
+                    }
+
+                    for (int i = startPage; i <= endPage; i++)
+                    {
+                        <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = i })"
+                           class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium @(i == currentPage ? "bg-red-600 text-white" : "border border-gray-300 hover:bg-gray-50")">@i</a>
+                    }
+
+                    if (endPage < totalPages)
+                    {
+                        if (endPage < totalPages - 1)
+                        {
+                            <span class="px-2 text-gray-500">...</span>
+                        }
+                        <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = totalPages })"
+                           class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center text-sm font-medium">@totalPages</a>
+                    }
+                }
+
+                <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, sortBy = sortBy, page = currentPage + 1 })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </a>
+
+                <a href="@Url.Action("Index", "Customer", new { viewType = viewType, searchString = searchString, statusFilter = statusFilter, page = totalPages })"
+                   class="w-9 h-9 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center justify-center @(currentPage == totalPages ? "opacity-50 pointer-events-none" : "")">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                </a>
+            </div>
+            <div class="text-center mt-3 text-sm text-gray-600">Trang @currentPage / @totalPages</div>
+        </div>
+    }
+}

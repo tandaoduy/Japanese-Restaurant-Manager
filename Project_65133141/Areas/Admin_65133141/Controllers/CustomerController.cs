@@ -17,31 +17,6 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
     {
         private QuanLyNhaHangNhat_65133141Entities6 db = new QuanLyNhaHangNhat_65133141Entities6();
         
-        private static List<long> _cachedCustomerRoleIds = null;
-        private static readonly object _lockObject = new object();
-        
-        private List<long> GetCustomerRoleIds()
-        {
-            if (_cachedCustomerRoleIds == null)
-            {
-                lock (_lockObject)
-                {
-                    if (_cachedCustomerRoleIds == null)
-                    {
-                        _cachedCustomerRoleIds = db.VaiTroes
-                            .AsNoTracking()
-                            .Where(r => r.TenVaiTro.ToLower() == "khách hàng" || 
-                                        r.TenVaiTro.ToLower() == "khach hang" || 
-                                        r.TenVaiTro.ToLower() == "user" || 
-                                        r.TenVaiTro.ToLower() == "customer")
-                            .Select(r => r.VaiTroID)
-                            .ToList();
-                    }
-                }
-            }
-            return _cachedCustomerRoleIds;
-        }
-
         // POST: Admin_65133141/Customer/ResetDemoCustomers
         // Chỉ dùng cho môi trường demo: xoá toàn bộ khách hàng và tạo lại 50 khách hàng mẫu
         [HttpPost]
@@ -50,25 +25,16 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         {
             try
             {
-                var customerRoleIds = GetCustomerRoleIds();
-                if (customerRoleIds == null || !customerRoleIds.Any())
-                {
-                    TempData["ErrorMessage"] = "Không tìm thấy vai trò 'Khách hàng' trong database!";
-                    return RedirectToAction("Index");
-                }
-
-                // Xoá toàn bộ tài khoản khách hàng hiện tại
-                var customersToRemove = db.NhanViens
-                    .Where(a => customerRoleIds.Contains(a.VaiTroID))
-                    .ToList();
+                // Xoá toàn bộ tài khoản khách hàng hiện tại trong bảng Users
+                var customersToRemove = db.Users.ToList();
 
                 if (customersToRemove.Any())
                 {
-                    db.NhanViens.RemoveRange(customersToRemove);
+                    db.Users.RemoveRange(customersToRemove);
                     db.SaveChanges();
 
-                    // Reseed lại identity để mã khách hàng hiển thị từ KH0001
-                    db.Database.ExecuteSqlCommand("DBCC CHECKIDENT ('NhanVien', RESEED, 0)");
+                    // Reseed lại identity để mã khách hàng hiển thị từ 1
+                    db.Database.ExecuteSqlCommand("DBCC CHECKIDENT ('Users', RESEED, 0)");
                 }
 
                 // Dữ liệu mẫu
@@ -91,85 +57,17 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
 
                 // Địa chỉ từ Nha Trang và các tỉnh thành khác
                 string[] cities = {
-                    "Nha Trang, Khánh Hòa",
-                    "Cam Ranh, Khánh Hòa",
-                    "Ninh Hòa, Khánh Hòa",
-                    "Vạn Ninh, Khánh Hòa",
-                    "Diên Khánh, Khánh Hòa",
-                    "TP. Hồ Chí Minh",
-                    "Hà Nội",
-                    "Đà Nẵng",
-                    "Hải Phòng",
-                    "Cần Thơ",
-                    "An Giang",
-                    "Bà Rịa - Vũng Tàu",
-                    "Bạc Liêu",
-                    "Bắc Giang",
-                    "Bắc Kạn",
-                    "Bắc Ninh",
-                    "Bến Tre",
-                    "Bình Định",
-                    "Bình Dương",
-                    "Bình Phước",
-                    "Bình Thuận",
-                    "Cà Mau",
-                    "Cao Bằng",
-                    "Đắk Lắk",
-                    "Đắk Nông",
-                    "Điện Biên",
-                    "Đồng Nai",
-                    "Đồng Tháp",
-                    "Gia Lai",
-                    "Hà Giang",
-                    "Hà Nam",
-                    "Hà Tĩnh",
-                    "Hải Dương",
-                    "Hậu Giang",
-                    "Hòa Bình",
-                    "Hưng Yên",
-                    "Kiên Giang",
-                    "Kon Tum",
-                    "Lai Châu",
-                    "Lâm Đồng",
-                    "Lạng Sơn",
-                    "Lào Cai",
-                    "Long An",
-                    "Nam Định",
-                    "Nghệ An",
-                    "Ninh Bình",
-                    "Phú Thọ",
-                    "Phú Yên",
-                    "Quảng Bình",
-                    "Quảng Nam",
-                    "Quảng Ngãi",
-                    "Quảng Ninh",
-                    "Quảng Trị",
-                    "Sóc Trăng",
-                    "Sơn La",
-                    "Tây Ninh",
-                    "Thái Bình",
-                    "Thái Nguyên",
-                    "Thanh Hóa",
-                    "Thừa Thiên Huế",
-                    "Tiền Giang",
-                    "Trà Vinh",
-                    "Tuyên Quang",
-                    "Vĩnh Long",
-                    "Vĩnh Phúc",
-                    "Yên Bái"
+                    "Nha Trang, Khánh Hòa", "Cam Ranh, Khánh Hòa", "Ninh Hòa, Khánh Hòa", "TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng"
                 };
 
                 string[] streets = {
                     "Nguyễn Huệ", "Lê Lợi", "Trần Hưng Đạo", "Hai Bà Trưng", "Lý Thường Kiệt",
-                    "Nguyễn Trãi", "Phạm Ngũ Lão", "Bùi Viện", "Đề Thám", "Nguyễn Thị Minh Khai",
-                    "Trần Phú", "Thống Nhất", "Yersin", "Pasteur", "Hùng Vương",
-                    "Lê Thánh Tôn", "Nguyễn Du", "Hoàng Diệu", "Bạch Đằng", "Võ Văn Tần"
+                    "Nguyễn Trãi", "Phạm Ngũ Lão", "Trần Phú", "Thống Nhất", "Yersin", "Hùng Vương"
                 };
 
                 var random = new Random();
                 string rawPassword = "Duytan0712@";
                 string hashedPassword = HashPassword(rawPassword);
-                long customerRoleId = customerRoleIds.First();
 
                 // Danh sách email đã tạo để tránh trùng lặp
                 var createdEmails = new HashSet<string>();
@@ -184,14 +82,13 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                     // Tạo SĐT 10 số bắt đầu bằng 0
                     string phone = "0" + random.Next(100000000, 999999999).ToString();
 
-                    // Địa chỉ từ Nha Trang và các tỉnh thành khác
+                    // Địa chỉ
                     string street = streets[random.Next(streets.Length)];
                     int number = random.Next(1, 500);
                     string city = cities[random.Next(cities.Length)];
                     string address = string.Format("{0} {1}, {2}", number, street, city);
 
-                    // Email dựa trên tên khách hàng: bỏ dấu (đ -> d) + bỏ khoảng trắng
-                    // Ví dụ: "Đình Thị Đài" -> "dinhthidai@gmail.com"
+                    // Email dựa trên tên khách hàng
                     string emailBase = RemoveDiacritics(fullName).ToLower();
                     emailBase = new string(emailBase.Where(c => !char.IsWhiteSpace(c) && char.IsLetterOrDigit(c)).ToArray());
                     if (string.IsNullOrEmpty(emailBase))
@@ -202,26 +99,27 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                     string email = emailBase + "@gmail.com";
                     int suffix = 1;
                     // Kiểm tra trong danh sách đã tạo và trong database
-                    while (createdEmails.Contains(email) || db.NhanViens.Any(u => u.Email == email))
+                    while (createdEmails.Contains(email) || db.Users.Any(u => u.Email == email))
                     {
                         email = emailBase + suffix + "@gmail.com";
                         suffix++;
                     }
                     createdEmails.Add(email);
 
-                    var customer = new NhanVien
+                    var customer = new User
                     {
+                        Username = email, // Username là email
                         HoTen = fullName,
                         Email = email,
                         SDT = phone,
-                        MatKhau = hashedPassword,
-                        VaiTroID = customerRoleId,
-                        TaiKhoan = email,
-                        TrangThai = "Hoạt động",
-                        DiaChi = address
+                        Password = hashedPassword,
+                        TrangThai = true, // Default active
+                        DiaChi = address,
+                        NgayTao = DateTime.Now,
+                        DiemTichLuy = 0
                     };
 
-                    db.NhanViens.Add(customer);
+                    db.Users.Add(customer);
                 }
 
                 db.SaveChanges();
@@ -274,7 +172,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 {'È', 'E'}, {'É', 'E'}, {'Ẹ', 'E'}, {'Ẻ', 'E'}, {'Ẽ', 'E'}, {'Ê', 'E'}, {'Ề', 'E'}, {'Ế', 'E'}, {'Ệ', 'E'}, {'Ể', 'E'}, {'Ễ', 'E'},
                 {'Ì', 'I'}, {'Í', 'I'}, {'Ị', 'I'}, {'Ỉ', 'I'}, {'Ĩ', 'I'},
                 {'Ò', 'O'}, {'Ó', 'O'}, {'Ọ', 'O'}, {'Ỏ', 'O'}, {'Õ', 'O'}, {'Ô', 'O'}, {'Ồ', 'O'}, {'Ố', 'O'}, {'Ộ', 'O'}, {'Ổ', 'O'}, {'Ỗ', 'O'}, {'Ơ', 'O'}, {'Ờ', 'O'}, {'Ớ', 'O'}, {'Ợ', 'O'}, {'Ở', 'O'}, {'Ỡ', 'O'},
-                {'Ù', 'U'}, {'Ú', 'U'}, {'Ụ', 'U'}, {'Ủ', 'U'}, {'Ũ', 'U'}, {'Ư', 'U'}, {'Ừ', 'U'}, {'Ứ', 'U'}, {'Ự', 'U'}, {'Ử', 'U'}, {'Ữ', 'U'},
+                {'Ù', 'U'}, {'Ú', 'U'}, {'Ụ', 'U'}, {'Ủ', 'U'}, {'Ũ', 'U'}, {'Ư', 'U'}, {'Ừ', 'U'}, {'Ứ', 'U'}, {'ự', 'U'}, {'ử', 'U'}, {'ữ', 'U'},
                 {'Ỳ', 'Y'}, {'Ý', 'Y'}, {'Ỵ', 'Y'}, {'Ỷ', 'Y'}, {'Ỹ', 'Y'}
             };
 
@@ -302,11 +200,8 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         {
             int pageSize = (viewType == "card") ? 12 : 5;
             
-            var customerRoleIds = GetCustomerRoleIds();
-            
-            var accounts = db.NhanViens
-                .AsNoTracking()
-                .Where(a => customerRoleIds.Contains(a.VaiTroID));
+            // Query Users table instead of NhanViens
+            var accounts = db.Users.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -320,7 +215,14 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
 
             if (!string.IsNullOrEmpty(statusFilter))
             {
-                accounts = accounts.Where(a => a.TrangThai == statusFilter);
+                // Convert string filter to boolean
+                bool isActive = statusFilter == "Hoạt động";
+                bool isInactive = statusFilter == "Vô hiệu hóa";
+                
+                if (isActive)
+                    accounts = accounts.Where(a => a.TrangThai == true);
+                else if (isInactive)
+                    accounts = accounts.Where(a => a.TrangThai == false);
             }
 
             // Sorting
@@ -330,10 +232,10 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 case "name":
                     accounts = accounts
                         .OrderBy(a => a.HoTen)
-                        .ThenBy(a => a.NhanVienID);
+                        .ThenBy(a => a.UserID);
                     break;
                 default:
-                    accounts = accounts.OrderBy(a => a.NhanVienID);
+                    accounts = accounts.OrderBy(a => a.UserID);
                     effectiveSort = "code";
                     break;
             }
@@ -357,31 +259,67 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
             ViewBag.TotalItems = totalCount;
             ViewBag.ViewType = viewType;
 
+            if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_CustomerList", accountList);
+            }
+
             return View(accountList);
+        }
+
+        public JsonResult GetSearchSuggestions(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+            {
+                return Json(new List<object>(), JsonRequestBehavior.AllowGet);
+            }
+
+            var termLower = term.ToLower();
+            var suggestions = db.Users
+                .AsNoTracking()
+                .Where(u => 
+                    (u.HoTen != null && u.HoTen.ToLower().Contains(termLower)) || 
+                    (u.Email != null && u.Email.ToLower().Contains(termLower)) || 
+                    (u.SDT != null && u.SDT.Contains(term))
+                )
+                .Select(u => new { 
+                    label = u.HoTen, 
+                    value = u.HoTen, 
+                    desc = u.Email,
+                    avatar = u.HoTen.Substring(0, 1).ToUpper()
+                })
+                .Take(5)
+                .ToList();
+
+            return Json(suggestions, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Details(long id, string viewType = null, int page = 1, string searchString = null, string statusFilter = null)
         {
-            var account = db.NhanViens
+            var account = db.Users
                 .AsNoTracking()
-                .Include(a => a.VaiTro)
-                .FirstOrDefault(a => a.NhanVienID == id);
+                .FirstOrDefault(a => a.UserID == id);
             
             if (account == null)
             {
                 TempData["ErrorMessage"] = "Không tìm thấy khách hàng!";
+                // Make sure to pass parameters back to keep state
                 return RedirectToAction("Index", new { viewType = viewType, page = page, searchString = searchString, statusFilter = statusFilter });
             }
 
             string address = account.DiaChi ?? "-";
 
-            ViewBag.CustomerCode = "KH" + account.NhanVienID.ToString("D5");
+            ViewBag.CustomerCode = "KH" + account.UserID.ToString("D5");
             ViewBag.FullName = account.HoTen ?? "-";
             ViewBag.Email = account.Email ?? "-";
             ViewBag.PhoneNumber = account.SDT ?? "-";
-            ViewBag.Status = account.TrangThai ?? "Hoạt động";
+            
+            // Map boolean status to string
+            bool isActive = account.TrangThai ?? true; // Default to true if null
+            ViewBag.Status = isActive ? "Hoạt động" : "Vô hiệu hóa";
+            
             ViewBag.Address = address;
-            ViewBag.PasswordHash = account.MatKhau ?? string.Empty;
+            ViewBag.PasswordHash = account.Password ?? string.Empty; // User model uses Password, not MatKhau
             
             ViewBag.ViewType = viewType ?? "table";
             ViewBag.Page = page;
@@ -397,24 +335,26 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         {
             try
             {
-                var account = db.NhanViens
+                var account = db.Users
                     .AsNoTracking()
-                    .FirstOrDefault(a => a.NhanVienID == id);
+                    .FirstOrDefault(a => a.UserID == id);
                 
                 if (account == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy khách hàng!" }, JsonRequestBehavior.AllowGet);
                 }
 
+                bool isActive = account.TrangThai ?? true;
+
                 var customerData = new
                 {
-                    customerCode = "KH" + account.NhanVienID.ToString("D5"),
+                    customerCode = "KH" + account.UserID.ToString("D5"),
                     fullName = account.HoTen ?? "-",
                     email = account.Email ?? "-",
                     phoneNumber = account.SDT ?? "-",
                     address = account.DiaChi ?? "-",
-                    status = account.TrangThai ?? "Hoạt động",
-                    passwordHash = account.MatKhau ?? string.Empty
+                    status = isActive ? "Hoạt động" : "Vô hiệu hóa",
+                    passwordHash = account.Password ?? string.Empty
                 };
 
                 return Json(new { success = true, customer = customerData }, JsonRequestBehavior.AllowGet);
@@ -429,7 +369,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DisableUser(long id, string viewType = null, int page = 1, string searchString = null, string statusFilter = null)
         {
-            var account = db.NhanViens.Find(id);
+            var account = db.Users.Find(id);
             if (account == null)
             {
                 if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -440,16 +380,19 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 return RedirectToAction("Index", new { viewType = viewType, page = page, searchString = searchString, statusFilter = statusFilter });
             }
 
-            account.TrangThai = account.TrangThai == "Hoạt động" ? "Vô hiệu hóa" : "Hoạt động";
+            // Toggle status boolean
+            bool currentStatus = account.TrangThai ?? true;
+            account.TrangThai = !currentStatus;
             
             try
             {
                 db.SaveChanges();
-                var successMsg = $"Đã {(account.TrangThai == "Hoạt động" ? "kích hoạt" : "vô hiệu hóa")} khách hàng thành công!";
+                string newStatusStr = (account.TrangThai == true) ? "Hoạt động" : "Vô hiệu hóa";
+                var successMsg = $"Đã {(account.TrangThai == true ? "kích hoạt" : "vô hiệu hóa")} khách hàng thành công!";
                 
                 if (Request.IsAjaxRequest() || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    return Json(new { success = true, message = successMsg, newStatus = account.TrangThai });
+                    return Json(new { success = true, message = successMsg, newStatus = newStatusStr });
                 }
                 
                 TempData["SuccessMessage"] = successMsg;
