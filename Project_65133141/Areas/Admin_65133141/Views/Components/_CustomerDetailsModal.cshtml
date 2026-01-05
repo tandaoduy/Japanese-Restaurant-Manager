@@ -43,19 +43,7 @@
                 <div class="customer-detail-value" id="modalAddress">-</div>
             </div>
 
-            <div class="auth-form-group">
-                <label class="auth-form-label">Mật khẩu</label>
-                <div class="flex items-center gap-3">
-                    <span id="modalPasswordMask" class="customer-detail-value flex-1">••••••••••••••••</span>
-                    <button type="button" id="modalTogglePasswordBtn" class="inline-flex items-center px-2 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                        <svg id="modalEyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                    </button>
-                </div>
-                <span id="modalPasswordFull" data-hash="" class="hidden"></span>
-            </div>
+
 
             <div class="auth-form-group">
                 <label class="auth-form-label">Trạng thái</label>
@@ -258,8 +246,7 @@
 </style>
 
 <script>
-    var modalPasswordShown = false;
-    var modalPasswordHash = '';
+
 
     function openCustomerDetailsModal(customerId) {
         const modal = document.getElementById('customerDetailsModal');
@@ -269,10 +256,7 @@
         document.body.style.overflow = 'hidden';
         modalBody.classList.add('loading');
 
-        // Reset password visibility
-        modalPasswordShown = false;
-        document.getElementById('modalPasswordMask').textContent = '••••••••••••••••';
-        document.getElementById('modalEyeIcon').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+
 
         // Fetch customer details via AJAX
         fetch('/Admin_65133141/Customer/GetCustomerDetails/' + customerId)
@@ -316,9 +300,7 @@
         // Address
         document.getElementById('modalAddress').textContent = customer.address || '-';
         
-        // Password hash
-        modalPasswordHash = customer.passwordHash || '';
-        document.getElementById('modalPasswordFull').setAttribute('data-hash', modalPasswordHash);
+
         
         // Status
         const statusBadge = document.getElementById('modalStatus');
@@ -340,27 +322,7 @@
         document.body.style.overflow = 'auto';
     }
 
-    // Toggle password visibility in modal
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleBtn = document.getElementById('modalTogglePasswordBtn');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', function() {
-                const maskSpan = document.getElementById('modalPasswordMask');
-                const eyeIcon = document.getElementById('modalEyeIcon');
-                
-                modalPasswordShown = !modalPasswordShown;
-                
-                if (modalPasswordShown) {
-                    const displayHash = modalPasswordHash.length > 36 ? modalPasswordHash.substring(0, 36) + '...' : modalPasswordHash;
-                    maskSpan.textContent = displayHash || '(chưa có)';
-                    eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.96 9.96 0 012.563-4.304m3.106-2.038A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.043 5.197M15 12a3 3 0 00-3-3m0 0a3 3 0 013 3m-3-3L4.5 4.5" />';
-                } else {
-                    maskSpan.textContent = '••••••••••••••••';
-                    eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
-                }
-            });
-        }
-    });
+
 
     // Close modal on ESC key
     document.addEventListener('keydown', function(e) {
