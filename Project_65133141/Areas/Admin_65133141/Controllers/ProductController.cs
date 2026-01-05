@@ -35,8 +35,11 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 })
                 .ToList();
 
-            // Lấy danh sách món ăn
+            // Lấy danh sách món ăn (mặc định loại bỏ món đã ngừng phục vụ)
             var query = db.MonAns.AsQueryable();
+
+            // Loại bỏ các món có trạng thái "Ngừng phục vụ" - đây là các món đã bị "xóa" (soft delete)
+            query = query.Where(m => m.TrangThai != "Ngừng phục vụ");
 
             if (categoryId.HasValue)
             {
@@ -284,6 +287,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         }
 
         // POST: Xóa qua AJAX
+        // POST: Xóa qua AJAX
         [HttpPost]
         [ValidateAntiForgeryToken]
         public JsonResult Delete(long id)
@@ -293,13 +297,31 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 var monAn = db.MonAns.Find(id);
                 if (monAn == null) return Json(new { success = false, message = "Không tìm thấy món ăn." });
 
-                db.MonAns.Remove(monAn);
-                db.SaveChanges();
-                return Json(new { success = true, message = "Xóa món ăn thành công." });
+                // Kiểm tra ràng buộc khóa ngoại (Dependencies check)
+                bool hasDependencies =  monAn.ChiTietDonHangs.Any() || 
+                                        monAn.DanhGias.Any() ||
+                                        monAn.ChiTietDatHangOnlines.Any();
+
+                if (hasDependencies)
+                {
+                    // Soft Delete (Chuyển trạng thái)
+                    monAn.TrangThai = "Ngừng phục vụ";
+                    db.SaveChanges();
+                    return Json(new { success = true, message = "Món ăn đã có dữ liệu liên quan. Đã chuyển trạng thái sang 'Ngừng phục vụ' thay vì xóa vĩnh viễn." });
+                }
+                else
+                {
+                    // Hard Delete (Xóa thật nếu chưa có dữ liệu)
+                    db.MonAns.Remove(monAn);
+                    db.SaveChanges();
+                    return Json(new { success = true, message = "Xóa món ăn thành công." });
+                }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+                // Log error here if cleaner logging existed
+                 var innerMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return Json(new { success = false, message = "Lỗi khi xóa: " + innerMessage });
             }
         }
         // POST: AJAX Create Product

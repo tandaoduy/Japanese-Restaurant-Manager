@@ -16,7 +16,7 @@ namespace Project_65133141.Models
     {
         public long ChiTietID { get; set; }
         public long DonOnlineID { get; set; }
-        public long MonAnID { get; set; }
+        public Nullable<long> MonAnID { get; set; }
         public int SoLuong { get; set; }
         public decimal DonGia { get; set; }
         public Nullable<decimal> ThanhTien { get; set; }

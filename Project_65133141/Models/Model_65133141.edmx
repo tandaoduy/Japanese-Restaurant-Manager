@@ -21,7 +21,7 @@
           </Key>
           <Property Name="ChiTietID" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="DonOnlineID" Type="bigint" Nullable="false" />
-          <Property Name="MonAnID" Type="bigint" Nullable="false" />
+          <Property Name="MonAnID" Type="bigint" />
           <Property Name="SoLuong" Type="int" Nullable="false" />
           <Property Name="DonGia" Type="decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="ThanhTien" Type="decimal" Precision="29" Scale="2" StoreGeneratedPattern="Computed" />
@@ -32,7 +32,7 @@
           </Key>
           <Property Name="ChiTietID" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="DonHangID" Type="bigint" Nullable="false" />
-          <Property Name="MonAnID" Type="bigint" Nullable="false" />
+          <Property Name="MonAnID" Type="bigint" />
           <Property Name="SoLuong" Type="int" Nullable="false" />
           <Property Name="DonGia" Type="decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="ThanhTien" Type="decimal" Precision="29" Scale="2" StoreGeneratedPattern="Computed" />
@@ -237,7 +237,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__ChiTietDa__MonAn__07C12930">
-          <End Role="MonAn" Type="Self.MonAn" Multiplicity="1" />
+          <End Role="MonAn" Type="Self.MonAn" Multiplicity="0..1" />
           <End Role="ChiTietDatHangOnline" Type="Self.ChiTietDatHangOnline" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="MonAn">
@@ -263,7 +263,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__ChiTietDo__MonAn__72C60C4A">
-          <End Role="MonAn" Type="Self.MonAn" Multiplicity="1" />
+          <End Role="MonAn" Type="Self.MonAn" Multiplicity="0..1" />
           <End Role="ChiTietDonHang" Type="Self.ChiTietDonHang" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="MonAn">
@@ -540,7 +540,7 @@
           </Key>
           <Property Name="ChiTietID" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="DonOnlineID" Type="Int64" Nullable="false" />
-          <Property Name="MonAnID" Type="Int64" Nullable="false" />
+          <Property Name="MonAnID" Type="Int64" />
           <Property Name="SoLuong" Type="Int32" Nullable="false" />
           <Property Name="DonGia" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="ThanhTien" Type="Decimal" Precision="29" Scale="2" annotation:StoreGeneratedPattern="Computed" />
@@ -553,7 +553,7 @@
           </Key>
           <Property Name="ChiTietID" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="DonHangID" Type="Int64" Nullable="false" />
-          <Property Name="MonAnID" Type="Int64" Nullable="false" />
+          <Property Name="MonAnID" Type="Int64" />
           <Property Name="SoLuong" Type="Int32" Nullable="false" />
           <Property Name="DonGia" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="ThanhTien" Type="Decimal" Precision="29" Scale="2" annotation:StoreGeneratedPattern="Computed" />
@@ -812,7 +812,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__ChiTietDa__MonAn__07C12930">
-          <End Role="MonAn" Type="Self.MonAn" Multiplicity="1" />
+          <End Role="MonAn" Type="Self.MonAn" Multiplicity="0..1" />
           <End Role="ChiTietDatHangOnline" Type="Self.ChiTietDatHangOnline" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="MonAn">
@@ -838,7 +838,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__ChiTietDo__MonAn__72C60C4A">
-          <End Role="MonAn" Type="Self.MonAn" Multiplicity="1" />
+          <End Role="MonAn" Type="Self.MonAn" Multiplicity="0..1" />
           <End Role="ChiTietDonHang" Type="Self.ChiTietDonHang" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="MonAn">

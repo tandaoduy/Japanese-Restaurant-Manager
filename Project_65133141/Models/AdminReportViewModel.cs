@@ -11,7 +11,7 @@ namespace Project_65133141.Models
 
     public class TopDishReport
     {
-        public long MonAnID { get; set; }
+        public long? MonAnID { get; set; }
         public string TenMon { get; set; }
         public int SoLuong { get; set; }
         public decimal DoanhThu { get; set; }

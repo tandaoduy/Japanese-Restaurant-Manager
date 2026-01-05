@@ -16,7 +16,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-900" id="detailDatBanId">#000000</h3>
+                            <h3 class="text-lg font-bold text-gray-900" id="detailDatBanId">DB0000</h3>
                             <p class="text-sm text-gray-500 mt-1">Mã đặt bàn</p>
                         </div>
                         <div class="space-y-3">
@@ -144,7 +144,7 @@
 
     function populateDatBanDetails(d) {
         // ID Formatting (#000000)
-        document.getElementById('detailDatBanId').textContent = '#' + d.DatBanID.toString().padStart(6, '0');
+        document.getElementById('detailDatBanId').textContent = 'DB' + d.DatBanID.toString().padStart(4, '0');
         
         document.getElementById('detailDatBanKhachHang').textContent = d.HoTenKhach || 'N/A';
         document.getElementById('detailDatBanSDT').textContent = d.SDTKhach || 'N/A';

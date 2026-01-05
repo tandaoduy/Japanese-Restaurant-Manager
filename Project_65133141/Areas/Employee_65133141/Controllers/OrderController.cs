@@ -126,7 +126,7 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
                             // Add new item
                             confirmedCart.Add(new CartItem
                             {
-                                MonAnID = detail.MonAnID,
+                                MonAnID = detail.MonAnID.GetValueOrDefault(),
                                 TenMon = detail.MonAn?.TenMon ?? "Món không xác định",
                                 Gia = detail.DonGia,
                                 SoLuong = detail.SoLuong,
@@ -497,7 +497,7 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
                     var orderDetail = new ChiTietDonHang
                     {
                         DonHangID = order.DonHangID,
-                        MonAnID = item.MonAnID,
+                        MonAnID = (long?)item.MonAnID,
                         SoLuong = item.SoLuong,
                         DonGia = item.Gia,
                         GhiChuMon = ""
@@ -630,7 +630,7 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
                     var orderDetail = new ChiTietDonHang
                     {
                         DonHangID = order.DonHangID,
-                        MonAnID = item.MonAnID,
+                        MonAnID = (long?)item.MonAnID,
                         SoLuong = item.SoLuong,
                         DonGia = menuItem.Gia,
                         GhiChuMon = item.GhiChu

@@ -16,13 +16,16 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         // GET: Admin_65133141/BanAn
         public ActionResult Index(string statusFilter = null)
         {
-            // Calculate GLOBAL statistics (from ALL tables, not filtered)
-            ViewBag.TrongCount = db.BanAns.Count(b => b.TrangThai == "Trống");
-            ViewBag.DaDatCount = db.BanAns.Count(b => b.TrangThai == "Đã đặt");
-            ViewBag.DangPhucVuCount = db.BanAns.Count(b => b.TrangThai == "Đang phục vụ");
-            ViewBag.TotalCount = db.BanAns.Count();
+            // Loại bỏ các bàn "Ngừng hoạt động" khỏi thống kê và danh sách
+            var activeTablesQuery = db.BanAns.Where(b => b.TrangThai != "Ngừng hoạt động");
+            
+            // Calculate GLOBAL statistics (from active tables only)
+            ViewBag.TrongCount = activeTablesQuery.Count(b => b.TrangThai == "Trống");
+            ViewBag.DaDatCount = activeTablesQuery.Count(b => b.TrangThai == "Đã đặt");
+            ViewBag.DangPhucVuCount = activeTablesQuery.Count(b => b.TrangThai == "Đang phục vụ");
+            ViewBag.TotalCount = activeTablesQuery.Count();
 
-            var query = db.BanAns.AsQueryable();
+            var query = activeTablesQuery;
 
             if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "all")
             {
@@ -195,8 +198,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
 
             try
             {
-                // Chỉ chặn xóa nếu bàn ĐANG CÓ KHÁCH (Đang phục vụ/Đang sử dụng)
-                // Các trạng thái "Đã đặt", "Đã xác nhận" (tương lai) vẫn cho xóa -> sẽ bị xóa theo cascade bên dưới
+                // Chặn xóa nếu bàn ĐANG CÓ KHÁCH (Đang phục vụ/Đang sử dụng)
                 var hasActiveReservations = db.DatBans.Any(d => d.BanID == id && 
                     (d.TrangThai == "Đang phục vụ" || d.TrangThai == "Đang sử dụng"));
                 
@@ -214,31 +216,23 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                     return Json(new { success = false, message = "Không thể xóa bàn có đơn hàng đang xử lý." });
                 }
 
-                // Xóa tất cả lịch sử đặt bàn liên quan (cancelled/completed)
-                var allReservations = db.DatBans.Where(d => d.BanID == id).ToList();
-                if (allReservations.Any())
+                // Kiểm tra xem bàn có dữ liệu lịch sử không (đơn hàng đã thanh toán, hóa đơn, etc.)
+                var hasHistoricalData = db.DatBans.Any(d => d.BanID == id) ||
+                                        db.DonHangs.Any(d => d.BanID == id);
+
+                if (hasHistoricalData)
                 {
-                    db.DatBans.RemoveRange(allReservations);
+                    // SOFT DELETE: Đổi trạng thái thành "Ngừng hoạt động" thay vì xóa
+                    table.TrangThai = "Ngừng hoạt động";
+                    db.SaveChanges();
+                    
+                    return Json(new { 
+                        success = true, 
+                        message = "Bàn đã được chuyển sang trạng thái 'Ngừng hoạt động' vì có dữ liệu lịch sử liên quan. Dữ liệu đặt bàn và đơn hàng cũ vẫn được giữ lại." 
+                    });
                 }
 
-                // Xóa tất cả đơn hàng cũ và chi tiết đơn hàng liên quan
-                var allOrders = db.DonHangs.Where(d => d.BanID == id).ToList();
-                foreach (var order in allOrders)
-                {
-                    // Xóa chi tiết đơn hàng trước
-                    var orderDetails = db.ChiTietDonHangs.Where(ct => ct.DonHangID == order.DonHangID).ToList();
-                    if (orderDetails.Any())
-                    {
-                        db.ChiTietDonHangs.RemoveRange(orderDetails);
-                    }
-                }
-                // Xóa đơn hàng
-                if (allOrders.Any())
-                {
-                    db.DonHangs.RemoveRange(allOrders);
-                }
-
-                // Cuối cùng xóa bàn
+                // HARD DELETE: Chỉ xóa thật nếu bàn không có dữ liệu liên quan
                 db.BanAns.Remove(table);
                 db.SaveChanges();
 
@@ -246,7 +240,8 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Không thể xóa bàn: " + ex.Message });
+                var innerMessage = ex.InnerException?.Message ?? ex.Message;
+                return Json(new { success = false, message = "Không thể xóa bàn: " + innerMessage });
             }
         }
 
