@@ -8,10 +8,10 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
     <link rel="shortcut icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
-    <!-- Google Fonts - Japanese Style -->
+    <!-- Google Fonts - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Noto+Serif+JP:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -20,7 +20,7 @@
                 extend: {
                     fontFamily: {
                         'sans': ['Inter', 'system-ui', 'sans-serif'],
-                        'display': ['Playfair Display', 'serif']
+                        'display': ['Inter', 'sans-serif']
                     }
                 }
             }
@@ -30,7 +30,11 @@
     @Scripts.Render("~/bundles/modernizr")
     <style>
         * {
-            font-family: 'Noto Sans JP', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        h1, h2, h3, .font-serif {
+            font-family: 'Inter', sans-serif !important;
         }
         
         /* Japanese Style Header */
@@ -1155,7 +1159,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <span class="text-sm group-hover:text-red-400 transition-colors">161 Nguyễn Thiện Thuật, phường Nha Trang, tỉnh Khánh Hòa, Việt Nam</span>
+                            <span class="text-sm group-hover:text-red-400 transition-colors">70 Phù Đổng, phường Nha Trang, tỉnh Khánh Hòa, Việt Nam</span>
                         </div>
                         <div class="flex items-center space-x-3 group">
                             <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

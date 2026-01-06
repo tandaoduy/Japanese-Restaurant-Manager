@@ -34,7 +34,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', sans-serif;
             background: white;
             padding: 20px;
             color: #000;
@@ -205,7 +205,7 @@
                     </div>
                     <div>
                         <div class="invoice-restaurant-name">SAKURA KAZOKU</div>
-                        <div class="invoice-restaurant-sub">161 Nguyễn Thiện Thuật, phường Nha Trang, Khánh Hòa</div>
+                        <div class="invoice-restaurant-sub">70 Phù Đổng, phường Nha Trang, Khánh Hòa</div>
                         <div class="invoice-restaurant-sub">SĐT: +012 345 67890</div>
                     </div>
                 </div>
@@ -313,8 +313,9 @@
                 if (hoaDon.DonHang.User != null)
                 {
                     // Khách hàng trong hệ thống
-                        tenKhach = hoaDon.DonHang.User.HoTen ?? "Khách vãng lai";
-                    soDienThoaiKhach = hoaDon.DonHang.User.SoDienThoai;
+                    tenKhach = hoaDon.DonHang.User.HoTen ?? "Khách vãng lai";
+                    // Model User không có SoDienThoai, mà dùng thuộc tính SDT
+                    soDienThoaiKhach = hoaDon.DonHang.User.SDT;
                 }
                 else
                 {
@@ -331,7 +332,7 @@
 
         <div class="footer">
             <p><strong>SAKURA KAZOKU</strong></p>
-            <p>161 Nguyễn Thiện Thuật, phường Nha Trang, Khánh Hòa</p>
+            <p>70 Phù Đổng, phường Nha Trang, Khánh Hòa</p>
             <p>SĐT: +012 345 67890</p>
         </div>
     </div>

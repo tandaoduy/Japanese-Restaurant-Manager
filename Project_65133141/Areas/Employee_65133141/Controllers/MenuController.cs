@@ -13,67 +13,125 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
     {
         private QuanLyNhaHangNhat_65133141Entities6 db = new QuanLyNhaHangNhat_65133141Entities6();
 
-        // GET: Employee_65133141/Menu
-        public ActionResult Index(string searchTerm = "", long? categoryId = null)
+       // GET: Employee_65133141/Menu
+        public ActionResult Index(long? categoryId, int page = 1)
+        {
+            // Recompile Trigger
+            const int pageSize = 12; // 12 món ăn mỗi trang
+            
+            // Lấy danh sách danh mục với thứ tự tùy chỉnh (Giống Admin)
+            var categories = db.DanhMucs.ToList()
+                .OrderBy(c => {
+                    var name = (c.TenDanhMuc ?? "").ToUpperInvariant();
+                    // Thứ tự: Sashimi, Sushi, Cơm/Mì, Teishoku, Đồ uống, Món khác, Tráng miệng
+                    if (name.Contains("SASHIMI")) return 1;
+                    if (name.Contains("SUSHI") || name.Contains("SHUSHI")) return 2;
+                    if (name.Contains("CƠM") || name.Contains("MÌ")) return 3;
+                    if (name.Contains("TEISHOKU")) return 4;
+                    if (name.Contains("UỐNG") || name.Contains("NƯỚC")) return 5;
+                    if (name.Contains("TRÁNG MIỆNG")) return 7;
+                    return 6; 
+                })
+                .ToList();
+
+            // Lấy danh sách món ăn
+            var query = db.MonAns.AsQueryable();
+
+            // Lọc bỏ món "Ngừng phục vụ" theo yêu cầu mới
+            query = query.Where(m => m.TrangThai != "Ngừng phục vụ"); 
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(m => m.DanhMucID == categoryId.Value);
+            }
+
+            // Đếm tổng số
+            int totalItems = query.Count();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Đảm bảo page hợp lệ
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            // Lấy dữ liệu cho trang hiện tại (Sorting Logic)
+            
+            // 1. Fetch ALL relevant items first (filtered by Category/Searching)
+            // Note: We fetch into memory to perform complex sorting by Category Name
+            // 1. Map Category Dictionary for efficient lookup
+            var categoryMap = categories.ToDictionary(c => c.DanhMucID, c => c.TenDanhMuc ?? "");
+
+            // 2. Fetch ALL relevant items first
+            var allFilteredItems = query.ToList(); 
+
+            // 3. Sort in memory using the Dictionary
+            var products = allFilteredItems
+                .OrderBy(m => {
+                    // Get Category Name safely from Map
+                    string catName = "";
+                    if (categoryMap.ContainsKey(m.DanhMucID))
+                    {
+                        catName = categoryMap[m.DanhMucID].ToUpperInvariant();
+                    }
+                    
+                    // Assign Rank based on User Request
+                    if (catName.Contains("SASHIMI")) return 1;
+                    if (catName.Contains("SUSHI") || catName.Contains("SHUSHI")) return 2;
+                    if (catName.Contains("CƠM") || catName.Contains("MÌ") || catName.Contains("LẨU")) return 3;
+                    if (catName.Contains("TEISHOKU") || catName.Contains("SET")) return 4;
+                    if (catName.Contains("UỐNG") || catName.Contains("NƯỚC") || catName.Contains("DRINK")) return 5;
+                    if (catName.Contains("TRÁNG MIỆNG") || catName.Contains("DESSERT")) return 7;
+                    
+                    return 6; // Others
+                })
+                .ThenBy(m => m.TenMon) // Secondary Sort by Name
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Truyền dữ liệu cho view
+            ViewBag.Categories = categories;
+            ViewBag.SelectedCategoryId = categoryId;
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+
+            return View(products);
+        }
+
+        // GET: AJAX Get Product Details
+        [HttpGet]
+        public JsonResult GetProductDetails(long id)
         {
             try
             {
-                // Get all categories
-                var categories = db.DanhMucs
-                    .Where(d => d.IsHienThi == true || d.IsHienThi == null)
-                    .OrderBy(d => d.TenDanhMuc)
-                    .ToList();
-                ViewBag.Categories = categories ?? new List<DanhMuc>();
+                var product = db.MonAns.Find(id);
+                if (product == null) return Json(new { success = false, message = "Không tìm thấy món ăn" }, JsonRequestBehavior.AllowGet);
 
-                // Get menu items
-                var query = db.MonAns.AsQueryable();
+                var category = db.DanhMucs.Find(product.DanhMucID);
 
-                // Filter by category
-                if (categoryId.HasValue && categoryId.Value > 0)
+                var data = new
                 {
-                    query = query.Where(m => m.DanhMucID == categoryId.Value);
-                }
+                    product.MonAnID,
+                    product.TenMon,
+                    product.DanhMucID,
+                    TenDanhMuc = category != null ? category.TenDanhMuc : "",
+                    product.Gia,
+                    product.GiaGoc,
+                    product.GiaGiam,
+                    product.DonViTinh,
+                    product.MoTa,
+                    product.HinhAnh,
+                    product.TrangThai,
+                    product.IsNoiBat,
+                    NgayTao = product.NgayTao.ToString("yyyy-MM-dd")
+                };
 
-                // Search by name
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    query = query.Where(m => m.TenMon.Contains(searchTerm));
-                }
-
-                // Only show active items
-                query = query.Where(m => m.TrangThai == "Hoạt động" || m.TrangThai == "Đang phục vụ");
-
-                var menuItems = query
-                    .OrderBy(m => m.DanhMucID)
-                    .ThenBy(m => m.TenMon)
-                    .ToList();
-
-                // Group by category using Tuple for better compatibility
-                var groupedMenu = menuItems
-                    .GroupBy(m => m.DanhMucID)
-                    .Select(g => new System.Tuple<DanhMuc, List<MonAn>>(
-                        categories.FirstOrDefault(c => c.DanhMucID == g.Key),
-                        g.ToList()
-                    ))
-                    .Where(g => g.Item1 != null)
-                    .OrderBy(g => g.Item1.TenDanhMuc)
-                    .ToList();
-
-                ViewBag.GroupedMenu = groupedMenu;
-                ViewBag.SearchTerm = searchTerm ?? "";
-                ViewBag.CategoryId = categoryId;
-
-                return View();
+                return Json(new { success = true, data = data }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                // Log error and show message
-                ViewBag.ErrorMessage = "Có lỗi xảy ra khi tải menu: " + ex.Message;
-                ViewBag.Categories = new List<DanhMuc>();
-                ViewBag.GroupedMenu = null;
-                ViewBag.SearchTerm = searchTerm ?? "";
-                ViewBag.CategoryId = categoryId;
-                return View();
+                return Json(new { success = false, message = "Lỗi server: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
 

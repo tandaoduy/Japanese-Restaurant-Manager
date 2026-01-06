@@ -11,7 +11,7 @@
 <div class="min-h-screen bg-gray-50">
     <!-- Header -->
     <div class="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="max-w-7xl mx-auto px-4 py-4 font-sans">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <a href="@Url.Action("Index", "Order", new { area = "Employee_65133141" })" 
@@ -29,20 +29,27 @@
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="max-w-7xl mx-auto px-4 py-6 font-sans">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Left: Menu Section -->
             <div class="lg:col-span-2">
-                <!-- Search Box -->
-                <div class="bg-white rounded-lg shadow-sm mb-4 p-3">
-                    <div class="relative">
-                        <div class="search-box-container flex items-center bg-gray-50 border-2 border-gray-200 rounded-lg pl-4 pr-1 py-2 focus-within:border-teal-500 focus-within:bg-white transition-all">
-                            <svg class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                            <input type="text" id="menuSearchInput" class="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400" placeholder="Tìm kiếm món ăn..." autocomplete="off">
-                        </div>
-                        <div id="searchAutocompleteDropdown" class="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-64 overflow-y-auto z-50 hidden">
+                <!-- Search Box (only spans left column) -->
+                <div class="mb-4" style="position: relative;">
+                    <div class="relative w-full">
+                        <input type="text" id="menuSearchInput"
+                               placeholder="Tìm kiếm món ăn..." autocomplete="off"
+                               class="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-stone-200 bg-white shadow-sm focus:border-amber-400 focus:ring-0 transition-all text-sm font-medium text-stone-700 placeholder:uppercase placeholder-stone-400"
+                               style="box-sizing: border-box !important; width: 100%; max-width: 100%; display: block;" />
+
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-600 pointer-events-none z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+
+                        <!-- Autocomplete Dropdown: same width as input, only in left column -->
+                        <div id="searchAutocompleteDropdown"
+                             style="display: none; box-sizing: border-box !important; width: 100%; max-width: 100%;"
+                             class="absolute left-0 top-full bg-white rounded-xl shadow-xl border-2 border-stone-200 max-h-80 overflow-y-auto z-50 mt-1 w-full"
+                             data-top-offset="53">
                             <!-- Autocomplete items will be inserted here -->
                         </div>
                     </div>
@@ -51,14 +58,14 @@
                 <!-- Category Tabs (Compact - Wrap) -->
                 <div class="mb-4">
                     <div class="category-wrap-container flex flex-wrap gap-2">
-                        <button class="category-tab-compact px-3 py-1.5 rounded-lg font-semibold text-xs whitespace-nowrap active bg-teal-500 text-white" data-category="all">
+                        <button class="category-tab-compact px-3 py-1.5 rounded-lg font-semibold text-xs whitespace-nowrap uppercase active bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm" data-category="all">
                             Tất cả
                         </button>
                         @if (categories != null)
                         {
                             foreach (var cat in categories)
                             {
-                                <button class="category-tab-compact px-3 py-1.5 rounded-lg font-semibold text-xs whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors" data-category="@cat.DanhMucID">
+                                <button class="category-tab-compact px-3 py-1.5 rounded-lg font-semibold text-xs whitespace-nowrap uppercase bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors" data-category="@cat.DanhMucID">
                                     @cat.TenDanhMuc
                                 </button>
                             }
@@ -117,7 +124,7 @@
                                                                     </svg>
                                                                 </button>
                                                                 <span class="quantity-display w-8 text-center font-semibold" data-mon-an-id="@item.MonAnID">0</span>
-                                                                <button class="quantity-btn plus w-8 h-8 rounded-full border-2 border-teal-500 bg-teal-500 text-white flex items-center justify-center hover:bg-teal-600" 
+                                                                <button class="quantity-btn plus w-8 h-8 rounded-full border-2 border-amber-500 bg-amber-500 text-white flex items-center justify-center hover:bg-amber-600" 
                                                                         data-mon-an-id="@item.MonAnID">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -149,12 +156,12 @@
                         <h2 class="text-xl font-bold text-gray-900 mb-2">Giỏ hàng</h2>
                         <!-- Cart Tabs -->
                         <div class="flex gap-2 border-b">
-                            <button class="cart-tab flex-1 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-teal-500 transition-colors" 
+                            <button class="cart-tab active flex-1 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-amber-600 transition-colors" 
                                 data-tab="pending">
                                 Món đang gọi
                                 <span id="pendingCount" class="ml-2 px-2 py-0.5 bg-gray-300 text-gray-700 rounded-full text-xs">0</span>
                             </button>
-                            <button class="cart-tab flex-1 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-teal-500 transition-colors" 
+                            <button class="cart-tab flex-1 py-2 text-center font-semibold text-sm border-b-2 border-transparent text-gray-500 hover:text-amber-600 transition-colors" 
                                 data-tab="confirmed">
                                 Món đã gọi
                                 <span id="confirmedCount" class="ml-2 px-2 py-0.5 bg-gray-300 text-gray-700 rounded-full text-xs">0</span>
@@ -163,7 +170,7 @@
                     </div>
 
                     <!-- Cart Content -->
-                    <div class="p-4 max-h-96 overflow-y-auto">
+                    <div class="p-4 max-h-96 overflow-y-auto" style="scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none;">
                         <!-- Pending Items -->
                         <div id="pendingCartItems" class="cart-content">
                             <div class="text-center text-gray-500 py-8">
@@ -178,6 +185,19 @@
                             </div>
                         </div>
                     </div>
+
+                    <style>
+                        /* Custom scrollbar for cart content - WebKit browsers (Chrome, Safari, Edge) */
+                        /* Custom scrollbar for cart content - HIDDEN */
+                        .overflow-y-auto::-webkit-scrollbar {
+                            display: none;
+                        }
+                        
+                        /* Smooth scroll behavior for entire page */
+                        html {
+                            scroll-behavior: smooth;
+                        }
+                    </style>
 
                     <!-- Cart Footer -->
                     <div class="p-4 border-t bg-gray-50">
@@ -196,10 +216,10 @@
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button id="confirmOrderBtn" class="flex-1 px-4 py-2 bg-white border-2 border-teal-500 text-teal-500 rounded-lg font-semibold hover:bg-teal-50">
+                            <button id="confirmOrderBtn" class="flex-1 px-4 py-2 bg-white border-2 border-amber-500 text-amber-600 rounded-lg font-semibold hover:bg-amber-50">
                                 Xác nhận
                             </button>
-                            <button id="paymentBtn" class="flex-1 px-4 py-2 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600">
+                            <button id="paymentBtn" class="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 shadow-md">
                                 Thanh toán
                             </button>
                         </div>
@@ -219,8 +239,8 @@
         <div class="p-4 sm:p-6">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-teal-100 flex items-center justify-center">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
@@ -233,7 +253,7 @@
         </div>
         <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 rounded-b-xl sm:rounded-b-2xl flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
             <button type="button" id="cancelConfirmOrderBtn" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-white hover:bg-gray-100 active:bg-gray-200 text-gray-700 rounded-lg font-semibold text-sm border border-gray-300 shadow-sm hover:shadow-md active:shadow-sm transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto">Hủy</button>
-            <button type="button" id="confirmOrderBtnModal" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg active:shadow-md transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto">Xác nhận</button>
+            <button type="button" id="confirmOrderBtnModal" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:bg-amber-800 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg active:shadow-md transition-all transform hover:scale-105 active:scale-95 w-full sm:w-auto">Xác nhận</button>
         </div>
     </div>
 </div>
@@ -377,7 +397,7 @@
                 html += '<p class="text-sm font-bold text-red-600 mb-1">' + formatCurrency(item.Total) + '</p>';
                 html += '<div class="flex items-center gap-2">';
                 if (type === 'pending') {
-                    html += '<button class="text-teal-600 hover:text-teal-700" onclick="editItem(' + item.MonAnID + ')" title="Chỉnh sửa">';
+                    html += '<button class="text-amber-600 hover:text-amber-700" onclick="editItem(' + item.MonAnID + ')" title="Chỉnh sửa">';
                     html += '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>';
                     html += '</button>';
                 }
@@ -693,20 +713,26 @@
         var allMenuItems = [];
         var searchDebounceTimer;
         
-        // Collect all menu items for search
+        // Collect all menu items for search (with image and price)
         function collectMenuItems() {
             allMenuItems = [];
             $('.category-section').each(function() {
                 var categoryId = $(this).data('category-id');
                 $(this).find('[data-mon-an-id]').each(function() {
-                    var itemName = $(this).find('h3').text().trim();
-                    var monAnId = $(this).data('mon-an-id');
+                    var $item = $(this);
+                    var itemName = $item.find('h3').text().trim();
+                    var monAnId = $item.data('mon-an-id');
+                    var itemImage = $item.find('img').attr('src') || '/Images/logoNhaHang.png';
+                    var priceText = $item.find('.text-red-600').first().text().trim();
+                    
                     if (itemName && monAnId) {
                         allMenuItems.push({
                             name: itemName,
                             monAnId: monAnId,
                             categoryId: categoryId,
-                            element: $(this)
+                            image: itemImage,
+                            price: priceText,
+                            element: $item
                         });
                     }
                 });
@@ -718,13 +744,19 @@
             var searchInput = $('#menuSearchInput');
             var dropdown = $('#searchAutocompleteDropdown');
             
+            // Position dropdown below input
+            function positionDropdown() {
+                var inputHeight = searchInput.outerHeight();
+                dropdown.css('top', (inputHeight + 1) + 'px');
+            }
+            
             // Handle search input
             searchInput.on('input', function() {
                 clearTimeout(searchDebounceTimer);
                 var query = $(this).val().trim();
                 
                 if (query.length === 0) {
-                    dropdown.addClass('hidden');
+                    dropdown.hide();
                     filterMenuItems('');
                     return;
                 }
@@ -732,21 +764,30 @@
                 searchDebounceTimer = setTimeout(function() {
                     showAutocompleteSuggestions(query);
                     filterMenuItems(query);
-                }, 300);
+                }, 150); // Faster response
             });
             
             searchInput.on('focus', function() {
                 var query = $(this).val().trim();
                 if (query.length > 0) {
+                    positionDropdown();
                     showAutocompleteSuggestions(query);
-                    dropdown.removeClass('hidden');
+                } else {
+                    dropdown.hide();
                 }
             });
             
             // Close dropdown when clicking outside
             $(document).on('click', function(e) {
-                if (!$(e.target).closest('.search-box-container, #searchAutocompleteDropdown').length) {
-                    dropdown.addClass('hidden');
+                if (!$(e.target).closest('#menuSearchInput, #searchAutocompleteDropdown').length) {
+                    dropdown.hide();
+                }
+            });
+            
+            // Position on window resize
+            $(window).on('resize', function() {
+                if (dropdown.is(':visible')) {
+                    positionDropdown();
                 }
             });
         }
@@ -756,11 +797,11 @@
         function updateCartTabStyles() {
             $('.cart-tab').each(function() {
                 if ($(this).hasClass('active')) {
-                    $(this).addClass('border-teal-500 text-teal-500').removeClass('border-transparent text-gray-500');
-                    $(this).find('span').addClass('bg-teal-500 text-white').removeClass('bg-gray-300 text-gray-700');
+                    $(this).addClass('border-amber-500 text-amber-600').removeClass('border-transparent text-gray-500');
+                    $(this).find('span').addClass('bg-amber-500 text-white').removeClass('bg-gray-300 text-gray-700');
                 } else {
-                    $(this).addClass('border-transparent text-gray-500').removeClass('border-teal-500 text-teal-500');
-                    $(this).find('span').addClass('bg-gray-300 text-gray-700').removeClass('bg-teal-500 text-white');
+                    $(this).addClass('border-transparent text-gray-500').removeClass('border-amber-500 text-amber-600');
+                    $(this).find('span').addClass('bg-gray-300 text-gray-700').removeClass('bg-amber-500 text-white');
                 }
             });
         }
@@ -769,30 +810,38 @@
             var dropdown = $('#searchAutocompleteDropdown');
             var lowerQuery = query.toLowerCase();
             
-            // Get unique matching items
+            // Get matching items with full data (deduplicated by name)
+            var seenNames = {};
             var matches = allMenuItems
                 .filter(function(item) {
                     return item.name.toLowerCase().includes(lowerQuery);
                 })
-                .map(function(item) { return item.name; })
-                .filter(function(name, index, self) {
-                    return self.indexOf(name) === index;
+                .filter(function(item) {
+                    if (seenNames[item.name]) return false;
+                    seenNames[item.name] = true;
+                    return true;
                 })
-                .slice(0, 5);
+                .slice(0, 6);
             
             if (matches.length === 0) {
-                dropdown.html('<div class="autocomplete-item text-gray-500">Không tìm thấy kết quả</div>');
-                dropdown.removeClass('hidden');
+                dropdown.html('<div class="p-4 text-center text-gray-500">Không tìm thấy kết quả</div>');
+                dropdown.show();
                 return;
             }
             
-            var html = matches.map(function(name) {
-                var escapedName = name.replace(/'/g, "\\'");
-                return '<div class="autocomplete-item" onclick="selectSearchSuggestion(\'' + escapedName + '\')">' + name + '</div>';
+            var html = matches.map(function(item) {
+                var escapedName = item.name.replace(/'/g, "\\'");
+                return '<div class="autocomplete-item flex items-center gap-3 p-2.5 hover:bg-amber-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors" onclick="selectSearchSuggestion(\'' + escapedName + '\')">' +
+                    '<img src="' + item.image + '" class="w-10 h-10 rounded-lg object-cover flex-shrink-0 border border-gray-200" onerror="this.src=\'/Images/logoNhaHang.png\';" />' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<div class="font-semibold text-gray-800 text-sm truncate">' + item.name + '</div>' +
+                        '<div class="text-red-600 font-bold text-sm">' + item.price + '</div>' +
+                    '</div>' +
+                '</div>';
             }).join('');
             
             dropdown.html(html);
-            dropdown.removeClass('hidden');
+            dropdown.show();
         }
         
         window.selectSearchSuggestion = function(name) {
@@ -882,13 +931,13 @@
             
             // Category tab switching
             $('.category-tab-compact').on('click', function() {
-                $('.category-tab-compact').removeClass('active bg-teal-500 text-white').addClass('bg-gray-100 text-gray-700');
-                $(this).addClass('active bg-teal-500 text-white').removeClass('bg-gray-100 text-gray-700');
+                $('.category-tab-compact').removeClass('active bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm').addClass('bg-gray-100 text-gray-700');
+                $(this).addClass('active bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm').removeClass('bg-gray-100 text-gray-700');
                 currentCategory = $(this).data('category');
                 
                 // Clear search when changing category
                 $('#menuSearchInput').val('');
-                $('#searchAutocompleteDropdown').addClass('hidden');
+                $('#searchAutocompleteDropdown').hide();
                 
                 if (currentCategory === 'all') {
                     $('.category-section').show();
@@ -976,7 +1025,7 @@
     }
     
     .search-box-container:focus-within {
-        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.15);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
     }
     
     /* Autocomplete Dropdown */
@@ -997,7 +1046,7 @@
     }
     
     .autocomplete-item:hover {
-        background: #f0fdfa;
+        background: #fffbeb;
     }
     
     /* Compact Category Tabs (Wrap - No Background) */
@@ -1015,18 +1064,18 @@
     }
     
     .category-tab-compact.active {
-        background-color: #14b8a6 !important;
+        background: linear-gradient(to right, #f59e0b, #d97706) !important;
         color: white !important;
-        box-shadow: 0 2px 4px rgba(20, 184, 166, 0.3);
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
     }
     
     .cart-tab.active {
-        border-bottom-color: #14b8a6 !important;
-        color: #14b8a6 !important;
+        border-bottom-color: #f59e0b !important;
+        color: #d97706 !important;
     }
     
     .cart-tab.active span {
-        background-color: #14b8a6 !important;
+        background-color: #f59e0b !important;
         color: white !important;
     }
     

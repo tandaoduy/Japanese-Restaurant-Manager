@@ -8,10 +8,10 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
     <link rel="shortcut icon" type="image/png" href="@Url.Content("~/Images/logoNhaHang.png")" />
-    <!-- Google Fonts - Noto Sans Vietnamese for perfect Vietnamese support -->
+    <!-- Google Fonts - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     @Styles.Render("~/Content/css")
@@ -284,33 +284,37 @@
             }
         }
 
-        /* Font family - Force Vietnamese support */
+        /* Font family - Inter */
         html, body {
-            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+            font-family: 'Inter', sans-serif !important;
             font-feature-settings: "liga" 1, "kern" 1;
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Force Vietnamese font for all elements */
+        h1, h2, h3, .font-serif {
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        /* Force Inter font for all elements */
         *, *::before, *::after {
-            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+            font-family: 'Inter', sans-serif !important;
         }
 
         /* Ensure Vietnamese characters render correctly */
         input, textarea, select, button {
-            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+            font-family: 'Inter', sans-serif !important;
         }
 
         /* Modal text */
         #confirmModal, #confirmModal * {
-            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+            font-family: 'Inter', sans-serif !important;
         }
 
         /* All text elements */
-        p, span, div, h1, h2, h3, h4, h5, h6, a, label, td, th, li {
-            font-family: 'Noto Sans', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Microsoft YaHei', 'SimSun', sans-serif !important;
+        p, span, div, h4, h5, h6, a, label, td, th, li {
+            font-family: 'Inter', sans-serif !important;
         }
     /* GLOBAL AUTH MODAL STYLES */
     .auth-modal-overlay {

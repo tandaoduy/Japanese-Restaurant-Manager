@@ -110,7 +110,7 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
         [HttpGet]
         public JsonResult GetSearchSuggestions(string query)
         {
-            if (string.IsNullOrEmpty(query) || query.Length < 2)
+            if (string.IsNullOrEmpty(query) || query.Length < 1)
             {
                 return Json(new { success = true, suggestions = new List<object>() }, JsonRequestBehavior.AllowGet);
             }
@@ -172,6 +172,20 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
             foreach (var table in tables)
             {
                 suggestions.Add(new { text = table, type = "Bàn" });
+            }
+
+            // Tìm theo tên món ăn trong đơn
+            var dishes = db.ChiTietDonHangs
+                .Where(d => d.DonHang.NhanVienID == nhanVienId.Value && 
+                           d.MonAn != null && d.MonAn.TenMon.ToLower().Contains(queryLower))
+                .Select(d => d.MonAn.TenMon)
+                .Distinct()
+                .Take(5)
+                .ToList();
+
+            foreach (var dish in dishes)
+            {
+                suggestions.Add(new { text = dish, type = "Món ăn" });
             }
 
             return Json(new { success = true, suggestions = suggestions.Take(10).ToList() }, JsonRequestBehavior.AllowGet);
@@ -346,7 +360,7 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
 <head>
     <meta charset='utf-8'>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
+        body { font-family: 'Inter', sans-serif; margin: 20px; }
         h1 { color: #0d9488; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background: #f0fdfa; padding: 10px; text-align: left; border: 1px solid #ddd; }

@@ -16,17 +16,13 @@
 <div id="alertContainer" class="fixed top-20 right-4 z-[10000] space-y-2 max-w-md"></div>
 
 <div class="container mx-auto px-4 py-6">
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Quản lý đặt bàn</h1>
-    </div>
-
-    <!-- Stats & Actions -->
     <div class="mb-6 flex items-center justify-between">
-        <div class="text-gray-600">
-            <p>Tổng số: <span class="font-semibold text-gray-900">@totalItems</span> đặt bàn</p>
+        <div>
+            <h1 class="text-3xl font-bold text-stone-800" style="font-family: 'Inter', sans-serif;">Quản lý đặt bàn</h1>
+            <p class="text-stone-500 text-sm mt-1">Danh sách và quản lý các đặt bàn của nhà hàng</p>
         </div>
         <button type="button" onclick="openCreateDatBanModal()" 
-                class="px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all shadow-md hover:shadow-lg">
+                class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -34,167 +30,81 @@
         </button>
     </div>
 
+    <!-- Stats & Actions -->
+    <div class="mb-6 flex items-center justify-between">
+        <div class="text-stone-600">
+            <p>Tổng số: <span class="font-bold text-amber-700">@totalItems</span> đặt bàn</p>
+        </div>
+    </div>
+
     <!-- Search and Filter -->
     <div class="mb-6 flex flex-wrap items-end gap-3 justify-end">
         @using (Html.BeginForm("Index", "DatBan", new { area = "Employee_65133141" }, FormMethod.Get, new { @class = "flex flex-wrap items-end gap-3" }))
         {
+            <!-- Icon-only Filter Dropdown -->
             <div class="relative">
-                <div class="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <input type="hidden" name="statusFilter" id="statusFilterInput" value="@(string.IsNullOrEmpty(statusFilter) ? "all" : statusFilter)" />
+                
+                <button type="button" id="filterBtn" onclick="toggleFilterDropdown()" 
+                        class="w-11 h-11 flex items-center justify-center rounded-xl border-2 border-stone-200 hover:border-amber-400 hover:bg-amber-50 text-stone-600 hover:text-amber-700 transition-all shadow-sm group bg-white"
+                        title="Lọc theo trạng thái">
+                    <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                     </svg>
+                </button>
+
+                <div id="filterDropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-stone-100 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in-down">
+                    <div class="py-1">
+                        <button type="button" onclick="selectStatus('all')" 
+                                class="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-amber-50 transition-colors flex items-center justify-between group @(string.IsNullOrEmpty(statusFilter) || statusFilter == "all" ? "text-amber-700 bg-amber-50/50" : "text-stone-600")">
+                            <span>Tất cả trạng thái</span>
+                            @if (string.IsNullOrEmpty(statusFilter) || statusFilter == "all") {
+                                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            }
+                        </button>
+                        @foreach (var status in statuses)
+                        {
+                            <button type="button" onclick="selectStatus('@status')" 
+                                    class="w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-amber-50 transition-colors flex items-center justify-between group @(statusFilter == status ? "text-amber-700 bg-amber-50/50" : "text-stone-600")">
+                                <span>@status</span>
+                                @if (statusFilter == status) {
+                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                }
+                            </button>
+                        }
+                    </div>
                 </div>
-                <select name="statusFilter" onchange="this.form.submit()" 
-                        class="pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-200 transition-all text-sm font-medium text-gray-700 appearance-none bg-white cursor-pointer">
-                    <option value="all" @(string.IsNullOrEmpty(statusFilter) || statusFilter == "all" ? "selected" : "")>Tất cả trạng thái</option>
-                    @foreach (var status in statuses)
-                    {
-                        <option value="@status" @(statusFilter == status ? "selected" : "")>@status</option>
-                    }
-                </select>
             </div>
 
             <div class="relative">
-                <input type="text" name="searchString" value="@searchString"
-                       placeholder="Tìm theo tên, SĐT, bàn..."
-                       class="w-64 pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-200 transition-all text-sm font-medium text-gray-700 placeholder-gray-400"
-                       onchange="this.form.submit()" />
-                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
+                <div class="flex items-center relative">
+                    <input type="text" id="searchInput" name="searchString" value="@searchString"
+                           placeholder="Tìm theo tên, SĐT, bàn..." autocomplete="off"
+                           class="w-64 pl-10 pr-10 py-2.5 rounded-xl border-2 border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all text-sm font-medium text-stone-700 placeholder-stone-400" />
+                    
+                    <!-- Search Icon -->
+                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-amber-600 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+
+                    <!-- Loading Indicator -->
+                    <div id="searchLoading" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2">
+                         <svg class="animate-spin h-4 w-4 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                         </svg>
+                    </div>
+                </div>
+                
+                <!-- Suggestions Dropdown -->
+                <div id="searchSuggestions" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto"></div>
             </div>
         }
     </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SĐT</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bàn</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số người</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var item in Model)
-                    {
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">DB@(item.DatBanID.ToString("D4"))</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">@(item.HoTenKhach ?? "N/A")</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@(item.SDTKhach ?? "N/A")</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                @if (item.BanAn != null)
-                                {
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        @item.BanAn.TenBan
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="text-gray-400">Chưa chọn</span>
-                                }
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                @item.ThoiGianDen.ToString("dd/MM/yyyy HH:mm")
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@(item.SoNguoi?.ToString() ?? "N/A")</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @{
-                                    var statusClass = "bg-gray-100 text-gray-800";
-                                    if (item.TrangThai == "Đã xác nhận") { statusClass = "bg-green-100 text-green-800"; }
-                                    else if (item.TrangThai == "Đang phục vụ") { statusClass = "bg-blue-100 text-blue-800"; }
-                                    else if (item.TrangThai == "Hoàn thành") { statusClass = "bg-purple-100 text-purple-800"; }
-                                    else if (item.TrangThai == "Đã hủy") { statusClass = "bg-red-100 text-red-800"; }
-                                }
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @statusClass">
-                                    @(item.TrangThai ?? "Chờ xác nhận")
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center gap-2">
-                                    <button type="button" onclick="openDatBanDetailsModal(@item.DatBanID)"
-                                            class="text-blue-600 hover:text-blue-900" title="Xem chi tiết">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                    </button>
-                                    <button type="button" onclick="openEditDatBanModal(@item.DatBanID)"
-                                            class="text-blue-600 hover:text-blue-900" title="Sửa">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">Không có đặt bàn nào</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination-container mt-8">
-        <div class="pagination-buttons">
-            @if (currentPage > 1)
-            {
-                <a href="@Url.Action("Index", "DatBan", new { area = "Employee_65133141", page = 1, searchString = searchString, statusFilter = statusFilter })" 
-                   class="pagination-btn" title="Trang đầu">«</a>
-                <a href="@Url.Action("Index", "DatBan", new { area = "Employee_65133141", page = currentPage - 1, searchString = searchString, statusFilter = statusFilter })" 
-                   class="pagination-btn" title="Trang trước">‹</a>
-            }
-            else
-            {
-                <span class="pagination-btn disabled">«</span>
-                <span class="pagination-btn disabled">‹</span>
-            }
-
-            @{
-                int maxPages = 5;
-                int startPage = Math.Max(1, currentPage - (maxPages / 2));
-                int endPage = Math.Min(totalPages, startPage + maxPages - 1);
-                
-                if (endPage - startPage < maxPages - 1)
-                {
-                    startPage = Math.Max(1, endPage - maxPages + 1);
-                }
-            }
-
-            @for (int i = startPage; i <= endPage; i++)
-            {
-                <a href="@Url.Action("Index", "DatBan", new { area = "Employee_65133141", page = i, searchString = searchString, statusFilter = statusFilter })" 
-                   class="pagination-btn @(i == currentPage ? "active" : "")">@i</a>
-            }
-
-            @if (currentPage < totalPages)
-            {
-                <a href="@Url.Action("Index", "DatBan", new { area = "Employee_65133141", page = currentPage + 1, searchString = searchString, statusFilter = statusFilter })" 
-                   class="pagination-btn" title="Trang sau">›</a>
-                <a href="@Url.Action("Index", "DatBan", new { area = "Employee_65133141", page = totalPages, searchString = searchString, statusFilter = statusFilter })" 
-                   class="pagination-btn" title="Trang cuối">»</a>
-            }
-            else
-            {
-                <span class="pagination-btn disabled">›</span>
-                <span class="pagination-btn disabled">»</span>
-            }
-        </div>
-        <div class="pagination-info">Trang @currentPage / @totalPages</div>
+    <!-- Table Container (Updated via AJAX) -->
+    <div id="datban-list-container">
+        @Html.Partial("~/Areas/Employee_65133141/Views/DatBan/_DatBanList.cshtml", Model)
     </div>
 </div>
 
@@ -209,18 +119,18 @@
         </button>
         
         <div class="flex flex-col md:flex-row h-full">
-            <!-- Left: Info Card (Teal Gradient) -->
-            <div class="w-full md:w-1/2 bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center p-6" style="min-height: 400px;">
+            <!-- Left: Info Card (Amber Gradient) -->
+            <div class="w-full md:w-1/2 bg-gradient-to-br from-stone-50 to-amber-50 flex items-center justify-center p-6 border-r border-amber-100" style="min-height: 400px;">
                 <div class="w-full max-w-sm">
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <div class="text-center mb-4">
                             <!-- Icon -->
-                            <div class="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <svg class="w-10 h-10 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-20 h-20 bg-amber-100/80 rounded-full flex items-center justify-center mx-auto mb-3 border border-amber-200 shadow-sm">
+                                <svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-900" id="detailDatBanId">DB0000</h3>
+                            <h3 class="text-xl font-bold text-stone-800" id="detailDatBanId" style="font-family: 'Inter', sans-serif !important;">DB0000</h3>
                             <p class="text-sm text-gray-500 mt-1">Mã đặt bàn</p>
                         </div>
                         <div class="space-y-3">
@@ -247,7 +157,7 @@
                    <!-- Header -->
                    <div class="flex items-start justify-between mb-4">
                        <div>
-                           <h2 class="text-2xl font-bold text-gray-900 mb-2 leading-tight" id="detailDatBanKhachHang">-</h2>
+                           <h2 class="text-3xl font-bold text-stone-900 mb-2 leading-tight" id="detailDatBanKhachHang" style="font-family: 'Inter', sans-serif !important;">-</h2>
                            <div class="flex gap-2">
                                <span id="detailDatBanStatusBadge" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold uppercase tracking-wide">-</span>
                            </div>
@@ -277,7 +187,7 @@
 
                 <!-- Footer Buttons -->
                 <div class="flex items-center gap-3 mt-auto">
-                    <button type="button" onclick="openEditFromDetails()" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg transform active:scale-95 flex items-center justify-center gap-2">
+                    <button type="button" onclick="openEditFromDetails()" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg transform active:scale-95 flex items-center justify-center gap-2 shadow-amber-500/20">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         Sửa đặt bàn
                     </button>
@@ -301,7 +211,7 @@
         </button>
 
         <div class="auth-modal-header">
-            <div class="auth-logo" style="background: #ecfdf5; color: #0d9488;">
+            <div class="auth-logo" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); color: #b45309; border: 1px solid rgba(212,175,55,0.2);">
                 <svg class="w-full h-full p-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
@@ -322,14 +232,14 @@
                          <div class="auth-form-group">
                             <label class="auth-form-label">Họ tên khách hàng <span class="auth-required">*</span></label>
                             <div class="auth-input-wrapper">
-                                <input type="text" name="HoTenKhach" id="editHoTenKhach" class="auth-form-control focus:border-teal-500 focus:ring-teal-200" required />
+                                <input type="text" name="HoTenKhach" id="editHoTenKhach" class="auth-form-control focus:border-amber-500 focus:ring-amber-200" required />
                             </div>
                         </div>
 
                          <div class="auth-form-group">
                             <label class="auth-form-label">Bàn ăn</label>
                             <div class="auth-input-wrapper">
-                                <select name="BanID" id="editBanID" class="auth-form-control focus:border-teal-500 focus:ring-teal-200">
+                                <select name="BanID" id="editBanID" class="auth-form-control focus:border-amber-500 focus:ring-amber-200">
                                     <option value="">-- Chọn bàn --</option>
                                     <!-- Populated via JS -->
                                 </select>
@@ -339,7 +249,7 @@
                         <div class="auth-form-group">
                             <label class="auth-form-label">Thời gian đến <span class="auth-required">*</span></label>
                             <div class="auth-input-wrapper">
-                                <input type="datetime-local" name="ThoiGianDen" id="editThoiGianDen" class="auth-form-control focus:border-teal-500 focus:ring-teal-200" required />
+                                <input type="datetime-local" name="ThoiGianDen" id="editThoiGianDen" class="auth-form-control focus:border-amber-500 focus:ring-amber-200" required />
                             </div>
                         </div>
                     </div>
@@ -349,21 +259,21 @@
                          <div class="auth-form-group">
                             <label class="auth-form-label">Số điện thoại <span class="auth-required">*</span></label>
                             <div class="auth-input-wrapper">
-                                <input type="tel" name="SDTKhach" id="editSDTKhach" class="auth-form-control focus:border-teal-500 focus:ring-teal-200" required />
+                                <input type="tel" name="SDTKhach" id="editSDTKhach" class="auth-form-control focus:border-amber-500 focus:ring-amber-200" required />
                             </div>
                         </div>
 
                          <div class="auth-form-group">
                             <label class="auth-form-label">Số người</label>
                             <div class="auth-input-wrapper">
-                                <input type="number" name="SoNguoi" id="editSoNguoi" class="auth-form-control focus:border-teal-500 focus:ring-teal-200" min="1" />
+                                <input type="number" name="SoNguoi" id="editSoNguoi" class="auth-form-control focus:border-amber-500 focus:ring-amber-200" min="1" />
                             </div>
                         </div>
 
                         <div class="auth-form-group">
                             <label class="auth-form-label">Trạng thái <span class="auth-required">*</span></label>
                             <div class="auth-input-wrapper">
-                                <select name="TrangThai" id="editTrangThai" class="auth-form-control focus:border-teal-500 focus:ring-teal-200">
+                                <select name="TrangThai" id="editTrangThai" class="auth-form-control focus:border-amber-500 focus:ring-amber-200">
                                     <option value="Chờ xác nhận">Chờ xác nhận</option>
                                     <option value="Đã xác nhận">Đã xác nhận</option>
                                     <option value="Đang phục vụ">Đang phục vụ</option>
@@ -378,13 +288,13 @@
                 <div class="auth-form-group mt-4">
                     <label class="auth-form-label">Ghi chú</label>
                     <div class="auth-input-wrapper">
-                        <textarea name="GhiChu" id="editGhiChu" rows="3" class="auth-form-control focus:border-teal-500 focus:ring-teal-200"></textarea>
+                        <textarea name="GhiChu" id="editGhiChu" rows="3" class="auth-form-control focus:border-amber-500 focus:ring-amber-200"></textarea>
                     </div>
                 </div>
 
                 <div class="auth-btn-group mt-6">
                     <button type="button" class="auth-btn auth-btn-cancel" onclick="closeEditDatBanModal()">Hủy</button>
-                    <button type="submit" class="auth-btn auth-btn-submit bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-teal-500/30">Lưu thay đổi</button>
+                    <button type="submit" class="auth-btn auth-btn-submit bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-500/30">Lưu thay đổi</button>
                 </div>
             }
 </div>
@@ -402,7 +312,7 @@
         </button>
 
         <div class="auth-modal-header">
-            <div class="auth-logo" style="background: #ecfdf5; color: #0d9488;">
+            <div class="auth-logo" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); color: #b45309; border: 1px solid rgba(212,175,55,0.2);">
                 <svg class="w-full h-full p-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
@@ -421,21 +331,21 @@
                          <div class="auth-form-group">
                             <label class="auth-form-label">Họ tên khách hàng <span class="auth-required">*</span></label>
                             <div class="auth-input-wrapper">
-                                <input type="text" name="customerName" id="createCustomerName" class="auth-form-control focus:border-teal-500 focus:ring-teal-200" required />
+                                <input type="text" name="customerName" id="createCustomerName" class="auth-form-control focus:border-amber-500 focus:ring-amber-200" required />
                             </div>
                         </div>
 
                          <div class="auth-form-group">
                             <label class="auth-form-label">Email</label>
                             <div class="auth-input-wrapper">
-                                <input type="email" name="customerEmail" id="createCustomerEmail" class="auth-form-control focus:border-teal-500 focus:ring-teal-200" />
+                                <input type="email" name="customerEmail" id="createCustomerEmail" class="auth-form-control focus:border-amber-500 focus:ring-amber-200" />
                             </div>
                         </div>
 
                         <div class="auth-form-group">
                             <label class="auth-form-label">Thời gian đến <span class="auth-required">*</span></label>
                             <div class="auth-input-wrapper">
-                                <input type="datetime-local" name="ThoiGianDen" id="createThoiGianDen" class="auth-form-control focus:border-teal-500 focus:ring-teal-200" required />
+                                <input type="datetime-local" name="ThoiGianDen" id="createThoiGianDen" class="auth-form-control focus:border-amber-500 focus:ring-amber-200" required />
                             </div>
                         </div>
                     </div>
@@ -445,7 +355,7 @@
                          <div class="auth-form-group">
                             <label class="auth-form-label">Số điện thoại <span class="auth-required">*</span></label>
                             <div class="auth-input-wrapper">
-                                <input type="tel" name="customerPhone" id="createCustomerPhone" class="auth-form-control focus:border-teal-500 focus:ring-teal-200" pattern="[0-9]{10}" required />
+                                <input type="tel" name="customerPhone" id="createCustomerPhone" class="auth-form-control focus:border-amber-500 focus:ring-amber-200" pattern="[0-9]{10}" required />
                                 <small class="text-gray-500 text-xs mt-1 block">10 chữ số</small>
                             </div>
                         </div>
@@ -453,14 +363,14 @@
                          <div class="auth-form-group">
                             <label class="auth-form-label">Số người</label>
                             <div class="auth-input-wrapper">
-                                <input type="number" name="datBan.SoNguoi" id="createSoNguoi" class="auth-form-control focus:border-teal-500 focus:ring-teal-200" min="1" value="2" />
+                                <input type="number" name="datBan.SoNguoi" id="createSoNguoi" class="auth-form-control focus:border-amber-500 focus:ring-amber-200" min="1" value="2" />
                             </div>
                         </div>
 
                         <div class="auth-form-group">
                             <label class="auth-form-label">Bàn ăn</label>
                             <div class="auth-input-wrapper">
-                                <select name="datBan.BanID" id="createBanID" class="auth-form-control focus:border-teal-500 focus:ring-teal-200">
+                                <select name="datBan.BanID" id="createBanID" class="auth-form-control focus:border-amber-500 focus:ring-amber-200">
                                     <option value="">-- Chọn bàn --</option>
                                     <!-- Populated via JS -->
                                 </select>
@@ -472,7 +382,7 @@
                 <div class="auth-form-group mt-4">
                     <label class="auth-form-label">Ghi chú</label>
                     <div class="auth-input-wrapper">
-                        <textarea name="datBan.GhiChu" id="createGhiChu" rows="3" class="auth-form-control focus:border-teal-500 focus:ring-teal-200"></textarea>
+                        <textarea name="datBan.GhiChu" id="createGhiChu" rows="3" class="auth-form-control focus:border-amber-500 focus:ring-amber-200"></textarea>
                     </div>
                 </div>
 
@@ -852,9 +762,57 @@
         document.body.style.overflow = 'auto';
     }
 
-    // Handle Form Submit
+    // Validation Helper
+    function validateDatBanInput(name, phone, email, people) {
+        const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
+        if (!name || !name.trim()) return { valid: false, message: 'Vui lòng nhập họ tên khách hàng.' };
+        if (!nameRegex.test(name)) return { valid: false, message: 'Tên khách hàng chỉ được chứa chữ cái và khoảng trắng.' };
+
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phone)) return { valid: false, message: 'Số điện thoại phải gồm đúng 10 chữ số.' };
+
+        if (email && email.trim() !== '') {
+            // Strict email regex: Only letters, numbers, and . _ -
+            const emailRegex = /^[a-zA-Z0-9._-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) return { valid: false, message: 'Email chỉ được chứa chữ, số và các ký tự:  _ . -' };
+        }
+        
+        if (people && parseInt(people) < 1) return { valid: false, message: 'Số người phải lớn hơn 0.' };
+
+        return { valid: true };
+    }
+
+    // Handle Create Form Submit
+    var createForm = document.getElementById('createDatBanForm');
+    if(createForm) {
+        createForm.addEventListener('submit', function(e) {
+            var name = document.getElementById('createCustomerName').value;
+            var phone = document.getElementById('createCustomerPhone').value;
+            var email = document.getElementById('createCustomerEmail').value;
+            var people = document.getElementById('createSoNguoi').value;
+
+            var val = validateDatBanInput(name, phone, email, people);
+            if (!val.valid) {
+                e.preventDefault();
+                showAlert('error', val.message);
+            }
+        });
+    }
+
+    // Handle Edit Form Submit
     document.getElementById('editDatBanForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        var name = document.getElementById('editHoTenKhach').value;
+        var phone = document.getElementById('editSDTKhach').value;
+        var people = document.getElementById('editSoNguoi').value;
+
+        var val = validateDatBanInput(name, phone, null, people);
+        if (!val.valid) {
+            showAlert('error', val.message);
+            return;
+        }
+
         var form = this;
         var formData = new FormData(form);
         var btn = form.querySelector('button[type="submit"]');
@@ -871,7 +829,6 @@
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Success
                 closeEditDatBanModal();
                 showAlert('success', 'Cập nhật thành công!');
                 setTimeout(() => window.location.reload(), 1000);
@@ -904,11 +861,172 @@
 
         if (successMsg) showAlert('success', successMsg);
         if (errorMsg) showAlert('error', errorMsg);
+        
+        setupInputValidation();
     });
+
+    function setupInputValidation() {
+        // Name: Letters & Spaces only
+        ['createCustomerName', 'editHoTenKhach'].forEach(id => {
+            var el = document.getElementById(id);
+            if(el) {
+                el.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '');
+                });
+            }
+        });
+
+        // Phone: Numbers only, max 10
+        ['createCustomerPhone', 'editSDTKhach'].forEach(id => {
+             var el = document.getElementById(id);
+            if(el) {
+                el.setAttribute('maxLength', '10');
+                el.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
+        });
+    }
+
+    function toggleFilterDropdown() {
+        const dd = document.getElementById('filterDropdown');
+        if (dd) dd.classList.toggle('hidden');
+    }
+
+    function selectStatus(status) {
+        const input = document.getElementById('statusFilterInput');
+        if (input) {
+            input.value = status;
+            // Submit form for live reload? Or just trigger search
+            // Since form is GET, submitting it refreshes page with params.
+            // Ideally we want AJAX refresh like Search.
+            // For now, let's just submit the form to keep it simple as before.
+            input.form.submit();
+        }
+        toggleFilterDropdown();
+    }
+
+    // Close filter dropdown on click outside
+    document.addEventListener('click', function(e) {
+        const dd = document.getElementById('filterDropdown');
+        const btn = document.getElementById('filterBtn');
+        if (dd && !dd.classList.contains('hidden') && !dd.contains(e.target) && !btn.contains(e.target)) {
+            dd.classList.add('hidden');
+        }
+    });
+
+    // --- Live Search & Autocomplete ---
+    const searchInput = document.getElementById('searchInput');
+    const suggestionsBox = document.getElementById('searchSuggestions');
+    const searchLoading = document.getElementById('searchLoading');
+    const datBanListContainer = document.getElementById('datban-list-container');
+    let searchDebounceTimer;
+    let suggestionsDebounceTimer;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const term = e.target.value.trim();
+
+            clearTimeout(searchDebounceTimer);
+            clearTimeout(suggestionsDebounceTimer);
+
+            // 1. Live Search
+            if (searchLoading) searchLoading.classList.remove('hidden');
+            searchDebounceTimer = setTimeout(() => {
+                performLiveSearch(term);
+            }, 300);
+
+            // 2. Suggestions
+            if (term.length >= 1) {
+                suggestionsDebounceTimer = setTimeout(() => {
+                    fetchSuggestions(term);
+                }, 200);
+            } else {
+                if (suggestionsBox) suggestionsBox.classList.add('hidden');
+            }
+        });
+
+        // Focus shows suggestions
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length >= 1 && suggestionsBox && suggestionsBox.children.length > 0) {
+                suggestionsBox.classList.remove('hidden');
+            }
+        });
+
+        // Click outside closes suggestions
+        document.addEventListener('click', function(e) {
+            if (suggestionsBox && !suggestionsBox.contains(e.target) && e.target !== searchInput) {
+                suggestionsBox.classList.add('hidden');
+            }
+        });
+    }
+
+    function performLiveSearch(term) {
+        const form = document.querySelector('form[action*="Index"]'); 
+        if (!form) return;
+
+        const formData = new FormData(form);
+        formData.set('searchString', term);
+        
+        const params = new URLSearchParams(formData);
+
+        fetch('@Url.Action("Index", "DatBan", new { area = "Employee_65133141" })?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            if (datBanListContainer) {
+                datBanListContainer.innerHTML = html;
+            }
+        })
+        .finally(() => {
+             if (searchLoading) searchLoading.classList.add('hidden');
+        });
+    }
+
+    function fetchSuggestions(term) {
+        fetch('@Url.Action("GetSearchSuggestions", "DatBan", new { area = "Employee_65133141" })?term=' + encodeURIComponent(term))
+            .then(res => res.json())
+            .then(data => {
+                if (!suggestionsBox) return;
+                
+                if (data.length === 0) {
+                    suggestionsBox.classList.add('hidden');
+                    return;
+                }
+
+                let html = '';
+                data.forEach(item => {
+                    html += `
+                        <div class="px-4 py-2 hover:bg-stone-100 cursor-pointer flex items-center gap-3 transition-colors text-left border-b border-stone-50 last:border-0" onclick="selectSuggestion('${item.value}')">
+                            <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs shrink-0 border border-amber-200">
+                                ${item.avatar}
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-stone-800">${item.label}</div>
+                                <div class="text-xs text-stone-500">${item.desc}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                suggestionsBox.innerHTML = html;
+                suggestionsBox.classList.remove('hidden');
+            })
+            .catch(err => console.error(err));
+    }
+
+    function selectSuggestion(value) {
+        if (searchInput) {
+            searchInput.value = value;
+            suggestionsBox.classList.add('hidden');
+            performLiveSearch(value);
+        }
+    }
 </script>
 
 <style>
-    /* Pagination Styles */
+    /* Pagination Styles - Luxury Amber Theme */
     .pagination-container {
         margin-top: 3rem;
         display: flex;
@@ -924,53 +1042,65 @@
     .pagination-btn {
         width: 40px; height: 40px;
         display: flex; align-items: center; justify-content: center;
-        border: 1px solid #e5e7eb; background: white; border-radius: 50%;
+        border: 1px solid #d6d3d1; background: white; border-radius: 50%;
         cursor: pointer; transition: all 0.3s ease;
-        font-weight: 500; color: #9ca3af; text-decoration: none; font-size: 18px;
+        font-weight: 500; color: #78716c; text-decoration: none; font-size: 18px;
     }
     .pagination-btn:hover:not(.active):not(.disabled) {
-        border-color: #14b8a6; color: #14b8a6; transform: scale(1.05);
+        border-color: #d97706; color: #d97706; transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(217, 119, 6, 0.15);
     }
     .pagination-btn.active {
         width: 44px; height: 44px;
-        background: #14b8a6; border: 1px solid #14b8a6; border-radius: 50%;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+        border: none; border-radius: 50%;
         color: white; font-size: 16px; font-weight: 600;
-        box-shadow: 0 4px 10px rgba(20, 184, 166, 0.2);
+        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
     }
     .pagination-btn.disabled {
-        opacity: 1; color: #9ca3af; border-color: #e5e7eb;
-        cursor: not-allowed; background: #f9fafb;
+        opacity: 1; color: #a8a29e; border-color: #e7e5e4;
+        cursor: not-allowed; background: #fafaf9;
     }
     .pagination-info {
-        color: #5b9bd5; font-size: 14px; font-weight: 400;
+        color: #b45309; font-size: 14px; font-weight: 500;
     }
     
-    /* Auth Modal Styles Global overrides/Additions */
+    /* Auth Modal Styles - Luxury Amber Theme */
     .auth-modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center;
-        z-index: 9999; backdrop-filter: blur(4px);
+        background: rgba(28, 25, 23, 0.6); display: flex; align-items: center; justify-content: center;
+        z-index: 9999; backdrop-filter: blur(6px);
     }
     .auth-modal-container {
-        background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        width: 90%; max-height: 90vh; overflow-y: auto; animation: authSlideIn 0.3s ease-out;
+        background: white; border-radius: 20px; box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+        width: 90%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; animation: authSlideIn 0.3s ease-out;
+        border: 1px solid rgba(212, 175, 55, 0.1);
     }
-    .auth-modal-header { padding: 24px 32px; text-align: center; border-bottom: 1px solid #f3f4f6; }
-    .auth-logo { width: 48px; height: 48px; margin: 0 auto 16px; background: #fff7ed; color: #ea580c; border-radius: 12px; }
-    .auth-modal-title { font-size: 24px; font-weight: 800; color: #1f2937; margin-bottom: 8px; }
-    .auth-modal-subtitle { color: #6b7280; font-size: 14px; }
-    .auth-modal-body { padding: 32px; }
+    .auth-modal-header { padding: 28px 32px; text-align: center; border-bottom: 1px solid #f5f5f4; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%); }
+    .auth-logo { width: 52px; height: 52px; margin: 0 auto 16px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #b45309; border-radius: 14px; border: 1px solid rgba(212, 175, 55, 0.2); }
+    .auth-modal-title { font-size: 24px; font-weight: 700; color: #1c1917; margin-bottom: 8px; font-family: 'Inter', sans-serif !important; }
+    .auth-modal-subtitle { color: #78716c; font-size: 14px; }
+    .auth-modal-body { 
+        padding: 32px; 
+        overflow-y: auto; 
+        /* Hide scrollbar */
+        scrollbar-width: none; 
+        -ms-overflow-style: none;
+    }
+    .auth-modal-body::-webkit-scrollbar { 
+        display: none; 
+    }
     .auth-form-group { margin-bottom: 20px; }
-    .auth-form-label { display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+    .auth-form-label { display: block; font-size: 14px; font-weight: 600; color: #44403c; margin-bottom: 8px; }
     .auth-required { color: #dc2626; margin-left: 2px; }
     .auth-input-wrapper { position: relative; }
-    .auth-form-control { width: 100%; padding: 10px 16px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 14px; transition: all 0.2s; }
-    .auth-form-control:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1); }
+    .auth-form-control { width: 100%; padding: 12px 16px; border: 1.5px solid #e7e5e4; border-radius: 12px; font-size: 14px; transition: all 0.2s; background: #fafaf9; }
+    .auth-form-control:focus { outline: none; border-color: #d97706; box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1); background: white; }
     .auth-btn-group { display: flex; gap: 12px; justify-content: flex-end; }
-    .auth-btn { padding: 10px 24px; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; }
-    .auth-btn-cancel { background: white; border: 1.5px solid #e5e7eb; color: #374151; }
-    .auth-btn-cancel:hover { background: #f9fafb; border-color: #d1d5db; }
-    .auth-btn-submit { background: linear-gradient(135deg, #0d9488 0%, #059669 100%); border: none; color: white; box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.3); }
-    .auth-btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 8px -1px rgba(13, 148, 136, 0.4); }
+    .auth-btn { padding: 12px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+    .auth-btn-cancel { background: white; border: 1.5px solid #e7e5e4; color: #44403c; }
+    .auth-btn-cancel:hover { background: #fafaf9; border-color: #d6d3d1; }
+    .auth-btn-submit { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none; color: white; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3); }
+    .auth-btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(217, 119, 6, 0.4); }
     @@keyframes authSlideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>

@@ -496,8 +496,12 @@
     }
 
     function populateBanAnDetails(table) {
-        // ID Formatting (#000000)
-        document.getElementById('detailBanAnId').textContent = '#' + (table.BanID || 0).toString().padStart(6, '0');
+        // ID Formatting (BA0001)
+        var idNum = table.BanID || 0;
+        var idStr = idNum.toString();
+        while (idStr.length < 4) idStr = "0" + idStr;
+        document.getElementById('detailBanAnId').textContent = 'BA' + idStr;
+        document.getElementById('detailBanAnId').className = 'text-lg font-bold text-amber-600';
         
         document.getElementById('detailBanAnTenBan').textContent = table.TenBan || 'N/A';
         document.getElementById('detailBanAnViTri').textContent = table.ViTri || 'N/A';

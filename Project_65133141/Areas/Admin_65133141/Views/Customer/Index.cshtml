@@ -60,10 +60,10 @@
             </div>
 
             <div class="w-full md:w-auto md:min-w-[300px] max-w-md relative" style="position: relative;">
-                <div class="flex items-stretch relative">
+                <div class="flex items-stretch relative" style="width: 100% !important; box-sizing: border-box !important;">
                     <input type="text" id="searchInput" name="searchString" value="@searchString"
                            placeholder="Nhập tên, email hoặc SĐT..." autocomplete="off"
-                           class="flex-1 pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none" style="border-radius: 0.5rem;" />
+                           class="flex-1 pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none" style="border-radius: 0.5rem; width: 100% !important; box-sizing: border-box !important;" />
                     <!-- Search Icon -->
                     <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -77,7 +77,7 @@
                     </div>
                 </div>
                 <!-- Suggestions Dropdown -->
-                <div id="searchSuggestions" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-20 max-h-60 overflow-y-auto"></div>
+                <div id="searchSuggestions" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-20 max-h-60 overflow-y-auto" style="width: 100% !important; box-sizing: border-box !important;"></div>
             </div>
         }
     </div>

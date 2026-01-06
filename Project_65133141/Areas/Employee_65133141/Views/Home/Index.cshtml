@@ -3,23 +3,180 @@
     Layout = "~/Areas/Employee_65133141/Views/Shared/_Layout.cshtml";
 }
 
-<div class="min-h-screen bg-gray-50/50">
-    <!-- Hero Section -->
-    <div class="relative bg-gradient-to-r from-teal-600 to-sky-600 pb-32 pt-12 overflow-hidden shadow-lg">
-        <!-- Decoration circles -->
-        <div class="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+<style>
+    /* Luxury Japanese Theme Styles */
+    .luxury-hero {
+        background: linear-gradient(135deg, #1a1512 0%, #2d1f1a 50%, #1a1512 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .luxury-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.5;
+    }
+
+    .gold-border {
+        border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .gold-glow {
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.1), 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    .luxury-card {
+        background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(250,249,247,0.98) 100%);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .luxury-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(212, 175, 55, 0.15), 0 0 0 1px rgba(212, 175, 55, 0.3);
+        border-color: rgba(212, 175, 55, 0.5);
+    }
+
+    .luxury-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #d4af37, transparent);
+        opacity: 0;
+        transition: opacity 0.4s;
+    }
+
+    .luxury-card:hover::before {
+        opacity: 1;
+    }
+
+    .icon-luxury {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    /* Cherry Blossom Animation */
+    .cherry-blossom {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(circle, #ffb7c5 40%, transparent 70%);
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        opacity: 0.6;
+        animation: fall linear infinite;
+    }
+
+    @@keyframes fall {
+        0% {
+            transform: translateY(-10px) rotate(0deg);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.6;
+        }
+        90% {
+            opacity: 0.6;
+        }
+        100% {
+            transform: translateY(100vh) rotate(720deg);
+            opacity: 0;
+        }
+    }
+
+    .shimmer-gold {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .shimmer-gold::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(212,175,55,0.2), transparent);
+        animation: shimmer-gold 3s infinite;
+    }
+
+    @@keyframes shimmer-gold {
+        0% { left: -100%; }
+        100% { left: 200%; }
+    }
+
+    .text-gold { color: #d4af37; }
+    .bg-gold { background-color: #d4af37; }
+    .border-gold { border-color: #d4af37; }
+
+    .glass-dark {
+        background: rgba(26, 21, 18, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .note-card {
+        background: linear-gradient(135deg, #1e1b18 0%, #2a2420 100%);
+        border: 1px solid rgba(212, 175, 55, 0.15);
+    }
+
+    .note-item {
+        border-left: 2px solid rgba(212, 175, 55, 0.3);
+        transition: all 0.3s;
+    }
+
+    .note-item:hover {
+        border-left-color: #d4af37;
+        background: rgba(212, 175, 55, 0.05);
+    }
+</style>
+
+<div class="min-h-screen" style="background: linear-gradient(180deg, #faf9f7 0%, #f5f3f0 100%);">
+    <!-- Luxury Hero Section -->
+    <div class="luxury-hero pb-36 pt-16 relative">
+        <!-- Cherry Blossoms (Decorative) -->
+        <div class="cherry-blossom" style="left: 10%; animation-duration: 8s; animation-delay: 0s;"></div>
+        <div class="cherry-blossom" style="left: 25%; animation-duration: 10s; animation-delay: 2s;"></div>
+        <div class="cherry-blossom" style="left: 45%; animation-duration: 9s; animation-delay: 1s;"></div>
+        <div class="cherry-blossom" style="left: 70%; animation-duration: 11s; animation-delay: 3s;"></div>
+        <div class="cherry-blossom" style="left: 85%; animation-duration: 7s; animation-delay: 0.5s;"></div>
+        
+        <!-- Gold Decorative Lines -->
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-30"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-50"></div>
+        
+        <!-- Decorative circles -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-amber-500/10 to-transparent rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-rose-500/10 to-transparent rounded-full blur-3xl"></div>
         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">Xin chào, @(Session["HoTen"] ?? "Nhân viên")! 👋</h1>
-                    <p class="text-teal-100 text-lg">Chúc bạn một ngày làm việc hiệu quả và tràn đầy năng lượng.</p>
+                    <p class="text-amber-400 text-sm font-semibold tracking-[0.3em] uppercase mb-2">いらっしゃいませ • Welcome</p>
+                    <h1 class="text-5xl font-bold text-white mb-3" style="font-family: 'Inter', sans-serif;">
+@{
+    var currentHour = DateTime.Now.Hour;
+    var greeting = "";
+    if (currentHour >= 5 && currentHour < 12) { greeting = "Chào buổi sáng"; }
+    else if (currentHour >= 12 && currentHour < 18) { greeting = "Chào buổi chiều"; }
+    else { greeting = "Chào buổi tối"; }
+}
+                        @greeting, <span class="text-gold">@(Session["UserName"] ?? "Nhân viên")</span>! 
+                    </h1>
+                    <p class="text-amber-100/80 text-lg">Chúc bạn một ngày làm việc hiệu quả và tràn đầy năng lượng.</p>
                 </div>
-                <div class="hidden md:block">
-                     <div class="bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/30 text-right">
-                        <div class="text-teal-50 text-sm font-medium">@DateTime.Now.ToString("dd 'tháng' MM, yyyy")</div>
-                        <div class="text-white text-3xl font-bold tracking-wider">@DateTime.Now.ToString("HH:mm")</div>
+                <div class="hidden lg:block">
+                    <div class="glass-dark rounded-2xl p-6 text-right gold-border">
+                        <div class="text-amber-400/80 text-sm font-medium tracking-wider uppercase">@DateTime.Now.ToString("dddd")</div>
+                        <div class="text-white text-4xl font-bold tracking-wider my-1" style="font-family: 'Inter', sans-serif;">@DateTime.Now.ToString("HH:mm")</div>
+                        <div class="text-amber-200/60 text-sm">@DateTime.Now.ToString("dd MMMM yyyy")</div>
                     </div>
                 </div>
             </div>
@@ -27,120 +184,135 @@
     </div>
 
     <!-- Main Content (Overlapping Hero) -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 pb-12 relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-28 pb-12 relative z-20">
         
+        <!-- Section Title -->
+        <div class="flex items-center gap-4 mb-8">
+            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-amber-400/30 to-transparent"></div>
+            <h2 class="text-sm font-bold tracking-[0.2em] uppercase text-amber-700">Chức năng chính</h2>
+            <div class="h-px flex-1 bg-gradient-to-l from-transparent via-amber-400/30 to-transparent"></div>
+        </div>
+
         <!-- Workflow Cards -->
-        <!-- Workflow Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
             <!-- 1. Sơ đồ bàn -->
             <a href="@Url.Action("Index", "BanAn", new { area = "Employee_65133141" })" 
-               class="group relative bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden text-decoration-none">
-                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform scale-150 -translate-y-2 translate-x-2">
-                    <svg class="w-32 h-32 text-teal-600" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6z"/></svg> 
-                </div>
+               class="group luxury-card relative rounded-2xl p-6 overflow-hidden text-decoration-none">
                 <div class="relative z-10">
-                    <div class="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                         <span class="text-3xl">🪑</span>
+                    <div class="w-16 h-16 rounded-2xl icon-luxury flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                        <svg class="w-8 h-8 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-1 group-hover:text-teal-600 transition-colors">Sơ Đồ Bàn</h3>
-                    <p class="text-gray-500 text-sm">Quản lý trạng thái bàn, đặt chỗ và xếp bàn cho khách.</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-700 transition-colors" style="font-family: 'Inter', sans-serif;">Sơ Đồ Bàn</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Quản lý trạng thái bàn và xếp chỗ cho khách.</p>
                 </div>
             </a>
 
-            <!-- 2. Gọi Món (Order) -->
+            <!-- 2. Gọi Món -->
             <a href="@Url.Action("Index", "Order", new { area = "Employee_65133141" })" 
-               class="group relative bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden text-decoration-none">
-                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform scale-150 -translate-y-2 translate-x-2">
-                     <svg class="w-32 h-32 text-orange-500" fill="currentColor" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
-                </div>
+               class="group luxury-card relative rounded-2xl p-6 overflow-hidden text-decoration-none">
                 <div class="relative z-10">
-                    <div class="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                         <span class="text-3xl">🍳</span>
+                    <div class="w-16 h-16 rounded-2xl icon-luxury flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                        <svg class="w-8 h-8 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">Gọi Món</h3>
-                    <p class="text-gray-500 text-sm">Tạo đơn hàng mới, thêm món và gửi yêu cầu bếp.</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-700 transition-colors" style="font-family: 'Inter', sans-serif;">Gọi Món</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Tạo đơn hàng mới và gửi yêu cầu bếp.</p>
                 </div>
             </a>
 
-            <!-- 3. Thực Đơn (Menu) -->
-             <a href="@Url.Action("Index", "Menu", new { area = "Employee_65133141" })" 
-               class="group relative bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden text-decoration-none">
-                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform scale-150 -translate-y-2 translate-x-2">
-                    <svg class="w-32 h-32 text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zM10 9h8v2h-8zm0 3h4v2h-4zm0-6h8v2h-8z"/></svg>
-                </div>
+            <!-- 3. Thực Đơn -->
+            <a href="@Url.Action("Index", "Menu", new { area = "Employee_65133141" })" 
+               class="group luxury-card relative rounded-2xl p-6 overflow-hidden text-decoration-none">
                 <div class="relative z-10">
-                    <div class="w-14 h-14 rounded-2xl bg-pink-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                         <span class="text-3xl">📖</span>
+                    <div class="w-16 h-16 rounded-2xl icon-luxury flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                        <svg class="w-8 h-8 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-1 group-hover:text-pink-600 transition-colors">Thực Đơn</h3>
-                    <p class="text-gray-500 text-sm">Tra cứu danh sách món ăn, giá cả và tình trạng món.</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-700 transition-colors" style="font-family: 'Inter', sans-serif;">Thực Đơn</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Tra cứu món ăn, giá cả và tình trạng.</p>
                 </div>
             </a>
 
-            <!-- 4. Đặt Bàn (Reservations) -->
+            <!-- 4. Đặt Bàn -->
             <a href="@Url.Action("Index", "DatBan", new { area = "Employee_65133141" })" 
-               class="group relative bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden text-decoration-none">
-                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform scale-150 -translate-y-2 translate-x-2">
-                     <svg class="w-32 h-32 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-                </div>
+               class="group luxury-card relative rounded-2xl p-6 overflow-hidden text-decoration-none">
                 <div class="relative z-10">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                         <span class="text-3xl">📅</span>
+                    <div class="w-16 h-16 rounded-2xl icon-luxury flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                        <svg class="w-8 h-8 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">Đặt Bàn</h3>
-                    <p class="text-gray-500 text-sm">Quản lý danh sách đặt bàn và thông tin khách hàng.</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-700 transition-colors" style="font-family: 'Inter', sans-serif;">Đặt Bàn</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Quản lý danh sách đặt bàn khách hàng.</p>
                 </div>
             </a>
 
-            <!-- 5. Quản Lý Đơn Hàng (Order Management) -->
+            <!-- 5. Quản Lý Đơn -->
             <a href="@Url.Action("Index", "DonHang", new { area = "Employee_65133141" })" 
-               class="group relative bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden text-decoration-none">
-                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform scale-150 -translate-y-2 translate-x-2">
-                     <svg class="w-32 h-32 text-indigo-500" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                </div>
+               class="group luxury-card relative rounded-2xl p-6 overflow-hidden text-decoration-none">
                 <div class="relative z-10">
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                         <span class="text-3xl">🧾</span>
+                    <div class="w-16 h-16 rounded-2xl icon-luxury flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                        <svg class="w-8 h-8 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">Quản Lý Đơn</h3>
-                    <p class="text-gray-500 text-sm">Xem danh sách, kiểm tra và xuất phiếu thanh toán.</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-700 transition-colors" style="font-family: 'Inter', sans-serif;">Quản Lý Đơn</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Xem và xuất phiếu thanh toán.</p>
                 </div>
             </a>
-
-
         </div>
         
-        <!-- Secondary Section -->
-        <div class="grid grid-cols-1 gap-6">
-             <!-- Quick Tips / Guidelines -->
-             <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden group">
-                <!-- Decoration -->
-                 <div class="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-teal-500/20 transition-all duration-700"></div>
-                 <div class="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl -ml-12 -mb-12"></div>
+        <!-- Section Title for Notes -->
+        <div class="flex items-center gap-4 mb-6">
+            <div class="h-px flex-1 bg-gradient-to-r from-transparent via-amber-400/30 to-transparent"></div>
+            <h2 class="text-sm font-bold tracking-[0.2em] uppercase text-amber-700">Ghi chú phục vụ</h2>
+            <div class="h-px flex-1 bg-gradient-to-l from-transparent via-amber-400/30 to-transparent"></div>
+        </div>
 
-                <h3 class="text-lg font-bold mb-6 flex items-center gap-2 relative z-10">
-                     <span class="w-1.5 h-6 bg-yellow-400 rounded-full"></span>
-                     Ghi chú phục vụ
-                </h3>
-                
-                <ul class="space-y-4 relative z-10">
-                    <li class="flex items-start gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
-                        <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold mt-0.5">1</div>
-                        <span class="text-gray-300 text-sm leading-relaxed">Luôn chào đón khách với nụ cười và câu "Irasshaimase" (Kính chào quý khách).</span>
-                    </li>
-                    <li class="flex items-start gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
-                        <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold mt-0.5">2</div>
-                        <span class="text-gray-300 text-sm leading-relaxed">Xác nhận lại order (tên món, số lượng) trước khi gửi yêu cầu xuống bếp.</span>
-                    </li>
-                     <li class="flex items-start gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
-                        <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold mt-0.5">3</div>
-                        <span class="text-gray-300 text-sm leading-relaxed">Luôn kiểm tra vệ sinh bàn ghế và setup đầy đủ dụng cụ trước khi xếp khách mới.</span>
-                    </li>
-                </ul>
-                
-                <div class="mt-6 pt-6 border-t border-white/10 relative z-10">
-                    <p class="text-slate-400 text-xs italic">"Sự hài lòng của khách hàng là niềm vui của chúng ta."</p>
+        <!-- Notes Section -->
+        <div class="note-card rounded-2xl p-8 relative overflow-hidden">
+            <!-- Decorative elements -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-amber-500/5 to-transparent rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-gradient-to-tr from-rose-500/5 to-transparent rounded-full blur-2xl"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                <div class="note-item pl-4 py-3 rounded-r-lg">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-sm flex-shrink-0">1</div>
+                        <div>
+                            <h4 class="text-amber-400 font-semibold mb-1">Chào đón khách</h4>
+                            <p class="text-gray-400 text-sm leading-relaxed">Luôn chào với nụ cười và câu "Irasshaimase" (いらっしゃいませ).</p>
+                        </div>
+                    </div>
                 </div>
+                
+                <div class="note-item pl-4 py-3 rounded-r-lg">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-sm flex-shrink-0">2</div>
+                        <div>
+                            <h4 class="text-amber-400 font-semibold mb-1">Xác nhận order</h4>
+                            <p class="text-gray-400 text-sm leading-relaxed">Đọc lại tên món và số lượng trước khi gửi xuống bếp.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="note-item pl-4 py-3 rounded-r-lg">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-sm flex-shrink-0">3</div>
+                        <div>
+                            <h4 class="text-amber-400 font-semibold mb-1">Chuẩn bị bàn</h4>
+                            <p class="text-gray-400 text-sm leading-relaxed">Kiểm tra vệ sinh và setup đầy đủ trước khi xếp khách.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-amber-500/10 text-center relative z-10">
+                <p class="text-amber-500/60 text-sm italic" style="font-family: 'Inter', sans-serif;">"Sự hài lòng của khách hàng là niềm vui của chúng ta."</p>
             </div>
         </div>
     </div>

@@ -14,6 +14,7 @@ namespace Project_65133141
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
+            // Trigger Rebuild 2
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);

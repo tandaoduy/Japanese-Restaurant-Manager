@@ -437,7 +437,7 @@ namespace Project_65133141.Services
         <div class='ticket-footer'>
             <div class='footer-text'>
                 <div style='margin-bottom: 10px;'>
-                    <span class='footer-highlight'>Địa chỉ:</span> 161 Nguyễn Thiện Thuật, phường Nha Trang, tỉnh Khánh Hòa
+                    <span class='footer-highlight'>Địa chỉ:</span> 70 Phù Đổng, phường Nha Trang, tỉnh Khánh Hòa
                 </div>
                 <div style='margin-bottom: 10px;'>
                     <span class='footer-highlight'>Hotline:</span> +012 345 67890

@@ -315,8 +315,15 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
         }
 
         // GET: Employee_65133141/Payment/Invoice?hoaDonId=xxx&cashAmount=...&change=...
-        public ActionResult Invoice(long hoaDonId, decimal? cashAmount, decimal? change)
+        public ActionResult Invoice(long? hoaDonId, decimal? cashAmount, decimal? change)
         {
+            // Nếu không có mã hóa đơn, quay lại trang Order với thông báo thay vì để MVC ném lỗi
+            if (!hoaDonId.HasValue)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy mã hóa đơn cần in.";
+                return RedirectToAction("Index", "Order", new { area = "Employee_65133141" });
+            }
+
             var hoaDon = db.HoaDons
                 .Include(h => h.DonHang)
                 .Include(h => h.DonHang.BanAn)
@@ -325,7 +332,7 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
                 .Include(h => h.NhanVien)
                 .Include(h => h.DonHang.ChiTietDonHangs)
                 .Include(h => h.DonHang.ChiTietDonHangs.Select(c => c.MonAn))
-                .FirstOrDefault(h => h.HoaDonID == hoaDonId);
+                .FirstOrDefault(h => h.HoaDonID == hoaDonId.Value);
 
             if (hoaDon == null)
             {

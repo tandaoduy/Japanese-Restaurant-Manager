@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using Project_65133141.Models;
 using Project_65133141.Filters;
+using Project_65133141.Services;
 
 namespace Project_65133141.Areas.Employee_65133141.Controllers
 {
@@ -158,7 +159,7 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
         // GET: Employee_65133141/DatBan
         public ActionResult Index(string searchString, string statusFilter = null, int page = 1)
         {
-            const int pageSize = 10;
+            const int pageSize = 5;
             
             var query = db.DatBans.AsQueryable();
 
@@ -219,6 +220,11 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
                 .OrderBy(s => s)
                 .ToList();
             ViewBag.Statuses = statuses;
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_DatBanList", datBans);
+            }
 
             return View(datBans);
         }
@@ -297,6 +303,36 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
                     UserEmail = emailUser
                 }
             }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetSearchSuggestions(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+            {
+                return Json(new List<object>(), JsonRequestBehavior.AllowGet);
+            }
+
+            var results = db.DatBans
+                .Where(d => d.HoTenKhach.Contains(term) || d.SDTKhach.Contains(term))
+                .OrderByDescending(d => d.ThoiGianDen)
+                .Take(5)
+                .Select(d => new
+                {
+                    d.HoTenKhach,
+                    d.SDTKhach,
+                    TenBan = d.BanAn != null ? d.BanAn.TenBan : ""
+                })
+                .ToList()
+                .Select(x => new
+                {
+                    label = x.HoTenKhach, // Search result title
+                    value = x.HoTenKhach, // Value to put in input
+                    desc = (string.IsNullOrEmpty(x.TenBan) ? "" : "Bàn " + x.TenBan + " - ") + x.SDTKhach,
+                    avatar = string.IsNullOrEmpty(x.HoTenKhach) ? "?" : x.HoTenKhach.Substring(0, 1).ToUpper()
+                });
+
+            return Json(results, JsonRequestBehavior.AllowGet);
         }
 
         // GET: Employee_65133141/DatBan/Edit/5
@@ -397,7 +433,43 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
                 try
                 {
                     db.SaveChanges();
-                    
+
+                    // Nếu trạng thái sau khi cập nhật là "Đã xác nhận" thì gửi email xác nhận cho khách (nếu có email)
+                    if (datBan.TrangThai == "Đã xác nhận" && datBan.UserID.HasValue)
+                    {
+                        try
+                        {
+                            // Load thông tin user và bàn để email đầy đủ
+                            var user = db.Users.Find(datBan.UserID.Value);
+                            if (user != null && !string.IsNullOrEmpty(user.Email) && user.Email.Contains("@"))
+                            {
+                                if (datBan.BanID.HasValue && datBan.BanAn == null)
+                                {
+                                    datBan.BanAn = db.BanAns.Find(datBan.BanID.Value);
+                                }
+
+                                var emailService = new EmailService();
+                                var customerName = string.IsNullOrEmpty(datBan.HoTenKhach) ? user.HoTen : datBan.HoTenKhach;
+                                var emailSent = emailService.SendBookingConfirmationEmail(
+                                    datBan,
+                                    user.Email,
+                                    customerName,
+                                    isConfirmed: true
+                                );
+
+                                if (!emailSent)
+                                {
+                                    System.Diagnostics.Debug.WriteLine("[Employee DatBanController] Không gửi được email xác nhận đặt bàn.");
+                                }
+                            }
+                        }
+                        catch (Exception emailEx)
+                        {
+                            // Log nhưng không làm fail việc cập nhật đặt bàn
+                            System.Diagnostics.Debug.WriteLine("[Employee DatBanController] Lỗi khi gửi email xác nhận: " + emailEx.Message);
+                        }
+                    }
+
                     if (Request.IsAjaxRequest())
                     {
                          return Json(new { success = true, message = "Cập nhật đặt bàn thành công!" });

@@ -17,6 +17,7 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
         // GET: Employee_65133141/Account
         public ActionResult Index()
         {
+            // Hiển thị trang thông tin cá nhân (dùng cùng view với Profile)
             return RedirectToAction("Profile");
         }
 
@@ -36,7 +37,57 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
                 return RedirectToAction("Login", "Account", new { area = "" });
             }
 
+            // Dùng view Index.cshtml để hiển thị thông tin cá nhân
+            return View("Index", nhanVien);
+        }
+
+        // GET: Employee_65133141/Account/Edit - Thay đổi thông tin cá nhân
+        public ActionResult Edit()
+        {
+            var userId = Session["UserId"] as long?;
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
+
+            var nhanVien = db.NhanViens.Find(userId.Value);
+            if (nhanVien == null)
+            {
+                Session.Clear();
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
+
             return View(nhanVien);
+        }
+
+        // POST: Employee_65133141/Account/Edit - Cập nhật thông tin cá nhân cơ bản
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(string HoTen, string SDT, string DiaChi)
+        {
+            var userId = Session["UserId"] as long?;
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
+
+            var nhanVien = db.NhanViens.Find(userId.Value);
+            if (nhanVien == null)
+            {
+                Session.Clear();
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
+
+            // Cập nhật các trường cơ bản
+            nhanVien.HoTen = HoTen;
+            nhanVien.SDT = SDT;
+            nhanVien.DiaChi = DiaChi;
+
+            db.Entry(nhanVien).State = EntityState.Modified;
+            db.SaveChanges();
+
+            TempData["SuccessMessage"] = "Cập nhật thông tin cá nhân thành công!";
+            return RedirectToAction("Profile");
         }
 
         // GET: Employee_65133141/Account/ChangePassword
