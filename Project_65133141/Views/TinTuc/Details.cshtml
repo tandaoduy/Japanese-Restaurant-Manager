@@ -1,7 +1,7 @@
 @model Project_65133141.Models.TinTuc
 @{
     ViewBag.Title = Model.TieuDe + " | SAKURA KAZOKU";
-    Layout = "~/Areas/User_65133141/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
     var relatedNews = ViewBag.RelatedNews as List<Project_65133141.Models.TinTuc>;
 }
 
@@ -152,7 +152,7 @@
                         @foreach (var news in relatedNews)
                         {
                             var relatedImg = !string.IsNullOrWhiteSpace(news.HinhAnh) ? Url.Content("~/Images/TinTuc/" + news.HinhAnh) : Url.Content("~/Images/slide09.jpg");
-                            <a href="@Url.Action("Details", "TinTuc", new { area = "User_65133141", slug = news.Slug })" class="group block">
+                            <a href="@Url.Action("Details", "TinTuc", new { area = "", slug = news.Slug })" class="group block">
                                 <div class="overflow-hidden rounded-lg mb-4 h-56 shadow-md">
                                     <img src="@relatedImg" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500" alt="@news.TieuDe">
                                 </div>
@@ -201,4 +201,3 @@
         margin: 2rem 0;
     }
 </style>
-

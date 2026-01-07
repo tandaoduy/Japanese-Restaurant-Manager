@@ -226,7 +226,7 @@
                             </svg>
                         </button>
                         <div style="flex-shrink: 0;">
-                            <img id="loginCaptchaImage" src="@Url.Action("Generate", "Captcha")" alt="CAPTCHA" style="height: 50px; border: 1px solid #ddd; border-radius: 4px;" />
+                            <img id="loginCaptchaImage" src="@Url.Action("Generate", "Captcha", new { area = "" })" alt="CAPTCHA" style="height: 50px; border: 1px solid #ddd; border-radius: 4px;" />
                         </div>
                     </div>
                     <span class="auth-error-message" data-valmsg-for="CaptchaCode" data-valmsg-replace="true"></span>
@@ -698,7 +698,7 @@
                             </svg>
                         </button>
                         <div style="flex-shrink: 0;">
-                            <img id="registerCaptchaImage" src="@Url.Action("Generate", "Captcha")" alt="CAPTCHA" style="height: 50px; border: 1px solid #ddd; border-radius: 4px;" />
+                            <img id="registerCaptchaImage" src="@Url.Action("Generate", "Captcha", new { area = "" })" alt="CAPTCHA" style="height: 50px; border: 1px solid #ddd; border-radius: 4px;" />
                         </div>
                     </div>
                     <span class="auth-error-message" data-valmsg-for="CaptchaCode" data-valmsg-replace="true"></span>
@@ -1300,7 +1300,7 @@
     function refreshForgotPasswordCaptcha() {
         const img = document.getElementById('forgotPasswordCaptchaImage');
         if (img) {
-            img.src = '@Url.Action("Generate", "Captcha")?t=' + new Date().getTime();
+            img.src = '@Url.Action("Generate", "Captcha", new { area = "" })?t=' + new Date().getTime();
             document.getElementById('forgotPasswordCaptchaCode').value = '';
         }
     }
@@ -2100,7 +2100,7 @@
         var captchaInput = document.getElementById('loginCaptchaCode');
         if (captchaImage) {
             // Add timestamp to force refresh
-            captchaImage.src = '@Url.Action("Generate", "Captcha")?t=' + new Date().getTime();
+            captchaImage.src = '@Url.Action("Generate", "Captcha", new { area = "" })?t=' + new Date().getTime();
         }
         if (captchaInput) {
             captchaInput.value = '';
@@ -2113,7 +2113,7 @@
         var captchaInput = document.getElementById('registerCaptchaCode');
         if (captchaImage) {
             // Add timestamp to force refresh
-            captchaImage.src = '@Url.Action("Generate", "Captcha")?t=' + new Date().getTime();
+            captchaImage.src = '@Url.Action("Generate", "Captcha", new { area = "" })?t=' + new Date().getTime();
         }
         if (captchaInput) {
             captchaInput.value = '';

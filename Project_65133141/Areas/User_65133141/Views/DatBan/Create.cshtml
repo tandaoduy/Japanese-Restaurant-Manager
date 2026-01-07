@@ -12,7 +12,7 @@
     // Fallback: If authenticated but no email in session, try to get from Identity.Name
     if (isAuthenticated && string.IsNullOrEmpty(userEmail))
     {
-        userEmail = User.Identity.Name; // Email is stored in Identity.Name
+        userEmail = User.Identity.Name;
         if (!string.IsNullOrEmpty(userEmail))
         {
             Session["UserEmail"] = userEmail;
@@ -22,37 +22,71 @@
     var hasValidUser = !string.IsNullOrEmpty(userEmail);
 }
 
+<style>
+    /* Custom Wa-Modern Styles */
+    .font-serif-jp {
+        font-family: 'Playfair Display', 'Merriweather', serif;
+    }
+    .bg-washi {
+        background-color: #fdfbf7;
+        background-image: url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 16c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm0-2c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zm33.414-6l5.95-5.95L45.95.636 40 6.586 34.05.636 32.636 2.05 38.586 8l-5.95 5.95 1.414 1.414L40 9.414l5.95 5.95 1.414-1.414L41.414 8zM40 48c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm0-2c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zM9.414 40l5.95-5.95-1.414-1.414L8 38.586l-5.95-5.95L.636 34.05 6.586 40l-5.95 5.95 1.414 1.414L8 41.414l5.95 5.95 1.414-1.414L9.414 40z' fill='%23d4ba9e' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+    .input-underlined {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem; /* rounded-md */
+        padding: 0.5rem 0.75rem;
+        transition: all 0.3s ease;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    .input-underlined:focus {
+        border-color: #9b2c2c;
+        box-shadow: 0 0 0 3px rgba(155, 44, 44, 0.1);
+        outline: none;
+    }
+    .btn-seal {
+        background-color: #9b2c2c;
+        color: white;
+        border: 2px solid #742a2a;
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-seal::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        border: 1px solid rgba(255,255,255,0.3);
+        pointer-events: none;
+    }
+</style>
+
 @if (!isAuthenticated || !hasValidUser)
 {
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-        <!-- Background Pattern -->
-        <div class="absolute inset-0 z-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%238B0000\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-        
-        <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-3xl shadow-2xl relative z-10 border-t-4 border-red-800">
+    <div class="min-h-screen flex items-center justify-center bg-washi px-4 py-12 sm:px-6 lg:px-8 relative">
+        <div class="max-w-md w-full space-y-8 bg-white p-10 shadow-2xl relative z-10 border-t-4 border-red-800">
             <div class="text-center">
-                <div class="mx-auto h-20 w-20 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                    <svg class="h-10 w-10 text-red-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
+                <div class="mx-auto h-16 w-16 flex items-center justify-center mb-6">
+                     <i class="fas fa-torii-gate text-4xl text-red-800"></i>
                 </div>
-                <h2 class="mt-2 text-3xl font-display font-bold text-gray-900">Vui lòng đăng nhập</h2>
-                <p class="mt-4 text-sm text-gray-500 leading-relaxed">Để đảm bảo chất lượng phục vụ tốt nhất, quý khách vui lòng đăng nhập trước khi đặt bàn.</p>
+                <h2 class="mt-2 text-3xl font-serif-jp font-bold text-gray-900">Yêu cầu đăng nhập</h2>
+                <p class="mt-4 text-sm text-gray-600 italic">"Để sự phục vụ được chu đáo nhất, xin quý khách vui lòng đăng danh."</p>
+                
                 @if (isAuthenticated && !hasValidUser)
                 {
-                    <p class="mt-2 text-sm text-red-600">Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.</p>
+                    <p class="mt-4 text-sm text-red-600 bg-red-50 py-2 px-3 rounded">Phiên đăng nhập đã hết hạn.</p>
                 }
             </div>
+            
             <div class="mt-8 space-y-4">
-                <a href="javascript:void(0)" onclick="openLoginModal()" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-red-800 to-red-700 hover:from-red-700 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-lg transform transition-all hover:-translate-y-1">
-                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <svg class="h-5 w-5 text-red-300 group-hover:text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                        </svg>
-                    </span>
+                <a href="javascript:void(0)" onclick="openLoginModal()" class="btn-seal w-full flex justify-center py-3 px-4 text-sm font-medium tracking-wide uppercase shadow-lg transform transition hover:-translate-y-0.5">
                     Đăng nhập tài khoản
                 </a>
-                <a href="@Url.Action("Index", "Home", new { area = "" })" class="w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-sm transition-colors">
-                    Về trang chủ
+                <a href="@Url.Action("Index", "Home", new { area = "" })" class="w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium text-gray-600 hover:text-red-800 hover:border-red-800 transition-colors uppercase tracking-wide">
+                    Quay về trang chủ
                 </a>
             </div>
         </div>
@@ -60,174 +94,163 @@
 }
 else
 {
-    <div class="min-h-screen py-12 relative overflow-hidden bg-gray-50">
-        <!-- Background Elements - Exact Match to Navbar -->
-        <div class="absolute top-0 left-0 w-full h-96 z-0" style="background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%); border-bottom: 3px solid #D4AF37;"></div>
-        <div class="absolute top-0 left-0 w-full h-full z-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+    <div class="min-h-screen py-16 bg-washi relative overflow-hidden">
+        <!-- Minimal Decor -->
+        <div class="absolute top-0 right-0 -mt-10 -mr-10 text-red-900 opacity-5 pointer-events-none">
+            <svg width="400" height="400" viewBox="0 0 200 200"><path d="M100 0C44.8 0 0 44.8 0 100s44.8 100 100 100 100-44.8 100-100S155.2 0 100 0zm0 180c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z" fill="currentColor"/></svg>
+        </div>
 
         <div class="container mx-auto px-4 relative z-10">
-            <div class="max-w-4xl mx-auto">
-                <!-- Page Title -->
-                <div class="text-center mb-12">
-                    <span class="text-yellow-400 font-medium tracking-widest uppercase mb-2 block text-sm">Chào mừng quý khách</span>
-                    <h1 class="text-4xl md:text-5xl font-display font-bold text-white mb-6" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">ĐẶT BÀN TRỰC TUYẾN</h1>
-                    <div class="w-24 h-1 mx-auto rounded-full" style="background: #D4AF37;"></div>
+            <div class="flex flex-col lg:flex-row gap-12 max-w-6xl mx-auto">
+                
+                <!-- Left: Aesthetic Title & Info -->
+                <div class="lg:w-1/3 pt-10 text-center lg:text-left">
+                    <span class="text-red-800 font-bold tracking-[0.3em] text-xs uppercase block mb-3">Đặt Bàn Trực Tuyến</span>
+                    <h1 class="text-5xl md:text-6xl font-serif-jp font-bold text-gray-900 leading-tight mb-8">
+                        Thưởng Vị <br/> <span class="text-gray-400 italic font-light">Tinh Hoa</span>
+                    </h1>
+                    
+                    <div class="w-16 h-1 bg-red-800 mb-8 mx-auto lg:mx-0"></div>
+                    
+                    <p class="text-gray-600 leading-loose mb-10 font-serif-jp text-lg italic">
+                        "Mỗi bữa ăn là một câu chuyện.<br/>Hãy để chúng tôi kể câu chuyện của bạn."
+                    </p>
+
+                    <div class="hidden lg:block space-y-8 pl-6 border-l border-gray-200">
+                        <div class="group">
+                            <h3 class="text-gray-900 font-bold uppercase tracking-wider text-sm mb-1 group-hover:text-red-800 transition-colors">Giờ Mở Cửa</h3>
+                            <p class="text-gray-500 font-serif-jp">11:00 - 22:00 (Hàng ngày)</p>
+                        </div>
+                        <div class="group">
+                            <h3 class="text-gray-900 font-bold uppercase tracking-wider text-sm mb-1 group-hover:text-red-800 transition-colors">Liên Hệ</h3>
+                            <p class="text-gray-500 font-serif-jp">0123 456 789</p>
+                        </div>
+                    </div>
                 </div>
 
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="mb-8 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-lg shadow-lg flex items-center">
-                        <svg class="h-6 w-6 mr-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        @TempData["ErrorMessage"]
-                    </div>
-                }
+                <!-- Right: Booking Form -->
+                <div class="lg:w-2/3">
+                    <div class="bg-white p-8 md:p-12 shadow-2xl relative">
+                        <!-- Red corner accent -->
+                        <div class="absolute top-0 right-0 w-4 h-4 bg-red-800"></div>
+                        <div class="absolute bottom-0 left-0 w-4 h-4 bg-gray-800"></div>
 
-                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
-                    <div class="grid md:grid-cols-5 h-full">
-                        <!-- Left Decoration Side - Exact Match Gradient -->
-                        <div class="hidden md:block md:col-span-2 relative overflow-hidden p-8 text-white flex flex-col justify-between" style="background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);">
-                            <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.3\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E'); background-size: 60px 60px;"></div>
-                            <div class="relative z-10">
-                                <h3 class="text-2xl font-display font-bold mb-4" style="color: #D4AF37;">SAKURA KAZOKU</h3>
-                                <p class="text-gray-100 font-light text-sm leading-relaxed mb-6">Trải nghiệm ẩm thực Nhật Bản tinh tế trong không gian sang trọng và ấm cúng.</p>
-                                
-                                <div class="space-y-4 text-sm">
-                                    <div class="flex items-start gap-3">
-                                        <svg class="w-5 h-5 mt-0.5" style="color: #D4AF37;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        <div>
-                                            <span class="block font-semibold text-white">Giờ mở cửa</span>
-                                            <span class="text-gray-200">11:00 - 22:00</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-start gap-3">
-                                        <svg class="w-5 h-5 mt-0.5" style="color: #D4AF37;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
-                                        <div>
-                                            <span class="block font-semibold text-white">Điện thoại</span>
-                                            <span class="text-gray-200">0123 456 789</span>
-                                        </div>
-                                    </div>
-                                </div>
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="mb-8 p-4 bg-red-50 border border-red-200 text-red-800 text-sm flex items-center">
+                                <i class="fas fa-exclamation-circle mr-3"></i>
+                                @TempData["ErrorMessage"]
                             </div>
-                            
-                            <div class="relative z-10 mt-8 pt-8 border-t border-white/20">
-                                <p class="text-xs text-center text-gray-300 italic">"Hương vị đích thực từ xứ sở hoa anh đào"</p>
-                            </div>
-                        </div>
+                        }
 
-                        <!-- Right Form Side -->
-                        <div class="md:col-span-3 p-8 md:p-10">
-                            @using (Html.BeginForm("Create", "DatBan", new { area = "User_65133141" }, FormMethod.Post, new { id = "datBanForm", @class = "space-y-6" }))
-                            {
-                                @Html.AntiForgeryToken()
+                        @using (Html.BeginForm("Create", "DatBan", new { area = "User_65133141" }, FormMethod.Post, new { id = "datBanForm", @class = "space-y-10", novalidate = "novalidate" }))
+                        {
+                            @Html.AntiForgeryToken()
 
-                                if (!ViewData.ModelState.IsValid)
-                                {
-                                    <div class="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded-r-lg">
-                                        @Html.ValidationSummary(true, "", new { @class = "text-red-700" })
-                                    </div>
-                                }
-
-                                <div class="space-y-6">
-                                    <div class="flex items-center gap-3 pb-2 border-b border-gray-100">
-                                        <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold">1</div>
-                                        <h3 class="font-bold text-gray-800">Thông tin liên hệ</h3>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 gap-5">
-                                        <div>
-                                            <label class="block text-sm font-semibold mb-2 text-gray-700">Họ và tên</label>
-                                            @Html.TextBoxFor(m => m.HoTenKhach, new { 
-                                                @class = "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800 placeholder-gray-400",
-                                                placeholder = "Nhập họ tên của bạn",
-                                                required = "required"
-                                            })
-                                            @Html.ValidationMessageFor(m => m.HoTenKhach, "", new { @class = "text-red-500 text-xs mt-1" })
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm font-semibold mb-2 text-gray-700">Số điện thoại</label>
-                                            @Html.TextBoxFor(m => m.SDTKhach, new { 
-                                                @class = "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800 placeholder-gray-400",
-                                                placeholder = "09xx xxx xxx",
-                                                type = "tel",
-                                                required = "required"
-                                            })
-                                            @Html.ValidationMessageFor(m => m.SDTKhach, "", new { @class = "text-red-500 text-xs mt-1" })
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center gap-3 pb-2 border-b border-gray-100 pt-4">
-                                        <div class="w-8 h-8 rounded-full bg-red-50 text-red-800 flex items-center justify-center font-bold border border-red-100">2</div>
-                                        <h3 class="font-bold text-gray-800">Thông tin đặt bàn</h3>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 gap-5">
-                                        <div>
-                                            <label class="block text-sm font-semibold mb-2 text-gray-700">Ngày đặt</label>
-                                            <input type="date" id="ngayDat" name="ngayDat" 
-                                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800"
-                                                   required="required"
-                                                   min="@DateTime.Now.ToString("yyyy-MM-dd")" />
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm font-semibold mb-2 text-gray-700">Khung giờ</label>
-                                            <select id="khungGio" name="khungGio" 
-                                                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800"
-                                                    required="required">
-                                                <option value="">Chọn giờ</option>
-                                                <option value="11:00">11:00 - 13:00</option>
-                                                <option value="13:00">13:00 - 15:00</option>
-                                                <option value="17:00">17:00 - 19:00</option>
-                                                <option value="19:00">19:00 - 21:00</option>
-                                                <option value="21:00">21:00 - 23:00</option>
-                                            </select>
-                                            @Html.HiddenFor(m => m.ThoiGianDen)
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-semibold mb-2 text-gray-700">Số lượng khách</label>
-                                        <div class="relative">
-                                            @Html.TextBoxFor(m => m.SoNguoi, new { 
-                                                @class = "w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800",
-                                                type = "number",
-                                                min = "1",
-                                                placeholder = "Số người",
-                                                required = "required"
-                                            })
-                                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-500">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-semibold mb-2 text-gray-700">Ghi chú (tùy chọn)</label>
-                                        @Html.TextAreaFor(m => m.GhiChu, new { 
-                                            @class = "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all outline-none text-gray-800 placeholder-gray-400",
-                                            rows = "3",
-                                            placeholder = "Yêu cầu đặc biệt (ví dụ: muốn đặt phòng VIP, phòng đôi, yêu cầu về thức ăn, ghế trẻ em, dị ứng, v.v.)"
+                            <!-- Section 1: Contact -->
+                            <div>
+                                <h3 class="font-serif-jp text-2xl text-gray-800 mb-6 flex items-center">
+                                    <span class="text-red-800 mr-3 text-sm">01.</span> Thông tin khách hàng
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div class="group">
+                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 group-focus-within:text-red-800 transition-colors">Họ và tên <span class="text-red-600">*</span></label>
+                                        @Html.TextBoxFor(m => m.HoTenKhach, new { 
+                                            @class = "input-underlined w-full py-2 text-gray-900 text-lg placeholder-gray-300",
+                                            placeholder = "Nguyễn Văn A",
+                                            required = "required",
+                                            oninvalid = "this.setCustomValidity('Vui lòng nhập họ và tên')",
+                                            oninput = "this.setCustomValidity('')"
                                         })
-                                        @Html.ValidationMessageFor(m => m.GhiChu, "", new { @class = "text-red-500 text-xs mt-1" })
-                                        <p class="text-xs text-gray-500 mt-2">
-                                            💡 <strong>Lưu ý:</strong> Chúng tôi sẽ tự động sắp xếp bàn phù hợp với số lượng khách của bạn. 
-                                            Nếu bạn muốn đặt phòng VIP hoặc phòng đôi, vui lòng ghi rõ trong phần ghi chú. 
-                                            Chúng tôi sẽ liên hệ với bạn để xác nhận.
-                                        </p>
+                                        @Html.ValidationMessageFor(m => m.HoTenKhach, "", new { @class = "text-red-600 text-xs mt-1 block" })
+                                    </div>
+                                    <div class="group">
+                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 group-focus-within:text-red-800 transition-colors">Số điện thoại <span class="text-red-600">*</span></label>
+                                        @Html.TextBoxFor(m => m.SDTKhach, new { 
+                                            @class = "input-underlined w-full py-2 text-gray-900 text-lg placeholder-gray-300",
+                                            placeholder = "09xx...",
+                                            type = "tel",
+                                            maxlength = "10",
+                                            required = "required",
+                                            oninvalid = "this.setCustomValidity('Vui lòng nhập số điện thoại')",
+                                            oninput = "this.setCustomValidity('')"
+                                        })
+                                        @Html.ValidationMessageFor(m => m.SDTKhach, "", new { @class = "text-red-600 text-xs mt-1 block" })
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="pt-6">
-                                    <button type="submit" class="w-full text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 group" style="background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%);">
-                                        <span>XÁC NHẬN ĐẶT BÀN</span>
-                                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                    </button>
+                            <!-- Section 2: Reservation Details -->
+                            <div>
+                                <h3 class="font-serif-jp text-2xl text-gray-800 mb-6 flex items-center">
+                                    <span class="text-red-800 mr-3 text-sm">02.</span> Chi tiết đặt bàn
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div class="group">
+                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 group-focus-within:text-red-800 transition-colors">Ngày <span class="text-red-600">*</span></label>
+                                        <input type="date" id="ngayDat" name="ngayDat" 
+                                               class="input-underlined w-full py-2 text-gray-900 text-lg"
+                                               required="required"
+                                               min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                               max="@DateTime.Now.AddYears(2).ToString("yyyy-MM-dd")"
+                                               oninvalid="this.setCustomValidity('Vui lòng chọn ngày từ hôm nay trở đi')"
+                                               oninput="this.setCustomValidity('')" />
+                                    </div>
+                                    <div class="group">
+                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 group-focus-within:text-red-800 transition-colors">Giờ <span class="text-red-600">*</span></label>
+                                        <select id="khungGio" name="khungGio" 
+                                                class="input-underlined w-full py-2 text-gray-900 text-lg bg-transparent"
+                                                required="required"
+                                                oninvalid="this.setCustomValidity('Vui lòng chọn giờ dùng bữa')"
+                                                oninput="this.setCustomValidity('')">
+                                            <option value="">Chọn khung giờ</option>
+                                            <option value="10:00">10:00 - 11:00</option>
+                                            <option value="11:00">11:00 - 12:00</option>
+                                            <option value="12:00">12:00 - 13:00</option>
+                                            <option value="13:00">13:00 - 14:00</option>
+                                            <option value="14:00">14:00 - 15:00</option>
+                                            <option value="15:00">15:00 - 16:00</option>
+                                            <option value="16:00">16:00 - 17:00</option>
+                                            <option value="17:00">17:00 - 18:00</option>
+                                            <option value="18:00">18:00 - 19:00</option>
+                                            <option value="19:00">19:00 - 20:00</option>
+                                            <option value="20:00">20:00 - 21:00</option>
+                                            <option value="21:00">21:00 - 22:00</option>
+                                        </select>
+                                        @Html.HiddenFor(m => m.ThoiGianDen)
+                                    </div>
+                                    <div class="group">
+                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 group-focus-within:text-red-800 transition-colors">Số khách <span class="text-red-600">*</span></label>
+                                        @Html.TextBoxFor(m => m.SoNguoi, new { 
+                                            @class = "input-underlined w-full py-2 text-gray-900 font-serif-jp text-lg",
+                                            type = "number",
+                                            min = "1",
+                                            value = "2",
+                                            required = "required",
+                                            oninvalid = "this.setCustomValidity('Vui lòng nhập số người')",
+                                            oninput = "this.setCustomValidity('')"
+                                        })
+                                    </div>
                                 </div>
-                            }
-                        </div>
+                            </div>
+
+                            <!-- Section 3: Notes -->
+                            <div class="group">
+                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 group-focus-within:text-red-800 transition-colors">Ghi chú đặc biệt</label>
+                                @Html.TextAreaFor(m => m.GhiChu, new { 
+                                    @class = "w-full py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-red-800 transition-colors outline-none text-gray-800 placeholder-gray-400 resize-none font-serif-jp",
+                                    rows = "2",
+                                    placeholder = "Ví dụ: Dị ứng, bàn yên tĩnh, ghế trẻ em..."
+                                })
+                            </div>
+
+                            <div class="pt-8 text-center">
+                                <button type="submit" class="btn-seal px-12 py-4 text-lg font-bold tracking-widest uppercase hover:bg-red-900 transition-colors shadow-xl w-full md:w-auto">
+                                    Xác nhận
+                                </button>
+                                <p class="text-xs text-gray-400 mt-4 italic">Chúng tôi sẽ liên hệ để xác nhận trong vòng 30 phút.</p>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -236,176 +259,522 @@ else
 }
 
 <script>
-    // Wait for jQuery to load (jQuery is loaded in _Layout.cshtml)
-    // showAlert function is now available globally from User area layout
+    // Wait for jQuery to load
     (function() {
         function initFormHandlers() {
-            // Check if jQuery is available
             if (typeof jQuery === 'undefined' || typeof window.jQuery === 'undefined') {
-                // Retry after a short delay
                 setTimeout(initFormHandlers, 100);
                 return;
             }
             
-            var $ = window.jQuery; // Use jQuery from global scope
+            var $ = window.jQuery;
             
-            // Combine date and time slot to set ThoiGianDen
-            var $ngayDatInput = $('#ngayDat');
-            var $khungGioSelect = $('#khungGio');
-            var $thoiGianDenHidden = $('#ThoiGianDen');
+            // --- 1. System Standard Alert (Toast) ---
+            // Design matches user screenshot: Light Green Bg, Left Border, Circular Icon
+            if (typeof showAlert !== 'function') {
+                window.showAlert = function(type, message) {
+                     var isSuccess = type === 'success';
+                     
+                     // Colors & Icons
+                     var bgColor = isSuccess ? 'bg-[#F0FDF4]' : 'bg-[#FEF2F2]'; // green-50 : red-50
+                     var borderColor = isSuccess ? 'border-l-4 border-[#22C55E]' : 'border-l-4 border-[#EF4444]'; // green-500 : red-500
+                     var iconBg = isSuccess ? 'bg-[#DCFCE7]' : 'bg-[#FEE2E2]'; // green-100 : red-100
+                     var iconColor = isSuccess ? 'text-[#15803D]' : 'text-[#B91C1C]'; // green-700 : red-700
+                     
+                     // Use SVG instead of FontAwesome for reliability
+                     var iconSvg = isSuccess 
+                        ? '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>'
+                        : '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+                     
+                     var titleColor = isSuccess ? 'text-[#166534]' : 'text-[#991B1B]'; // green-800 : red-800
+                     var textColor = isSuccess ? 'text-[#15803D]' : 'text-[#B91C1C]'; // green-700 : red-700
+                     var title = isSuccess ? 'Thành công' : 'Lỗi';
 
-            function updateThoiGianDen() {
-                var ngayDat = $ngayDatInput.val();
-                var khungGio = $khungGioSelect.val();
-                
-                if (ngayDat && khungGio) {
-                    var date = new Date(ngayDat);
-                    var timeParts = khungGio.split(':');
-                    date.setHours(parseInt(timeParts[0]), parseInt(timeParts[1] || 0), 0);
-                    
-                    // Format as yyyy-MM-ddTHH:mm for datetime-local
-                    var year = date.getFullYear();
-                    var month = String(date.getMonth() + 1).padStart(2, '0');
-                    var day = String(date.getDate()).padStart(2, '0');
-                    var hours = String(date.getHours()).padStart(2, '0');
-                    var minutes = String(date.getMinutes()).padStart(2, '0');
-                    
-                    $thoiGianDenHidden.val(year + '-' + month + '-' + day + 'T' + hours + ':' + minutes);
-                }
+                     // Unique ID
+                     var toastId = 'toast-' + Date.now();
+                     
+                     // Template matches the provided image structure
+                     var $toast = $(
+                        '<div id="' + toastId + '" class="fixed top-5 right-5 z-[200] flex items-start p-4 rounded-md shadow-lg transform transition-all duration-300 translate-x-[120%] ' + bgColor + ' ' + borderColor + '" style="min-width: 320px; max-width: 400px;">' +
+                            // Icon Circle
+                            '<div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-full ' + iconBg + ' ' + iconColor + '">' +
+                                iconSvg +
+                            '</div>' +
+                            // Content
+                            '<div class="ml-3 flex-1">' +
+                                '<h3 class="text-sm font-bold ' + titleColor + '">' + title + '</h3>' +
+                                '<div class="mt-1 text-sm ' + textColor + '">' + message + '</div>' +
+                            '</div>' +
+                            // Close Button
+                            '<button onclick="$(\'#' + toastId + '\').remove()" class="ml-4 -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex h-8 w-8 ' + textColor + ' hover:bg-white/50 focus:ring-2 focus:ring-offset-2 ' + iconColor + '">' +
+                                '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>' +
+                            '</button>' +
+                        '</div>'
+                     );
+                     
+                     $('body').append($toast);
+                     
+                     // Animation In
+                     setTimeout(function() {
+                         $toast.removeClass('translate-x-[120%]').addClass('translate-x-0');
+                     }, 100);
+                     
+                     // Auto Dismiss
+                     setTimeout(function() {
+                         $toast.removeClass('translate-x-0').addClass('translate-x-[120%]');
+                         setTimeout(function() { $toast.remove(); }, 300);
+                     }, 5000);
+                };
             }
-
-            $ngayDatInput.on('change', updateThoiGianDen);
-            $khungGioSelect.on('change', updateThoiGianDen);
             
-            // Combine date and time slot to set ThoiGianDen
-            var $ngayDatInput = $('#ngayDat');
-            var $khungGioSelect = $('#khungGio');
-            var $thoiGianDenHidden = $('#ThoiGianDen');
-
-            function updateThoiGianDen() {
-                var ngayDat = $ngayDatInput.val();
-                var khungGio = $khungGioSelect.val();
+            // --- 2. System Standard Modal (Confirmation) ---
+            // Simple, clean confirmation modal
+            window.showConfirmModal = function(formData) {
+                // Remove existing if any
+                $('#bookingConfirmModal').remove();
                 
-                if (ngayDat && khungGio) {
-                    var date = new Date(ngayDat);
-                    var timeParts = khungGio.split(':');
-                    date.setHours(parseInt(timeParts[0]), parseInt(timeParts[1] || 0), 0);
-                    
-                    // Format as yyyy-MM-ddTHH:mm for datetime-local
-                    var year = date.getFullYear();
-                    var month = String(date.getMonth() + 1).padStart(2, '0');
-                    var day = String(date.getDate()).padStart(2, '0');
-                    var hours = String(date.getHours()).padStart(2, '0');
-                    var minutes = String(date.getMinutes()).padStart(2, '0');
-                    
-                    $thoiGianDenHidden.val(year + '-' + month + '-' + day + 'T' + hours + ':' + minutes);
+                // Parse Data for display
+                var data = {};
+                formData.split('&').forEach(function(part) {
+                    var item = part.split('=');
+                    data[item[0]] = decodeURIComponent(item[1].replace(/\+/g, ' '));
+                });
+                
+                // Format Date to dd/mm/yyyy
+                var formattedDate = '';
+                if (data['ngayDat']) {
+                    var parts = data['ngayDat'].split('-');
+                    if (parts.length === 3) {
+                        formattedDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+                    } else {
+                        formattedDate = data['ngayDat'];
+                    }
                 }
-            }
 
-            $ngayDatInput.on('change', updateThoiGianDen);
-            $khungGioSelect.on('change', updateThoiGianDen);
+                var modalHtml = 
+                '<div id="bookingConfirmModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(1px);">' +
+                    '<div class="bg-white rounded-lg shadow-xl max-w-sm w-full overflow-hidden transform transition-all animate-bounce-in">' +
+                        '<div class="p-6">' +
+                            '<h3 class="text-xl font-bold text-gray-900 mb-2">Xác nhận đặt bàn</h3>' +
+                            '<p class="text-gray-600 mb-6">Bạn có chắc chắn muốn gửi yêu cầu đặt bàn với thông tin đã nhập không?</p>' +
+                            
+                            // Simple Summary
+                            '<div class="text-sm text-gray-600 mb-6 space-y-1">' +
+                                '<p><strong>Khách hàng:</strong> ' + (data['HoTenKhach'] || '') + '</p>' +
+                                '<p><strong>Thời gian:</strong> ' + (data['khungGio'] || '') + ' - ' + formattedDate + '</p>' +
+                                '<p><strong>Số khách:</strong> ' + (data['SoNguoi'] || '') + '</p>' +
+                            '</div>' +
 
-            // Handle form submission with AJAX
-            $('#datBanForm').on('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
+                            '<div class="flex justify-end gap-3">' +
+                                '<button onclick="$(\'#bookingConfirmModal\').remove()" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-md transition">' +
+                                    'Hủy bỏ' +
+                                '</button>' +
+                                '<button id="btnRealSubmit" class="px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition shadow-sm">' +
+                                    'Xác nhận' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
                 
-                var ngayDat = $ngayDatInput.val();
-                var khungGio = $khungGioSelect.val();
+                $('body').append(modalHtml);
                 
-                if (!ngayDat || !khungGio) {
-                    showAlert('warning', 'Vui lòng chọn đầy đủ ngày đặt và khung giờ!');
-                    return false;
-                }
-                
-                // Ensure ThoiGianDen is set before submit
-                updateThoiGianDen();
-                
-                // Double check that ThoiGianDen has a value
-                var thoiGianDen = $thoiGianDenHidden.val();
-                if (!thoiGianDen) {
-                    console.log("Hidden value is empty!");
-                    showAlert('error', 'Không thể xác định thời gian đến. Vui lòng thử lại!');
-                    return false;
-                }
-                
-                // Get form data using jQuery
-                var formData = $(this).serialize();
-                
-                // Show loading state
-                var $submitButton = $(this).find('button[type="submit"]');
-                var originalButtonText = $submitButton.html();
-                $submitButton.prop('disabled', true);
-                $submitButton.html('<span>Đang xử lý...</span>');
-                
-                // Submit via AJAX using jQuery
-                $.ajax({
-                    url: $(this).attr('action'),
+                // Handle Real Submit
+                $('#btnRealSubmit').on('click', function() {
+                    var $btn = $(this);
+                    $btn.prop('disabled', true).text('Đang xử lý...');
+                    processBookingSubmission(formData);
+                });
+            };
+
+            // Process Submission Function (Extracted)
+            function processBookingSubmission(formData) {
+                 $.ajax({
+                    url: $('#datBanForm').attr('action'),
                     type: 'POST',
                     data: formData,
                     dataType: 'json',
                     success: function(data) {
+                        $('#bookingConfirmModal').remove(); // Close modal
+                        
                         if (data.success) {
-                            // Show success notification
-                            showAlert('success', data.message);
-                            // Reset form
+                            showAlert('success', 'Đặt bàn thành công! Chúng tôi sẽ liên hệ sớm.');
                             $('#datBanForm')[0].reset();
-                            // Stay on page (no redirect)
+                            $('.input-underlined').removeClass('border-red-500 ring-1 ring-red-500');
                         } else {
-                            // Show error message
                             if (data.errors) {
-                                var errorMessages = [];
+                                var msg = [];
                                 for (var key in data.errors) {
                                     if (data.errors.hasOwnProperty(key)) {
-                                        if (Array.isArray(data.errors[key])) {
-                                            errorMessages.push(data.errors[key].join(', '));
-                                        } else {
-                                            errorMessages.push(data.errors[key]);
-                                        }
+                                        msg.push(Array.isArray(data.errors[key]) ? data.errors[key].join(', ') : data.errors[key]);
                                     }
                                 }
-                                showAlert('error', errorMessages.join('\n'));
+                                showAlert('error', msg.join('\n'));
                             } else {
-                                showAlert('error', data.message || 'Đã xảy ra lỗi khi đặt bàn. Vui lòng thử lại.');
+                                showAlert('error', data.message || 'Có lỗi xảy ra.');
                             }
                         }
                     },
-                    error: function(xhr, status, error) {
-                        console.error('AJAX Error:', status, error);
-                        console.error('Response:', xhr.responseText);
-                        
-                        // Try to parse error response
-                        var errorMessage = 'Lỗi: Không thể kết nối đến server. Vui lòng thử lại.';
-                        try {
-                            if (xhr.responseJSON && xhr.responseJSON.message) {
-                                errorMessage = 'Lỗi: ' + xhr.responseJSON.message;
-                            } else if (xhr.responseText) {
-                                // If response is HTML (error page), show generic message
-                                if (xhr.responseText.indexOf('<html') !== -1) {
-                                    errorMessage = 'Lỗi: Server trả về lỗi. Vui lòng kiểm tra lại thông tin và thử lại.';
-                                }
-                            }
-                        } catch (e) {
-                            console.error('Error parsing response:', e);
-                        }
-                        showAlert('error', errorMessage);
+                    error: function() {
+                        $('#bookingConfirmModal').remove();
+                        showAlert('error', 'Lỗi kết nối. Vui lòng thử lại sau.');
                     },
                     complete: function() {
-                        // Restore button state
-                        $submitButton.prop('disabled', false);
-                        $submitButton.html(originalButtonText);
+                        // Reset submit button state if needed (though usually we reset form or close modal)
+                        var $submitBtn = $('#datBanForm button[type="submit"]');
+                        $submitBtn.prop('disabled', false).html('Xác nhận');
                     }
                 });
-                
-                return false;
-            });
+            }
             
-            // Also update on page load if values are already set
+            // Logic xử lý Ngày/Giờ -> ThoiGianDen hidden field
+            var $ngayDatInput = $('#ngayDat');
+            var $khungGioSelect = $('#khungGio');
+            var $thoiGianDenHidden = $('#ThoiGianDen');
+
+            function updateThoiGianDen() {
+                var ngayDat = $ngayDatInput.val();
+                var khungGio = $khungGioSelect.val();
+                
+                if (ngayDat && khungGio) {
+                    var date = new Date(ngayDat);
+                    var timeParts = khungGio.split(':');
+                    date.setHours(parseInt(timeParts[0]), parseInt(timeParts[1] || 0), 0);
+                    
+                    var year = date.getFullYear();
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var day = String(date.getDate()).padStart(2, '0');
+                    var hours = String(date.getHours()).padStart(2, '0');
+                    var minutes = String(date.getMinutes()).padStart(2, '0');
+                    
+                    $thoiGianDenHidden.val(year + '-' + month + '-' + day + 'T' + hours + ':' + minutes);
+                }
+            }
+
+            $ngayDatInput.on('change', updateThoiGianDen);
+            $khungGioSelect.on('change', updateThoiGianDen);
+            
             if ($ngayDatInput.val() && $khungGioSelect.val()) {
                 updateThoiGianDen();
             }
+
+            // Validation Helper Functions
+            function validateName(name) {
+                // Regex cho tiếng Việt và khoảng trắng, không số, không ký tự đặc biệt
+                var regex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/;
+                return regex.test(name);
+            }
+
+            function validatePhone(phone) {
+                // Chỉ nhận đúng 10 chữ số
+                var regex = /^\d{10}$/;
+                return regex.test(phone);
+            }
+
+            function validateDate(dateStr) {
+                if (!dateStr) return false;
+                var date = new Date(dateStr);
+                var year = date.getFullYear();
+                var today = new Date();
+                today.setHours(0,0,0,0);
+                
+                // Năm phải có 4 chữ số (trong khoảng hợp lý, ví dụ: năm nay hoặc năm sau)
+                var currentYear = today.getFullYear();
+                if (year < currentYear || year > currentYear + 2) {
+                    return false;
+                }
+                
+                // Không được bé hơn ngày hiện tại
+                if (date < today) {
+                    return false;
+                }
+                
+                return true;
+            }
+
+            // Real-time Input Blocking (Strict)
+            // 1. Phone: Strictly allow only numbers
+            $('#SDTKhach').on('keydown', function(e) {
+                // Allow: backspace, delete, tab, escape, enter, arrows
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) !== -1 ||
+                     // Allow: Ctrl+A
+                    (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) || 
+                     // Allow: home, end, left, right
+                    (e.keyCode >= 35 && e.keyCode <= 40)) {
+                         return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+
+            $('#SDTKhach').on('input', function() {
+                // Cleanup (Handle paste)
+                var val = $(this).val();
+                var cleanVal = val.replace(/[^0-9]/g, '');
+                if (val !== cleanVal) $(this).val(cleanVal);
+            });
+
+            // 2. Name: Block numbers and common symbols immediately
+            $('#HoTenKhach').on('keydown', function(e) {
+                // Block Numbers (top row and numpad)
+                if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                // Block Common Symbols (Shift + Number row)
+                // e.key is reliable for actual char check
+                if (e.key && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                    // Regex whitelist: Letters and Space ONLY
+                    var regex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]$/;
+                    if (!regex.test(e.key)) {
+                        e.preventDefault();
+                    }
+                }
+            });
+
+            $('#HoTenKhach').on('input', function() {
+                // Cleanup (Handle paste/IME artifacts)
+                var val = $(this).val();
+                var cleanVal = val.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]/g, '');
+                if (val !== cleanVal) {
+                    $(this).val(cleanVal);
+                }
+            });
+
+            // 3. Guests: Strict Number (Positive Integer Only) block
+            $('#SoNguoi').on('keydown', function(e) {
+                // Allow: backspace, delete, tab, escape, enter, arrows
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) !== -1 ||
+                     // Allow: Ctrl+A
+                    (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) || 
+                     // Allow: home, end, left, right
+                    (e.keyCode >= 35 && e.keyCode <= 40)) {
+                         return;
+                }
+                // Block: -, +, e, ., (decimal point)
+                if ($.inArray(e.key, ['-', '+', 'e', '.', ',']) !== -1) {
+                    e.preventDefault();
+                    return;
+                }
+                // Ensure that it is a number
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+
+            $('#SoNguoi').on('input', function() {
+                var val = $(this).val();
+                // Replace strictly anything that is not 0-9
+                var cleanVal = val.replace(/[^0-9]/g, '');
+                // Prevent '0' at start unless single digit 0 (but min is 1 so whatever)
+                // Actually reasonable to block 0 start for guests
+                if (cleanVal.length > 1 && cleanVal.startsWith('0')) {
+                    cleanVal = cleanVal.substring(1);
+                }
+                if (val !== cleanVal) $(this).val(cleanVal);
+            });
+
+            // Helper: Show/Clear Inline Error
+            function showInlineError(inputSelector, message) {
+                var $input = $(inputSelector);
+                // Tìm span validation message ngay sau input (nếu dùng Html.ValidationMessageFor)
+                var $span = $input.next('.field-validation-valid, .field-validation-error');
+                
+                // Nếu không tìm thấy bằng .next() (do có thể cách nhau bởi element khác), tìm theo data-valmsg-for
+                if ($span.length === 0) {
+                    var name = $input.attr('name');
+                    $span = $('[data-valmsg-for="' + name + '"]');
+                }
+                
+                if ($span.length > 0) {
+                    $span.text(message);
+                    $span.removeClass('field-validation-valid').addClass('field-validation-error text-red-500 text-sm mt-1 block');
+                    $input.addClass('border-red-500 ring-1 ring-red-500');
+                } else {
+                    // Fallback nếu không có span
+                    $input.after('<span class="field-validation-error text-red-500 text-sm mt-1 block">' + message + '</span>');
+                    $input.addClass('border-red-500 ring-1 ring-red-500');
+                }
+            }
+
+            function clearInlineError(inputSelector) {
+                var $input = $(inputSelector);
+                var name = $input.attr('name');
+                var $span = $('[data-valmsg-for="' + name + '"]');
+                
+                if ($span.length > 0) {
+                    $span.text('');
+                    $span.addClass('field-validation-valid').removeClass('field-validation-error');
+                }
+                $input.removeClass('border-red-500 ring-1 ring-red-500');
+                
+                // Reset custom validity for browser
+                $input[0].setCustomValidity('');
+            }
+
+            // Real-time validation listeners (Blur)
+            $('#HoTenKhach').on('blur', function() {
+                var val = $(this).val();
+                if (!val) {
+                    showInlineError('#HoTenKhach', 'Vui lòng nhập họ và tên.');
+                } else if (!validateName(val)) {
+                    showInlineError('#HoTenKhach', 'Họ tên chỉ được phép chứa chữ cái, không được chứa số hoặc ký tự đặc biệt.');
+                } else {
+                    clearInlineError('#HoTenKhach');
+                }
+            });
+
+            $('#SDTKhach').on('blur', function() {
+                var val = $(this).val();
+                if (!val) {
+                    showInlineError('#SDTKhach', 'Vui lòng nhập số điện thoại.');
+                } else if (!validatePhone(val)) {
+                    showInlineError('#SDTKhach', 'Số điện thoại phải bao gồm đúng 10 chữ số.');
+                } else {
+                    clearInlineError('#SDTKhach');
+                }
+            });
+
+            $ngayDatInput.on('blur', function() {
+                var val = $(this).val();
+                if (!val) {
+                     // Custom logic for date parent err-msg
+                     var $parent = $(this).parent();
+                     if ($parent.find('.err-msg').length === 0) {
+                        $parent.append('<span class="err-msg text-red-500 text-sm mt-1 block"></span>');
+                     }
+                     $parent.find('.err-msg').text('Vui lòng chọn ngày.');
+                     $(this).addClass('border-red-500 ring-1 ring-red-500');
+                } else if (!validateDate(val)) {
+                     var $parent = $(this).parent();
+                     if ($parent.find('.err-msg').length===0) $parent.append('<span class="err-msg text-red-500 text-sm mt-1 block"></span>');
+                     $parent.find('.err-msg').text('Năm phải hợp lệ (4 số) và không được nhỏ hơn ngày hiện tại.');
+                     $(this).addClass('border-red-500 ring-1 ring-500');
+                     $(this).val(''); 
+                } else {
+                    $(this).parent().find('.err-msg').remove(); // Remove instead of text('') to be cleaner
+                    $(this).removeClass('border-red-500 ring-1 ring-red-500');
+                }
+            });
+
+            $khungGioSelect.on('blur', function() {
+                var val = $(this).val();
+                var $parent = $(this).parent();
+                if (!val) {
+                     if ($parent.find('.err-msg').length === 0) {
+                        $parent.append('<span class="err-msg text-red-500 text-sm mt-1 block"></span>');
+                     }
+                     $parent.find('.err-msg').text('Vui lòng chọn khung giờ.');
+                     $(this).addClass('border-red-500 ring-1 ring-red-500');
+                } else {
+                    $parent.find('.err-msg').remove();
+                    $(this).removeClass('border-red-500 ring-1 ring-red-500');
+                }
+            });
+
+            $('#SoNguoi').on('blur', function() {
+                 var val = $(this).val();
+                 var intVal = parseInt(val, 10);
+                 var $parent = $(this).parent();
+                 
+                 if (!val) {
+                      if ($parent.find('.err-msg').length === 0) {
+                        $parent.append('<span class="err-msg text-red-500 text-sm mt-1 block"></span>');
+                     }
+                     $parent.find('.err-msg').text('Vui lòng nhập số khách.');
+                     $(this).addClass('border-red-500 ring-1 ring-red-500');
+                 } else if (isNaN(intVal) || intVal <= 0) {
+                     if ($parent.find('.err-msg').length === 0) {
+                        $parent.append('<span class="err-msg text-red-500 text-sm mt-1 block"></span>');
+                     }
+                     $parent.find('.err-msg').text('Số khách phải lớn hơn 0.');
+                     $(this).addClass('border-red-500 ring-1 ring-red-500');
+                     $(this).val(''); // Clear invalid
+                 } else {
+                     $parent.find('.err-msg').remove();
+                     $(this).removeClass('border-red-500 ring-1 ring-red-500');
+                 }
+            });
+
+            // AJAX Submit Handler
+            $('#datBanForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                var ngayDat = $ngayDatInput.val();
+                var khungGio = $khungGioSelect.val();
+                
+                // Reset Errors
+                $('.err-msg').text('');
+                clearInlineError('#HoTenKhach');
+                clearInlineError('#SDTKhach');
+
+                var isValid = true;
+
+                if (!ngayDat) {
+                    isValid = false;
+                     var $p = $ngayDatInput.parent();
+                     if ($p.find('.err-msg').length===0) $p.append('<span class="err-msg text-red-600 text-xs mt-1 block"></span>');
+                     $p.find('.err-msg').text('Vui lòng chọn ngày.');
+                     $ngayDatInput.addClass('border-red-500');
+                }
+                
+                if (!khungGio) {
+                    isValid = false;
+                     var $p = $khungGioSelect.parent();
+                     if ($p.find('.err-msg').length===0) $p.append('<span class="err-msg text-red-600 text-xs mt-1 block"></span>');
+                     $p.find('.err-msg').text('Vui lòng chọn giờ.');
+                     $khungGioSelect.addClass('border-red-500');
+                }
+                
+                // Guests Check
+                var guests = $('#SoNguoi').val();
+                var guestsInt = parseInt(guests, 10);
+                if (!guests || isNaN(guestsInt) || guestsInt <= 0) {
+                     var $p = $('#SoNguoi').parent();
+                     if ($p.find('.err-msg').length === 0) {
+                        $p.append('<span class="err-msg text-red-600 text-xs mt-1 block"></span>');
+                     }
+                     $p.find('.err-msg').text('Số khách phải lớn hơn 0.');
+                     $('#SoNguoi').addClass('border-red-500 ring-1 ring-red-500');
+                     isValid = false;
+                }
+
+                // Strict Validation before Submit
+                var nameVal = $('#HoTenKhach').val();
+                var phoneVal = $('#SDTKhach').val();
+
+                if (!validateName(nameVal)) {
+                    showInlineError('#HoTenKhach', 'Họ tên chỉ được phép chứa chữ cái, không được chứa số hoặc ký tự đặc biệt.');
+                    isValid = false;
+                }
+
+                if (!validatePhone(phoneVal)) {
+                    showInlineError('#SDTKhach', 'Số điện thoại phải bao gồm đúng 10 chữ số.');
+                    isValid = false;
+                }
+
+                if (ngayDat && !validateDate(ngayDat)) {
+                    var $p = $ngayDatInput.parent();
+                     if ($p.find('.err-msg').length===0) $p.append('<span class="err-msg text-red-600 text-xs mt-1 block"></span>');
+                     $p.find('.err-msg').text('Ngày đặt không hợp lệ.');
+                     $ngayDatInput.addClass('border-red-500');
+                    isValid = false;
+                }
+                
+                if (!isValid) return false;
+
+                updateThoiGianDen();
+                
+                var formData = $(this).serialize();
+                
+                // --- Show Confirmation Modal instead of direct submit ---
+                showConfirmModal(formData);
+            });
         }
         
-        // Start initialization when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initFormHandlers);
         } else {

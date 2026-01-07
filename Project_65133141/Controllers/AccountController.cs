@@ -234,6 +234,7 @@ namespace Project_65133141.Controllers
                         Session["IsAdminOrEmployee"] = false;
                         Session["SessionStartTime"] = DateTime.Now;
                         Session["SessionExpiryTime"] = DateTime.Now.AddMinutes(60);
+                        Session["UserAvatar"] = customerUser.Avatar;
 
                         // Redirect to return URL or home page
                         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -562,7 +563,7 @@ namespace Project_65133141.Controllers
                 }
             }
             
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", new { area = "" });
         }
 
         // GET: Account/ForgotPassword - Disabled

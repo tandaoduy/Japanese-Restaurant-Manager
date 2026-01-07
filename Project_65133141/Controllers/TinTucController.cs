@@ -3,10 +3,10 @@ using System.Linq;
 using System.Web.Mvc;
 using Project_65133141.Models;
 
-namespace Project_65133141.Areas.User_65133141.Controllers
+namespace Project_65133141.Controllers
 {
     /// <summary>
-    /// Controller hiển thị tin tức và ưu đãi cho khách hàng
+    /// Controller hiển thị tin tức và ưu đãi cho khách hàng (Public/Guest)
     /// </summary>
     public class TinTucController : Controller
     {
@@ -41,8 +41,6 @@ namespace Project_65133141.Areas.User_65133141.Controllers
             
             return View(tinTucs);
         }
-
-
 
         /// <summary>
         /// Hiển thị chi tiết tin tức theo slug

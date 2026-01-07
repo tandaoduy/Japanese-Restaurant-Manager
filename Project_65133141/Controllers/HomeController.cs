@@ -13,6 +13,48 @@ namespace Project_65133141.Controllers
     {
         private QuanLyNhaHangNhat_65133141Entities6 db = new QuanLyNhaHangNhat_65133141Entities6();
 
+        /// <summary>
+        /// Strict Area Isolation: Force logout when navigating from authenticated areas to root
+        /// </summary>
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            // Only check if user is authenticated
+            if (User.Identity.IsAuthenticated)
+            {
+                // Check if user is coming from restricted areas (User/Admin/Employee) via Referrer
+                // This detects links like "Trang chủ" in user menu
+                var referrer = Request.UrlReferrer?.AbsolutePath?.ToLower();
+                
+                if (!string.IsNullOrEmpty(referrer) &&
+                    (referrer.Contains("/user_65133141/") || 
+                     referrer.Contains("/admin_65133141/") || 
+                     referrer.Contains("/employee_65133141/")))
+                {
+                    // Force complete logout
+                    FormsAuthentication.SignOut();
+                    Session.Clear();
+                    Session.Abandon();
+                    
+                    // Clear auth cookie explicitly
+                    if (Request.Cookies[FormsAuthentication.FormsCookieName] != null)
+                    {
+                        var c = new HttpCookie(FormsAuthentication.FormsCookieName)
+                        {
+                            Expires = DateTime.Now.AddDays(-1)
+                        };
+                        Response.Cookies.Add(c);
+                    }
+                    
+                    // Redirect to Home/Index to refresh state completely (with clean session)
+                    // Add signedOut param to avoid redirect loops if any
+                    filterContext.Result = RedirectToAction("Index", "Home", new { signedOut = "true", area = "" });
+                    return;
+                }
+            }
+            
+            base.OnActionExecuting(filterContext);
+        }
+
         public ActionResult Index()
         {
             // Clear all cart sessions when accessing home page

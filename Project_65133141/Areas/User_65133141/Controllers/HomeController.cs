@@ -38,6 +38,12 @@ namespace Project_65133141.Areas.User_65133141.Controllers
             return View();
         }
 
+        // GET: User_65133141/Home/Contact
+        public ActionResult Contact()
+        {
+            return View();
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

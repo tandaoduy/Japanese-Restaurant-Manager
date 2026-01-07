@@ -2,54 +2,94 @@
 
 @{
     ViewBag.Title = "Thực đơn";
-    Layout = "~/Areas/User_65133141/Views/Shared/_Layout.cshtml";
     var categories = ViewBag.Categories as List<Project_65133141.Models.DanhMuc> ?? new List<Project_65133141.Models.DanhMuc>();
     var categoryDict = ViewBag.CategoryDict as Dictionary<long, string> ?? new Dictionary<long, string>();
     var selectedCategoryId = ViewBag.SelectedCategoryId as long?;
     var searchString = ViewBag.SearchString as string ?? "";
 }
 
-<!-- Menu Hero Section -->
-<section class="relative h-[50vh] md:h-[60vh] overflow-hidden -mt-36">
+<!-- Menu Hero Section - Style like About page -->
+<section class="hero-section relative overflow-hidden -mt-36" style="height: 60vh; min-height: 500px;">
     <style>
-        .menu-hero-overlay {
-            background: linear-gradient(135deg, rgba(139, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%);
+        .hero-section img.hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: fadeScaleIn 1.5s ease-out;
         }
-        .menu-hero-content {
-            animation: menuFadeIn 1s ease-out;
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
         }
-        @@keyframes menuFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .hero-content-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            padding-top: 144px;
         }
-        .menu-hero-title {
-            font-family: 'Playfair Display', serif;
-            text-shadow: 2px 4px 12px rgba(0, 0, 0, 0.5);
+        .hero-text {
+            color: white;
+            max-width: 768px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+            text-align: left;
+        }
+        .hero-title {
+            font-size: 3.75rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 4px 8px rgba(0,0,0,0.8);
+            letter-spacing: 0.05em;
+        }
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding-bottom: 0.75rem;
+            color: #ec4899;
+            position: relative;
+            display: inline-block;
+        }
+        .hero-subtitle::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #ec4899;
+            animation: expandWidth 1s ease-out 0.8s forwards;
+        }
+        @@keyframes fadeScaleIn {
+            from { opacity: 0; transform: scale(1.1); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @@keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @@keyframes expandWidth {
+            to { width: 100%; }
+        }
+        @@media (max-width: 767px) {
+            .hero-title { font-size: 2rem; }
+            .hero-subtitle { font-size: 1rem; }
         }
     </style>
     
-    <img src="@Url.Content("~/Images/thucdon.jpg")" 
-         alt="Thực đơn SAKURA KAZOKU" 
-         class="absolute inset-0 w-full h-full object-cover">
-    
-    <div class="menu-hero-overlay absolute inset-0"></div>
-    
-    <div class="absolute inset-0 flex items-center pt-36">
+    <img src="@Url.Content("~/Images/slide04.jpg")" alt="Thực đơn SAKURA KAZOKU" class="hero-image">
+    <div class="hero-overlay"></div>
+    <div class="hero-content-wrapper">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="menu-hero-content text-white max-w-3xl">
-                <p class="text-amber-400 font-semibold text-lg mb-3 tracking-widest uppercase">SAKURA KAZOKU</p>
-                <h1 class="menu-hero-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4">
-                    Thực đơn
-                </h1>
-                <p class="text-xl md:text-2xl font-light text-gray-200 leading-relaxed">
-                    Khám phá hương vị ẩm thực Nhật Bản đích thực với những món ăn được chế biến từ nguyên liệu tươi ngon nhất
-                </p>
+            <div class="hero-text">
+                <h1 class="hero-title">SAKURA KAZOKU</h1>
+                <p class="hero-subtitle">Thực đơn</p>
             </div>
         </div>
     </div>
@@ -61,28 +101,28 @@
         <p class="text-gray-600">Khám phá các món ăn đặc trưng của chúng tôi</p>
     </div>
 
-    <!-- Category Filter -->
+    <!-- Category Filter - match Home index style (emoji icons) -->
     <div class="category-scroll-container mb-12">
-        <a href="@Url.Action("Index", "Menu", new { area = "User_65133141" })" class="category-pill @(!selectedCategoryId.HasValue ? "category-pill-active" : "")">
-            <div class="category-pill-icon">
-                <img src="@Url.Content("~/Images/intro_0.png")" alt="All" style="width: 40px; height: 40px; object-fit: contain;" />
-            </div>
+        <a href="@Url.Action("Index", "Menu")" class="category-pill @(!selectedCategoryId.HasValue ? "category-pill-active" : "")">
+            <div class="category-pill-icon">📚</div>
             <span>Tất cả</span>
         </a>
+
         @foreach (var category in categories)
         {
             var upperName = (category.TenDanhMuc ?? "").ToUpperInvariant();
-            string iconImg = "icon_monkhac.png"; // Default
+            string icon = "🍽️";
 
-            if (upperName.Contains("SUSHI") || upperName.Contains("SHUSHI")) { iconImg = "icon_shushi.png"; }
-            else if (upperName.Contains("CƠM") || upperName.Contains("MÌ")) { iconImg = "icon_MiCom.png"; }
-            else if (upperName.Contains("UỐNG") || upperName.Contains("NƯỚC")) { iconImg = "icon_douong.png"; }
-            
-            <a href="@Url.Action("Index", "Menu", new { area = "User_65133141", categoryId = category.DanhMucID })" 
+            if (upperName.Contains("SASHIMI")) { icon = "🥢"; }
+            else if (upperName.Contains("SUSHI") || upperName.Contains("SHUSHI")) { icon = "🍣"; }
+            else if (upperName.Contains("CƠM") || upperName.Contains("MÌ")) { icon = "🍜"; }
+            else if (upperName.Contains("TEISHOKU")) { icon = "🍱"; }
+            else if (upperName.Contains("UỐNG") || upperName.Contains("NƯỚC")) { icon = "🥤"; }
+            else if (upperName.Contains("TRÁNG MIỆNG")) { icon = "🍰"; }
+
+            <a href="@Url.Action("Index", "Menu", new { categoryId = category.DanhMucID })"
                class="category-pill @(selectedCategoryId == category.DanhMucID ? "category-pill-active" : "")">
-                <div class="category-pill-icon">
-                     <img src="@Url.Content("~/Images/" + iconImg)" alt="@category.TenDanhMuc" style="width: 40px; height: 40px; object-fit: contain;" />
-                </div>
+                <div class="category-pill-icon">@icon</div>
                 <span>@category.TenDanhMuc</span>
             </a>
         }
@@ -112,15 +152,16 @@
         }
 
         .category-pill-icon {
-            width: 68px;
-            height: 68px;
+            width: 80px;
+            height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #f8fafc;
-            border-radius: 20px; /* Squircleish */
+            border-radius: 24px; /* Squircleish */
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-size: 32px;
         }
 
         .category-pill span {
@@ -131,13 +172,14 @@
         }
 
         .category-pill-active .category-pill-icon {
-            background: #DC2626; /* Red-600 */
-            box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.3);
-            transform: translateY(-2px);
+            background: #EF4444; /* Red-500 equivalent */
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.35);
+            transform: translateY(-2px) scale(1.05);
+            color: #ffffff;
         }
 
         .category-pill-active span {
-            color: #DC2626;
+            color: #EF4444;
         }
 
         .category-pill:hover:not(.category-pill-active) .category-pill-icon {
@@ -150,72 +192,114 @@
             overflow: hidden;
             background: white;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
+            transition: all 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
             position: relative;
+            animation: fadeInUp 0.6s ease both;
         }
-        
+
         .product-card-redesign:hover {
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            transform: translateY(-4px);
+            transform: translateY(-6px) scale(1.01);
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 
-    <!-- Menu Items Grid -->
+    <!-- Menu Items Grid - match Home index card style -->
     @if (Model != null && Model.Any())
     {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div id="menu-grid" class="grid md:grid-cols-4 gap-8">
             @foreach (var item in Model)
             {
-                <div class="product-card-redesign">
-                    <div class="relative h-56 overflow-hidden bg-gray-100">
-                        @if (!string.IsNullOrEmpty(item.HinhAnh))
+                var categoryName = categoryDict.ContainsKey(item.DanhMucID)
+                    ? categoryDict[item.DanhMucID]
+                    : "Khác";
+
+                var gradientClass = "from-gray-400 to-gray-600";
+
+                if (categoryName != null)
+                {
+                    var upperCat = categoryName.ToUpperInvariant();
+                    if (upperCat.Contains("SUSHI") || upperCat.Contains("SHUSHI"))
+                    {
+                        gradientClass = "from-pink-400 via-pink-500 to-pink-600";
+                    }
+                    else if (upperCat.Contains("CƠM") || upperCat.Contains("MÌ"))
+                    {
+                        gradientClass = "from-orange-400 via-orange-500 to-orange-600";
+                    }
+                    else if (upperCat.Contains("UỐNG"))
+                    {
+                        gradientClass = "from-teal-400 via-teal-500 to-cyan-600";
+                    }
+                    else if (upperCat.Contains("TRÁNG MIỆNG"))
+                    {
+                        gradientClass = "from-purple-400 via-purple-500 to-purple-600";
+                    }
+                    else
+                    {
+                        gradientClass = "from-blue-400 via-blue-500 to-blue-600";
+                    }
+                }
+
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group product-card-redesign menu-card">
+                    <div class="h-56 bg-gradient-to-br @gradientClass flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                        @if (!string.IsNullOrWhiteSpace(item.HinhAnh))
                         {
-                            <img src="@Url.Content("~/Images/" + item.HinhAnh)" 
-                                 alt="@item.TenMon" 
-                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                            var imagePath = item.HinhAnh;
+                            if (!imagePath.StartsWith("~/") && !imagePath.StartsWith("/") && !imagePath.StartsWith("http"))
+                            {
+                                imagePath = "~/Images/Products/" + imagePath;
+                            }
+                            <img src="@Url.Content(imagePath)" alt="@item.TenMon" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300" />
                         }
                         else
                         {
-                            <div class="w-full h-full flex items-center justify-center bg-gray-200">
-                                <span class="text-4xl">🍽️</span>
-                            </div>
+                            <span class="text-7xl transform group-hover:scale-110 transition-transform duration-300 relative z-10">🍽️</span>
                         }
-                        
-                         @if (item.GiaGiam.HasValue && item.GiaGiam.Value < item.GiaGoc)
+
+                        @if (item.GiaGiam.HasValue && item.GiaGiam.Value > 0 && item.GiaGiam.Value < item.GiaGoc)
                         {
-                            var discount = Math.Round((1 - (item.GiaGiam.Value / item.GiaGoc)) * 100);
-                            <div class="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
-                                -@discount%
+                            var discountPercent = (int)Math.Round(100 - (item.GiaGiam.Value / item.GiaGoc) * 100);
+                            <div class="absolute top-3 right-3 z-10">
+                                <span class="bg-red-600 text-white text-xs font-black px-3 py-1 rounded-xl uppercase shadow-lg">
+                                    -@discountPercent%
+                                </span>
                             </div>
                         }
                     </div>
-                    
-                    <div class="p-4">
-                        <h3 class="text-lg font-bold text-gray-900 mb-1 truncate">@item.TenMon</h3>
-                        <p class="text-xs text-gray-500 mb-4">Món ăn đặc sắc</p> <!-- Static text as per design request, or dynamic description -->
-                        
-                        <div class="flex items-baseline gap-2">
-                             @if (item.GiaGiam.HasValue && item.GiaGiam.Value < item.GiaGoc)
-                            {
-                                <span class="text-xl font-bold text-red-600">@string.Format("{0:#,##0}đ", item.GiaGiam)</span>
-                                <span class="text-sm text-gray-400 line-through">@string.Format("{0:#,##0}đ", item.GiaGoc)</span>
-                            }
-                            else
-                            {
-                                <span class="text-xl font-bold text-red-600">@string.Format("{0:#,##0}đ", item.Gia)</span>
-                            }
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-3 text-gray-900">@item.TenMon</h3>
+                        <p class="text-gray-600 mb-5 leading-relaxed line-clamp-2">@(item.MoTa ?? "Món ăn đặc sắc")</p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-baseline gap-3">
+                                @if (item.GiaGiam.HasValue && item.GiaGiam.Value > 0 && item.GiaGiam.Value < item.GiaGoc)
+                                {
+                                    var discountPercent = (int)Math.Round(100 - (item.GiaGiam.Value / item.GiaGoc) * 100);
+                                    <span class="text-2xl font-bold text-red-600">@String.Format("{0:N0}đ", item.GiaGiam)</span>
+                                    <span class="text-lg text-gray-400 line-through ml-2">@String.Format("{0:N0}đ", item.GiaGoc)</span>
+                                }
+                                else
+                                {
+                                    <span class="text-2xl font-bold text-red-600">@String.Format("{0:N0}đ", item.GiaGoc)</span>
+                                }
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Optional: Add to Cart button could go here, floating or bottom right -->
-                     <div class="absolute bottom-4 right-4 bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 cursor-pointer transition-colors" onclick="location.href='@Url.Action("Details", "Product", new { area = "User_65133141", id = item.MonAnID })'">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                        </svg>
                     </div>
                 </div>
             }
         </div>
+        <div id="menu-pagination" class="mt-10 flex flex-col items-center justify-center gap-4"></div>
     }
     else
     {
@@ -232,4 +316,130 @@
     }
 </div>
 
+<script>
+    (function () {
+        const pageSize = 12; // 12 cards per page, 4 per row
+        const cards = Array.prototype.slice.call(document.querySelectorAll('#menu-grid .menu-card'));
+        const paginationContainer = document.getElementById('menu-pagination');
+
+        if (!cards.length || !paginationContainer) return;
+
+        const totalPages = Math.max(1, Math.ceil(cards.length / pageSize));
+        let currentPage = 1;
+
+        function renderPage(page) {
+            currentPage = page;
+
+            cards.forEach(function (card, index) {
+                const pageIndex = Math.floor(index / pageSize) + 1;
+                if (pageIndex === page) {
+                    card.style.display = '';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(12px)';
+                    // small delay for animation
+                    setTimeout(function () {
+                        card.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 10);
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            renderPagination();
+        }
+
+        function createPageButton(page, text, isActive, isDisabled) {
+            const btn = document.createElement('button');
+            btn.textContent = text || page;
+            btn.type = 'button';
+            btn.className = 'w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-sm font-semibold mx-1 transition-all duration-200 bg-white hover:bg-gray-100';
+
+            if (isActive) {
+                btn.className = 'w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold mx-1 transition-all duration-200 bg-red-500 text-white shadow-md hover:bg-red-600';
+            }
+
+            if (isDisabled) {
+                btn.disabled = true;
+                btn.className += ' text-gray-300 cursor-not-allowed hover:bg-white';
+            } else if (!isActive) {
+                btn.addEventListener('click', function () {
+                    if (page >= 1 && page <= totalPages && page !== currentPage) {
+                        renderPage(page);
+                    }
+                });
+            }
+
+            return btn;
+        }
+
+        function renderPagination() {
+            paginationContainer.innerHTML = '';
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex items-center justify-center';
+
+            // First and Prev
+            wrapper.appendChild(createPageButton(1, '«', false, currentPage === 1));
+            wrapper.appendChild(createPageButton(currentPage - 1, '‹', false, currentPage === 1));
+
+            // Page numbers (simple version: show all if <=5, else use window + ellipsis)
+            if (totalPages <= 5) {
+                for (let i = 1; i <= totalPages; i++) {
+                    wrapper.appendChild(createPageButton(i, String(i), i === currentPage, false));
+                }
+            } else {
+                const addEllipsis = function () {
+                    const span = document.createElement('span');
+                    span.textContent = '...';
+                    span.className = 'mx-1 text-gray-400 text-sm select-none';
+                    wrapper.appendChild(span);
+                };
+
+                const windowSize = 3;
+                let start = Math.max(1, currentPage - 1);
+                let end = Math.min(totalPages, start + windowSize - 1);
+
+                if (end - start < windowSize - 1) {
+                    start = Math.max(1, end - windowSize + 1);
+                }
+
+                // First page
+                wrapper.appendChild(createPageButton(1, '1', currentPage === 1, false));
+
+                if (start > 2) {
+                    addEllipsis();
+                }
+
+                for (let i = start; i <= end; i++) {
+                    if (i !== 1 && i !== totalPages) {
+                        wrapper.appendChild(createPageButton(i, String(i), i === currentPage, false));
+                    }
+                }
+
+                if (end < totalPages - 1) {
+                    addEllipsis();
+                }
+
+                if (totalPages > 1) {
+                    wrapper.appendChild(createPageButton(totalPages, String(totalPages), currentPage === totalPages, false));
+                }
+            }
+
+            // Next and Last
+            wrapper.appendChild(createPageButton(currentPage + 1, '›', false, currentPage === totalPages));
+            wrapper.appendChild(createPageButton(totalPages, '»', false, currentPage === totalPages));
+
+            paginationContainer.appendChild(wrapper);
+
+            const info = document.createElement('div');
+            info.className = 'text-sm text-gray-500 mt-2';
+            info.textContent = 'Trang ' + currentPage + ' / ' + totalPages;
+            paginationContainer.appendChild(info);
+        }
+
+        renderPage(1);
+    })();
+</script>
 

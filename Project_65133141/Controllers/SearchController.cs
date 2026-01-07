@@ -25,7 +25,25 @@ namespace Project_65133141.Controllers
 
             query = query.ToLower().Trim();
 
+            // Detect current area from Referer
+            string currentArea = "";
+            var referer = Request.UrlReferrer?.AbsolutePath ?? Request.Path;
+            
+            if (referer.Contains("/User_65133141/"))
+            {
+                currentArea = "User_65133141";
+            }
+            else if (referer.Contains("/Admin_65133141/"))
+            {
+                currentArea = "Admin_65133141";
+            }
+            else if (referer.Contains("/Employee_65133141/"))
+            {
+                currentArea = "Employee_65133141";
+            }
+
             // 1. Tìm kiếm Món ăn (Products)
+            var menuUrl = string.IsNullOrEmpty(currentArea) ? "/Menu" : "/" + currentArea + "/Menu";
             var products = db.MonAns
                 .Where(m => m.TenMon.ToLower().Contains(query) ||
                            (m.MoTa != null && m.MoTa.ToLower().Contains(query)))
@@ -36,11 +54,12 @@ namespace Project_65133141.Controllers
                     name = m.TenMon,
                     image = m.HinhAnh,
                     price = m.Gia,
-                    url = "/Menu#mon-" + m.MonAnID
+                    url = menuUrl + "#mon-" + m.MonAnID
                 })
                 .ToList();
 
             // 2. Tìm kiếm Tin tức
+            var tinTucBaseUrl = string.IsNullOrEmpty(currentArea) ? "/TinTuc/Details/" : "/" + currentArea + "/TinTuc/Details/";
             var news = db.TinTucs
                 .Where(t => t.IsHienThi == true &&
                            (t.TieuDe.ToLower().Contains(query) ||
@@ -52,7 +71,7 @@ namespace Project_65133141.Controllers
                     title = t.TieuDe,
                     image = t.HinhAnh,
                     slug = t.Slug,
-                    url = "/User_65133141/TinTuc/Details/" + t.Slug
+                    url = tinTucBaseUrl + t.Slug
                 })
                 .ToList();
 
@@ -64,29 +83,55 @@ namespace Project_65133141.Controllers
                 {
                     id = d.DanhMucID,
                     name = d.TenDanhMuc,
-                    url = "/Menu?category=" + d.DanhMucID
+                    url = menuUrl + "?category=" + d.DanhMucID
                 })
                 .ToList();
 
-            // 4. LUÔN hiển thị tất cả trang gợi ý (Suggested)
-            var suggestedPages = new List<object>
+            // 4. LUÔN hiển thị tất cả trang gợi ý (Suggested) - context-aware
+            var suggestedPages = new List<object>();
+            
+            if (string.IsNullOrEmpty(currentArea))
             {
-                new { name = "Trang chủ", url = "/" },
-                new { name = "Giới thiệu", url = "/Home/About" },
-                new { name = "Liên hệ", url = "/Home/Contact" },
-                new { name = "Thực đơn", url = "/Menu" },
-                new { name = "Đặt bàn", url = "/User_65133141/DatBan/Create" },
-                new { name = "Tin tức & Khuyến mãi", url = "/User_65133141/TinTuc" },
-                new { name = "Món ăn nổi bật", url = "/#featured-dishes" },
-                new { name = "Đăng nhập", url = "/Account/Login" }
-            };
+                // Root area suggestions
+                suggestedPages = new List<object>
+                {
+                    new { name = "Trang chủ", url = "/" },
+                    new { name = "Giới thiệu", url = "/Home/About" },
+                    new { name = "Liên hệ", url = "/Home/Contact" },
+                    new { name = "Thực đơn", url = "/Menu" },
+                    new { name = "Đặt bàn", url = "/Account/Login" },
+                    new { name = "Tin tức & Khuyến mãi", url = "/TinTuc" },
+                    new { name = "Món ăn nổi bật", url = "/#featured-dishes" },
+                    new { name = "Đăng nhập", url = "/Account/Login" }
+                };
+            }
+            else
+            {
+                // User/Admin/Employee area suggestions
+                var areaPrefix = "/" + currentArea;
+                suggestedPages = new List<object>
+                {
+                    new { name = "Trang chủ", url = areaPrefix + "/Home" },
+                    new { name = "Giới thiệu", url = areaPrefix + "/Home/About" },
+                    new { name = "Thực đơn", url = areaPrefix + "/Menu" },
+                    new { name = "Tin tức & Khuyến mãi", url = areaPrefix + "/TinTuc" },
+                    new { name = "Liên hệ", url = areaPrefix + "/Home/Contact" }
+                };
+                
+                // Add area-specific links
+                if (currentArea == "User_65133141")
+                {
+                    suggestedPages.Add(new { name = "Đặt bàn", url = areaPrefix + "/DatBan/Create" });
+                    suggestedPages.Add(new { name = "Đơn đặt của tôi", url = areaPrefix + "/DatBan/MyReservations" });
+                }
+            }
 
             return Json(new
             {
                 success = true,
                 products = products,
                 news = news,
-                pages = suggestedPages, // Luôn hiển thị tất cả
+                pages = suggestedPages,
                 categories = categories
             }, JsonRequestBehavior.AllowGet);
         }

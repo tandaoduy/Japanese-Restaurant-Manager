@@ -156,9 +156,11 @@
     <Compile Include="Areas\Admin_65133141\Controllers\AccountController.cs" />
     <Compile Include="Areas\Admin_65133141\Controllers\BanAnController.cs" />
     <Compile Include="Areas\Employee_65133141\Controllers\BanAnController.cs" />
+    <Compile Include="Areas\User_65133141\Controllers\AccountController.cs" />
     <Compile Include="Areas\User_65133141\Controllers\DatBanController.cs" />
     <Compile Include="Areas\User_65133141\Controllers\HomeController.cs" />
     <Compile Include="Areas\User_65133141\Controllers\MenuController.cs" />
+    <Compile Include="Areas\User_65133141\Controllers\TinTucController.cs" />
     <Compile Include="Areas\User_65133141\User_65133141AreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CaptchaController.cs" />
@@ -166,6 +168,7 @@
     <Compile Include="Controllers\MenuController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\SeedDataController.cs" />
+    <Compile Include="Controllers\TinTucController.cs" />
     <Compile Include="Filters\AreaErrorHandlerAttribute.cs" />
     <Compile Include="Filters\RoleAuthorizeAttribute.cs" />
     <Compile Include="Areas\Admin_65133141\Controllers\BaseAreaController.cs" />
@@ -174,22 +177,54 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\BanAn.cs" />
-    <Compile Include="Models\ChiTietDatHangOnline.cs" />
-    <Compile Include="Models\ChiTietDonHang.cs" />
-    <Compile Include="Models\DanhGia.cs" />
-    <Compile Include="Models\DanhMuc.cs" />
-    <Compile Include="Models\DatBan.cs" />
-    <Compile Include="Models\DatHangOnline.cs" />
-    <Compile Include="Models\DonHang.cs" />
-    <Compile Include="Models\HoaDon.cs" />
-    <Compile Include="Models\MonAn.cs" />
-    <Compile Include="Models\NhanVien.cs" />
-    <Compile Include="Models\ThanhToan.cs" />
-    <Compile Include="Models\ThongBao.cs" />
-    <Compile Include="Models\TinTuc.cs" />
-    <Compile Include="Models\User.cs" />
-    <Compile Include="Models\VaiTro.cs" />
+    <Compile Include="Models\BanAn.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ChiTietDatHangOnline.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ChiTietDonHang.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DanhGia.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DanhMuc.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DatBan.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DatHangOnline.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DonHang.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\HoaDon.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\MonAn.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\NhanVien.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ThanhToan.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ThongBao.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\TinTuc.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\User.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\VaiTro.cs">
+      <DependentUpon>Model_65133141.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Form\LoginForm.cs" />
     <Compile Include="Models\Form\RegisterForm.cs" />
     <Compile Include="Models\Model_65133141.Context.cs">
@@ -341,6 +376,10 @@
     <Content Include="Areas\Employee_65133141\Views\Account\Edit.cshtml" />
     <Content Include="Areas\Employee_65133141\Views\Account\Index.cshtml" />
     <Content Include="Areas\Admin_65133141\Views\TinTuc\Index.cshtml" />
+    <Content Include="Areas\User_65133141\Views\Account\Profile.cshtml" />
+    <Content Include="Areas\User_65133141\Views\DatBan\Create.cshtml" />
+    <Content Include="Areas\User_65133141\Views\DatBan\MyReservations.cshtml" />
+    <Content Include="Areas\User_65133141\Views\Home\Contact.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -375,6 +414,8 @@
     <Content Include="Views\Components\_Table.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Shared\_AuthModals.cshtml" />
+    <Content Include="Views\TinTuc\Details.cshtml" />
+    <Content Include="Views\TinTuc\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
