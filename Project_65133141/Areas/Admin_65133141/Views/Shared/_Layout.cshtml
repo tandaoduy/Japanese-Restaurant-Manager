@@ -748,18 +748,15 @@
             <span>THỐNG KÊ</span>
         </a>
         
-        <!-- Logout Button at Bottom -->
-        @if (User.Identity.IsAuthenticated)
-        {
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem 0;">
-                <a href="@Url.Action("Logout", "Account", new { area = "" })" class="sidebar-menu-item" style="position: relative;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                    </svg>
-                    <span>ĐĂNG XUẤT</span>
-                </a>
-            </div>
-        }
+        <a href="@Url.Action("Index", "TinTuc", new { area = "Admin_65133141" })" 
+           class="sidebar-menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "TinTuc" ? "active" : "")">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+            </svg>
+            <span>TIN TỨC & ƯU ĐÃI</span>
+        </a>
+        
+
     </nav>
 
     <!-- Add padding to prevent content from being hidden under fixed header -->
@@ -790,7 +787,8 @@
                                       controller == "Product" ? "Quản lý thực đơn" : 
                                       controller == "DatBan" ? "Quản lý đặt bàn" : 
                                       controller == "DonHang" ? "Quản lý đơn hàng" : 
-                                      controller == "BaoCao" ? "Thống kê" : controller)
+                                      controller == "BaoCao" ? "Thống kê" : 
+                                      controller == "TinTuc" ? "Tin tức & Ưu đãi" : controller)
                                 </span>
                             }
                             else
@@ -802,7 +800,8 @@
                                       controller == "Product" ? "Quản lý thực đơn" : 
                                       controller == "DatBan" ? "Quản lý đặt bàn" : 
                                       controller == "DonHang" ? "Quản lý đơn hàng" : 
-                                      controller == "BaoCao" ? "Thống kê" : controller)
+                                      controller == "BaoCao" ? "Thống kê" : 
+                                      controller == "TinTuc" ? "Tin tức & Ưu đãi" : controller)
                                 </a>
                                 <span class="breadcrumb-separator">/</span>
                                 <span class="breadcrumb-item active">

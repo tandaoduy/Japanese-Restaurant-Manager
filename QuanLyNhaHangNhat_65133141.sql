@@ -255,13 +255,18 @@ GO
 CREATE TABLE DanhGia (
     DanhGiaID BIGINT IDENTITY(1,1) PRIMARY KEY,
     UserID BIGINT NOT NULL,
-    MonAnID BIGINT NULL,
-    SoSao INT CHECK (SoSao BETWEEN 1 AND 5),
-    NoiDung NVARCHAR(MAX),
+    
+    -- Đánh giá sao cho dịch vụ/website
+    SoSao INT NOT NULL CHECK (SoSao BETWEEN 1 AND 5), 
+    
+    -- Nội dung góp ý về trải nghiệm
+    NoiDung NVARCHAR(MAX), 
+    
+    -- Thời điểm đánh giá
     NgayDanhGia DATETIME DEFAULT GETDATE(),
     
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (MonAnID) REFERENCES MonAn(MonAnID)
+    -- Liên kết với bảng người dùng
+    CONSTRAINT FK_DanhGia_User FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 GO
 
@@ -343,13 +348,7 @@ GO
 -- ============================================================
 
 -- ============ PHẦN 1: THÊM CỘT CHO BẢNG ChiTietDonHang ============
--- Tại sao: Khi xóa món ăn, cột MonAnID sẽ không còn hợp lệ.
---          Cột TenMonSnapshot sẽ lưu lại tên món tại thời điểm đặt hàng.
 ALTER TABLE ChiTietDonHang ADD TenMonSnapshot NVARCHAR(255) NULL;
-
--- Cho phép MonAnID = NULL (để sau khi xóa món, record vẫn tồn tại)
--- Tại sao: Mặc định FK không cho phép NULL, khi xóa sẽ báo lỗi.
---          Đổi thành NULL để có thể xóa món mà không ảnh hưởng record cũ.
 ALTER TABLE ChiTietDonHang ALTER COLUMN MonAnID BIGINT NULL;
 
 -- ============ PHẦN 2: THÊM CỘT CHO BẢNG DatBan ============
@@ -357,22 +356,3 @@ ALTER TABLE ChiTietDonHang ALTER COLUMN MonAnID BIGINT NULL;
 --          Cột TenBanSnapshot sẽ lưu lại tên bàn tại thời điểm đặt.
 ALTER TABLE DatBan ADD TenBanSnapshot NVARCHAR(100) NULL;
 
--- BanID đã là nullable trong model hiện tại, không cần thay đổi.
-
--- ============ PHẦN 3: XÓA RÀNG BUỘC FOREIGN KEY (NẾU CẦN) ============
--- Tại sao: SQL Server có thể không cho xóa record nếu có FK constraint.
---          Cần xóa constraint cũ và tạo lại với ON DELETE SET NULL.
-
--- Tìm tên constraint FK của ChiTietDonHang -> MonAn (chạy query này để xem tên):
--- SELECT name FROM sys.foreign_keys WHERE parent_object_id = OBJECT_ID('ChiTietDonHang') AND referenced_object_id = OBJECT_ID('MonAn');
-
--- Sau đó xóa và tạo lại (thay 'FK_ChiTietDonHang_MonAn' bằng tên thực):
--- ALTER TABLE ChiTietDonHang DROP CONSTRAINT FK_ChiTietDonHang_MonAn;
--- ALTER TABLE ChiTietDonHang ADD CONSTRAINT FK_ChiTietDonHang_MonAn 
---     FOREIGN KEY (MonAnID) REFERENCES MonAn(MonAnID) ON DELETE SET NULL;
-
--- Tương tự cho DatBan -> BanAn:
--- SELECT name FROM sys.foreign_keys WHERE parent_object_id = OBJECT_ID('DatBan') AND referenced_object_id = OBJECT_ID('BanAn');
--- ALTER TABLE DatBan DROP CONSTRAINT FK_DatBan_BanAn;
--- ALTER TABLE DatBan ADD CONSTRAINT FK_DatBan_BanAn 
---     FOREIGN KEY (BanID) REFERENCES BanAn(BanID) ON DELETE SET NULL;

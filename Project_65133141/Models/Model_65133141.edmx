@@ -21,7 +21,7 @@
           </Key>
           <Property Name="ChiTietID" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="DonOnlineID" Type="bigint" Nullable="false" />
-          <Property Name="MonAnID" Type="bigint" />
+          <Property Name="MonAnID" Type="bigint" Nullable="false" />
           <Property Name="SoLuong" Type="int" Nullable="false" />
           <Property Name="DonGia" Type="decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="ThanhTien" Type="decimal" Precision="29" Scale="2" StoreGeneratedPattern="Computed" />
@@ -37,6 +37,7 @@
           <Property Name="DonGia" Type="decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="ThanhTien" Type="decimal" Precision="29" Scale="2" StoreGeneratedPattern="Computed" />
           <Property Name="GhiChuMon" Type="nvarchar" MaxLength="255" />
+          <Property Name="TenMonSnapshot" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="DanhGia">
           <Key>
@@ -44,8 +45,7 @@
           </Key>
           <Property Name="DanhGiaID" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="UserID" Type="bigint" Nullable="false" />
-          <Property Name="MonAnID" Type="bigint" />
-          <Property Name="SoSao" Type="int" />
+          <Property Name="SoSao" Type="int" Nullable="false" />
           <Property Name="NoiDung" Type="nvarchar(max)" />
           <Property Name="NgayDanhGia" Type="datetime" />
         </EntityType>
@@ -73,6 +73,7 @@
           <Property Name="GhiChu" Type="nvarchar(max)" />
           <Property Name="TrangThai" Type="nvarchar" MaxLength="50" />
           <Property Name="NgayTao" Type="datetime" />
+          <Property Name="TenBanSnapshot" Type="nvarchar" MaxLength="100" />
         </EntityType>
         <EntityType Name="DatHangOnline">
           <Key>
@@ -237,7 +238,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__ChiTietDa__MonAn__07C12930">
-          <End Role="MonAn" Type="Self.MonAn" Multiplicity="0..1" />
+          <End Role="MonAn" Type="Self.MonAn" Multiplicity="1" />
           <End Role="ChiTietDatHangOnline" Type="Self.ChiTietDatHangOnline" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="MonAn">
@@ -271,30 +272,6 @@
             </Principal>
             <Dependent Role="ChiTietDonHang">
               <PropertyRef Name="MonAnID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__DanhGia__MonAnID__1332DBDC">
-          <End Role="MonAn" Type="Self.MonAn" Multiplicity="0..1" />
-          <End Role="DanhGia" Type="Self.DanhGia" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="MonAn">
-              <PropertyRef Name="MonAnID" />
-            </Principal>
-            <Dependent Role="DanhGia">
-              <PropertyRef Name="MonAnID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__DanhGia__UserID__123EB7A3">
-          <End Role="Users" Type="Self.Users" Multiplicity="1" />
-          <End Role="DanhGia" Type="Self.DanhGia" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="UserID" />
-            </Principal>
-            <Dependent Role="DanhGia">
-              <PropertyRef Name="UserID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -432,6 +409,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_DanhGia_User">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="DanhGia" Type="Self.DanhGia" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="DanhGia">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="QuanLyNhaHangNhat_65133141ModelStoreContainer">
           <EntitySet Name="BanAn" EntityType="Self.BanAn" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ChiTietDatHangOnline" EntityType="Self.ChiTietDatHangOnline" Schema="dbo" store:Type="Tables" />
@@ -464,14 +453,6 @@
           <AssociationSet Name="FK__ChiTietDo__MonAn__72C60C4A" Association="Self.FK__ChiTietDo__MonAn__72C60C4A">
             <End Role="MonAn" EntitySet="MonAn" />
             <End Role="ChiTietDonHang" EntitySet="ChiTietDonHang" />
-          </AssociationSet>
-          <AssociationSet Name="FK__DanhGia__MonAnID__1332DBDC" Association="Self.FK__DanhGia__MonAnID__1332DBDC">
-            <End Role="MonAn" EntitySet="MonAn" />
-            <End Role="DanhGia" EntitySet="DanhGia" />
-          </AssociationSet>
-          <AssociationSet Name="FK__DanhGia__UserID__123EB7A3" Association="Self.FK__DanhGia__UserID__123EB7A3">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="DanhGia" EntitySet="DanhGia" />
           </AssociationSet>
           <AssociationSet Name="FK__DatBan__BanID__656C112C" Association="Self.FK__DatBan__BanID__656C112C">
             <End Role="BanAn" EntitySet="BanAn" />
@@ -517,6 +498,10 @@
             <End Role="NhanVien" EntitySet="NhanVien" />
             <End Role="TinTuc" EntitySet="TinTuc" />
           </AssociationSet>
+          <AssociationSet Name="FK_DanhGia_User" Association="Self.FK_DanhGia_User">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="DanhGia" EntitySet="DanhGia" />
+          </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -540,7 +525,7 @@
           </Key>
           <Property Name="ChiTietID" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="DonOnlineID" Type="Int64" Nullable="false" />
-          <Property Name="MonAnID" Type="Int64" />
+          <Property Name="MonAnID" Type="Int64" Nullable="false" />
           <Property Name="SoLuong" Type="Int32" Nullable="false" />
           <Property Name="DonGia" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="ThanhTien" Type="Decimal" Precision="29" Scale="2" annotation:StoreGeneratedPattern="Computed" />
@@ -560,6 +545,7 @@
           <Property Name="GhiChuMon" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="DonHang" Relationship="Self.FK__ChiTietDo__DonHa__71D1E811" FromRole="ChiTietDonHang" ToRole="DonHang" />
           <NavigationProperty Name="MonAn" Relationship="Self.FK__ChiTietDo__MonAn__72C60C4A" FromRole="ChiTietDonHang" ToRole="MonAn" />
+          <Property Name="TenMonSnapshot" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="DanhGia">
           <Key>
@@ -567,12 +553,9 @@
           </Key>
           <Property Name="DanhGiaID" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="UserID" Type="Int64" Nullable="false" />
-          <Property Name="MonAnID" Type="Int64" />
-          <Property Name="SoSao" Type="Int32" />
+          <Property Name="SoSao" Type="Int32" Nullable="false" />
           <Property Name="NoiDung" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="NgayDanhGia" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="MonAn" Relationship="Self.FK__DanhGia__MonAnID__1332DBDC" FromRole="DanhGia" ToRole="MonAn" />
-          <NavigationProperty Name="User" Relationship="Self.FK__DanhGia__UserID__123EB7A3" FromRole="DanhGia" ToRole="Users" />
         </EntityType>
         <EntityType Name="DanhMuc">
           <Key>
@@ -600,6 +583,7 @@
           <Property Name="NgayTao" Type="DateTime" Precision="3" />
           <NavigationProperty Name="BanAn" Relationship="Self.FK__DatBan__BanID__656C112C" FromRole="DatBan" ToRole="BanAn" />
           <NavigationProperty Name="User" Relationship="Self.FK__DatBan__UserID__6477ECF3" FromRole="DatBan" ToRole="Users" />
+          <Property Name="TenBanSnapshot" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="DatHangOnline">
           <Key>
@@ -675,7 +659,6 @@
           <Property Name="NgayTao" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="ChiTietDatHangOnlines" Relationship="Self.FK__ChiTietDa__MonAn__07C12930" FromRole="MonAn" ToRole="ChiTietDatHangOnline" />
           <NavigationProperty Name="ChiTietDonHangs" Relationship="Self.FK__ChiTietDo__MonAn__72C60C4A" FromRole="MonAn" ToRole="ChiTietDonHang" />
-          <NavigationProperty Name="DanhGias" Relationship="Self.FK__DanhGia__MonAnID__1332DBDC" FromRole="MonAn" ToRole="DanhGia" />
         </EntityType>
         <EntityType Name="NhanVien">
           <Key>
@@ -812,7 +795,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__ChiTietDa__MonAn__07C12930">
-          <End Role="MonAn" Type="Self.MonAn" Multiplicity="0..1" />
+          <End Role="MonAn" Type="Self.MonAn" Multiplicity="1" />
           <End Role="ChiTietDatHangOnline" Type="Self.ChiTietDatHangOnline" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="MonAn">
@@ -845,18 +828,6 @@
               <PropertyRef Name="MonAnID" />
             </Principal>
             <Dependent Role="ChiTietDonHang">
-              <PropertyRef Name="MonAnID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__DanhGia__MonAnID__1332DBDC">
-          <End Role="MonAn" Type="Self.MonAn" Multiplicity="0..1" />
-          <End Role="DanhGia" Type="Self.DanhGia" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="MonAn">
-              <PropertyRef Name="MonAnID" />
-            </Principal>
-            <Dependent Role="DanhGia">
               <PropertyRef Name="MonAnID" />
             </Dependent>
           </ReferentialConstraint>
@@ -1024,10 +995,6 @@
             <End Role="MonAn" EntitySet="MonAns" />
             <End Role="ChiTietDonHang" EntitySet="ChiTietDonHangs" />
           </AssociationSet>
-          <AssociationSet Name="FK__DanhGia__MonAnID__1332DBDC" Association="Self.FK__DanhGia__MonAnID__1332DBDC">
-            <End Role="MonAn" EntitySet="MonAns" />
-            <End Role="DanhGia" EntitySet="DanhGias" />
-          </AssociationSet>
           <AssociationSet Name="FK__DanhGia__UserID__123EB7A3" Association="Self.FK__DanhGia__UserID__123EB7A3">
             <End Role="Users" EntitySet="Users" />
             <End Role="DanhGia" EntitySet="DanhGias" />
@@ -1101,6 +1068,7 @@
           <EntitySetMapping Name="ChiTietDonHangs">
             <EntityTypeMapping TypeName="QuanLyNhaHangNhat_65133141Model.ChiTietDonHang">
               <MappingFragment StoreEntitySet="ChiTietDonHang">
+                <ScalarProperty Name="TenMonSnapshot" ColumnName="TenMonSnapshot" />
                 <ScalarProperty Name="ChiTietID" ColumnName="ChiTietID" />
                 <ScalarProperty Name="DonHangID" ColumnName="DonHangID" />
                 <ScalarProperty Name="MonAnID" ColumnName="MonAnID" />
@@ -1116,7 +1084,6 @@
               <MappingFragment StoreEntitySet="DanhGia">
                 <ScalarProperty Name="DanhGiaID" ColumnName="DanhGiaID" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />
-                <ScalarProperty Name="MonAnID" ColumnName="MonAnID" />
                 <ScalarProperty Name="SoSao" ColumnName="SoSao" />
                 <ScalarProperty Name="NoiDung" ColumnName="NoiDung" />
                 <ScalarProperty Name="NgayDanhGia" ColumnName="NgayDanhGia" />
@@ -1137,6 +1104,7 @@
           <EntitySetMapping Name="DatBans">
             <EntityTypeMapping TypeName="QuanLyNhaHangNhat_65133141Model.DatBan">
               <MappingFragment StoreEntitySet="DatBan">
+                <ScalarProperty Name="TenBanSnapshot" ColumnName="TenBanSnapshot" />
                 <ScalarProperty Name="DatBanID" ColumnName="DatBanID" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />
                 <ScalarProperty Name="HoTenKhach" ColumnName="HoTenKhach" />

@@ -139,6 +139,7 @@
     <Compile Include="Areas\Admin_65133141\Controllers\EmployeeController.cs" />
     <Compile Include="Areas\Admin_65133141\Controllers\HomeController.cs" />
     <Compile Include="Areas\Admin_65133141\Controllers\ProductController.cs" />
+    <Compile Include="Areas\Admin_65133141\Controllers\TinTucController.cs" />
     <Compile Include="Areas\Admin_65133141\Controllers\SessionController.cs" />
     <Compile Include="Areas\Admin_65133141\Data\Form\AccountForm.cs" />
     <Compile Include="Areas\Admin_65133141\Data\Form\ProductForm.cs" />
@@ -163,6 +164,7 @@
     <Compile Include="Controllers\CaptchaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MenuController.cs" />
+    <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\SeedDataController.cs" />
     <Compile Include="Filters\AreaErrorHandlerAttribute.cs" />
     <Compile Include="Filters\RoleAuthorizeAttribute.cs" />
@@ -172,35 +174,24 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\BanAn.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\ChiTietDatHangOnline.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\ChiTietDonHang.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\DanhGia.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\DanhMuc.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\DatBan.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\DatHangOnline.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\DonHang.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
+    <Compile Include="Models\BanAn.cs" />
+    <Compile Include="Models\ChiTietDatHangOnline.cs" />
+    <Compile Include="Models\ChiTietDonHang.cs" />
+    <Compile Include="Models\DanhGia.cs" />
+    <Compile Include="Models\DanhMuc.cs" />
+    <Compile Include="Models\DatBan.cs" />
+    <Compile Include="Models\DatHangOnline.cs" />
+    <Compile Include="Models\DonHang.cs" />
+    <Compile Include="Models\HoaDon.cs" />
+    <Compile Include="Models\MonAn.cs" />
+    <Compile Include="Models\NhanVien.cs" />
+    <Compile Include="Models\ThanhToan.cs" />
+    <Compile Include="Models\ThongBao.cs" />
+    <Compile Include="Models\TinTuc.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\VaiTro.cs" />
     <Compile Include="Models\Form\LoginForm.cs" />
     <Compile Include="Models\Form\RegisterForm.cs" />
-    <Compile Include="Models\HoaDon.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\Model_65133141.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -216,29 +207,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model_65133141.edmx</DependentUpon>
     </Compile>
-    <Compile Include="Models\MonAn.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\NhanVien.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\nhan_vien.cs" />
     <Compile Include="Models\Model_65133141.Context.Extensions.cs" />
-    <Compile Include="Models\ThanhToan.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\ThongBao.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\TinTuc.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\User.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\VaiTro.cs">
-      <DependentUpon>Model_65133141.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\vai_tro.cs" />
     <Compile Include="Models\AdminReportViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -370,6 +340,7 @@
     <Content Include="Areas\Employee_65133141\Views\Account\ChangePassword.cshtml" />
     <Content Include="Areas\Employee_65133141\Views\Account\Edit.cshtml" />
     <Content Include="Areas\Employee_65133141\Views\Account\Index.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\TinTuc\Index.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />

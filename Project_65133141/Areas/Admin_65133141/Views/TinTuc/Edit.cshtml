@@ -1,0 +1,68 @@
+@model Project_65133141.Models.TinTuc
+@{
+    ViewBag.Title = "Sửa tin tức";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Chỉnh sửa tin tức</h2>
+
+    @using (Html.BeginForm("Edit", "TinTuc", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.TinTucID)
+        @Html.ValidationSummary(true, "", new { @class = "text-red-500 mb-3" })
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4 max-w-3xl">
+            <div class="form-group">
+                @Html.LabelFor(m => m.TieuDe, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.TieuDe, new { @class = "form-input" })
+                @Html.ValidationMessageFor(m => m.TieuDe, "", new { @class = "text-red-500 text-sm" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.MoTaNgan, new { @class = "form-label" })
+                @Html.TextAreaFor(m => m.MoTaNgan, 3, 0, new { @class = "form-input form-textarea" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.NoiDung, new { @class = "form-label" })
+                @Html.TextAreaFor(m => m.NoiDung, 8, 0, new { @class = "form-input form-textarea" })
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Hình ảnh hiện tại</label>
+                @{
+                    var imagePath = !string.IsNullOrWhiteSpace(Model.HinhAnh)
+                        ? Url.Content("~/Images/TinTuc/" + Model.HinhAnh)
+                        : Url.Content("~/Images/slide09.jpg");
+                }
+                <img src="@imagePath" alt="@Model.TieuDe" class="w-full h-40 object-cover rounded-lg border border-gray-200 mb-2" onerror="this.src='@Url.Content("~/Images/slide09.jpg")'" />
+                <label class="form-label">Chọn ảnh mới (nếu muốn thay)</label>
+                <input type="file" name="imageFile" accept="image/*" class="form-input" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label class="form-label">Hiển thị</label>
+                    <div class="flex items-center gap-2">
+                        @Html.CheckBox("IsHienThi", Model.IsHienThi ?? true)
+                        <span class="text-sm text-gray-600">Cho phép hiển thị trên website</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nổi bật</label>
+                    <div class="flex items-center gap-2">
+                        @Html.CheckBox("IsNoiBat", Model.IsNoiBat ?? false)
+                        <span class="text-sm text-gray-600">Đánh dấu là tin nổi bật</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-4">
+                <button type="submit" class="btn-success">Lưu thay đổi</button>
+                @Html.ActionLink("Hủy", "Index", null, new { @class = "btn-secondary" })
+            </div>
+        </div>
+    }
+</div>

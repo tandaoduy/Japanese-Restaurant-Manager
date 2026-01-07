@@ -1,0 +1,60 @@
+@model Project_65133141.Models.TinTuc
+@{
+    ViewBag.Title = "Thêm tin tức";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Thêm tin tức mới</h2>
+
+    @using (Html.BeginForm("Create", "TinTuc", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-red-500 mb-3" })
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4 max-w-3xl">
+            <div class="form-group">
+                @Html.LabelFor(m => m.TieuDe, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.TieuDe, new { @class = "form-input" })
+                @Html.ValidationMessageFor(m => m.TieuDe, "", new { @class = "text-red-500 text-sm" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.MoTaNgan, new { @class = "form-label" })
+                @Html.TextAreaFor(m => m.MoTaNgan, 3, 0, new { @class = "form-input form-textarea" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.NoiDung, new { @class = "form-label" })
+                @Html.TextAreaFor(m => m.NoiDung, 8, 0, new { @class = "form-input form-textarea" })
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Hình ảnh</label>
+                <input type="file" name="imageFile" accept="image/*" class="form-input" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label class="form-label">Hiển thị</label>
+                    <div class="flex items-center gap-2">
+                        @Html.CheckBoxFor(m => m.IsHienThi, new { @checked = "checked" })
+                        <span class="text-sm text-gray-600">Cho phép hiển thị trên website</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nổi bật</label>
+                    <div class="flex items-center gap-2">
+                        @Html.CheckBoxFor(m => m.IsNoiBat)
+                        <span class="text-sm text-gray-600">Đánh dấu là tin nổi bật</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-4">
+                <button type="submit" class="btn-success">Lưu</button>
+                @Html.ActionLink("Hủy", "Index", null, new { @class = "btn-secondary" })
+            </div>
+        </div>
+    }
+</div>

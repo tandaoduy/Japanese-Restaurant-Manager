@@ -1,0 +1,205 @@
+@{
+    ViewBag.Title = "Liên hệ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .contact-hero {
+        position: relative;
+        height: 60vh;
+        min-height: 400px;
+        overflow: hidden;
+    }
+    .contact-hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        animation: fadeScaleIn 1.5s ease-out;
+    }
+    .contact-hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .contact-hero-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        padding-top: 144px;
+    }
+    .contact-hero-text {
+        color: white;
+        max-width: 768px;
+        animation: fadeInUp 1s ease-out 0.3s both;
+        text-align: left;
+    }
+    .contact-hero-title {
+        font-size: 3.75rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-shadow: 2px 4px 8px rgba(0,0,0,0.8);
+        letter-spacing: 0.05em;
+    }
+    .contact-hero-subtitle {
+        font-size: 1.5rem;
+        font-weight: 600;
+        padding-bottom: 0.75rem;
+        color: #ec4899;
+        position: relative;
+        display: inline-block;
+    }
+    .contact-hero-subtitle::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #ec4899;
+        animation: expandWidth 1s ease-out 0.8s forwards;
+    }
+    @@keyframes fadeScaleIn {
+        from { opacity: 0; transform: scale(1.1); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @@keyframes expandWidth {
+        to { width: 100%; }
+    }
+    @@media (max-width: 767px) {
+        .contact-hero-title { font-size: 2rem; }
+        .contact-hero-subtitle { font-size: 1rem; }
+        .contact-hero { min-height: 350px; height: 50vh; }
+    }
+    
+    .contact-card {
+        background: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    }
+    .contact-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+</style>
+
+<div class="relative">
+    <!-- Hero Section - Style like About page -->
+    <section class="contact-hero -mt-36">
+        <img src="@Url.Content("~/Images/slide04.jpg")" alt="Liên hệ SAKURA KAZOKU" class="contact-hero-image">
+        <div class="contact-hero-overlay"></div>
+        <div class="contact-hero-content">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="contact-hero-text">
+                    <h1 class="contact-hero-title">SAKURA KAZOKU</h1>
+                    <p class="contact-hero-subtitle">Liên hệ</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Thông tin liên hệ - Chỉ hiển thị thông tin, không có form -->
+    <div class="max-w-5xl mx-auto px-4 py-12 md:py-16">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">Thông tin liên hệ</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Nếu bạn có bất kỳ câu hỏi nào về đặt bàn, thực đơn hoặc dịch vụ, 
+                hãy liên hệ với chúng tôi qua các thông tin dưới đây.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Địa chỉ -->
+            <div class="contact-card p-6 flex items-start gap-5">
+                <div class="contact-icon">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">Địa chỉ</h3>
+                    <p class="text-gray-600">70 Phù Đổng, phường Nha Trang, tỉnh Khánh Hòa</p>
+                </div>
+            </div>
+
+            <!-- Điện thoại -->
+            <div class="contact-card p-6 flex items-start gap-5">
+                <div class="contact-icon">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">Điện thoại</h3>
+                    <p class="text-gray-600">(+84) 123 456 789</p>
+                    <a href="tel:+84123456789" class="text-red-600 hover:text-red-700 text-sm font-medium mt-1 inline-block">Gọi ngay →</a>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="contact-card p-6 flex items-start gap-5">
+                <div class="contact-icon">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">Email</h3>
+                    <p class="text-gray-600">tan.dd.65cntt@ntu.edu.vn</p>
+                    <a href="mailto:tan.dd.65cntt@ntu.edu.vn" class="text-red-600 hover:text-red-700 text-sm font-medium mt-1 inline-block">Gửi email →</a>
+                </div>
+            </div>
+
+            <!-- Giờ mở cửa -->
+            <div class="contact-card p-6 flex items-start gap-5">
+                <div class="contact-icon">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">Giờ mở cửa</h3>
+                    <p class="text-gray-600">Thứ 2 - Chủ nhật</p>
+                    <p class="text-red-600 font-semibold">10:00 - 22:00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bản đồ -->
+    <div class="bg-gray-50 border-t border-gray-200">
+        <div class="max-w-5xl mx-auto px-4 py-10">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 text-center">Vị trí nhà hàng</h2>
+            <div class="rounded-2xl overflow-hidden shadow-lg border border-gray-200 h-80 md:h-96">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3041.117326713932!2d109.18371357371896!3d12.239562230507445!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31705d739cb0618b%3A0x8d1784218ceafd6!2sSakura%20Sushi%20BBQ%20Nha%20Trang!5e1!3m2!1svi!2s!4v1767755019910!5m2!1svi!2s"
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+    </div>
+</div>

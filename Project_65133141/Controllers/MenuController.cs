@@ -29,6 +29,9 @@ namespace Project_65133141.Controllers
                 })
                 .ToList();
 
+            // Tạo dictionary lưu thứ tự của từng category
+            var categoryOrder = categories.Select((c, idx) => new { c.DanhMucID, Order = idx }).ToDictionary(x => x.DanhMucID, x => x.Order);
+
             // Lấy danh sách món ăn
             var query = db.MonAns
                 .Where(m => m.TrangThai == "Hoạt động" || m.TrangThai == "Đang phục vụ")
@@ -49,9 +52,13 @@ namespace Project_65133141.Controllers
                 );
             }
 
-            // Load related category data
-            var products = query
-                .OrderBy(m => m.TenMon)
+            // Load products
+            var products = query.ToList();
+            
+            // Sort products by category order, then by name
+            products = products
+                .OrderBy(m => categoryOrder.ContainsKey(m.DanhMucID) ? categoryOrder[m.DanhMucID] : 99)
+                .ThenBy(m => m.TenMon)
                 .ToList();
 
             // Create a dictionary to map DanhMucID to TenDanhMuc for easy lookup in view

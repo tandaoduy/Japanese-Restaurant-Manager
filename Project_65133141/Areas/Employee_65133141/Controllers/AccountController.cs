@@ -22,7 +22,7 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
         }
 
         // GET: Employee_65133141/Account/Profile
-        public ActionResult Profile()
+        public new ActionResult Profile()
         {
             var userId = Session["UserId"] as long?;
             if (userId == null)

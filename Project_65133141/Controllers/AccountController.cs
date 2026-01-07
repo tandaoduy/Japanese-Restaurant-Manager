@@ -50,8 +50,13 @@ namespace Project_65133141.Controllers
         // [ValidateAntiForgeryToken]  // Disabled for AJAX modal login to avoid missing cookie issues
         public ActionResult Login(LoginForm model, string returnUrl)
         {
-            // Check if it's an AJAX request (from modal)
-            bool isAjaxRequest = Request.IsAjaxRequest();
+            // Check if it's an AJAX request (from modal) - check both methods
+            bool isAjaxRequest = Request.IsAjaxRequest() || 
+                                 Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            
+            System.Diagnostics.Debug.WriteLine($"[Login] IsAjaxRequest: {isAjaxRequest}");
+            System.Diagnostics.Debug.WriteLine($"[Login] X-Requested-With header: {Request.Headers["X-Requested-With"]}");
+
 
             // Validate CAPTCHA
             if (!CaptchaController.VerifyCaptcha(Session, model.CaptchaCode))
@@ -74,7 +79,7 @@ namespace Project_65133141.Controllers
             if (ModelState.IsValid)
             {
                 // IMPORTANT: Check admin/employee in nhan_vien table FIRST
-                var adminUser = db.nhan_vien.FirstOrDefault(u => u.Email == model.Email);
+                var adminUser = db.nhan_vien.FirstOrDefault(u => u.Email.ToLower() == model.Email.ToLower());
                 
                 if (adminUser != null)
                 {
@@ -171,7 +176,7 @@ namespace Project_65133141.Controllers
                 }
                 
                 // If not admin/employee or password wrong, try to find customer in Users table
-                var customerUser = db.Users.FirstOrDefault(u => u.Email == model.Email);
+                var customerUser = db.Users.FirstOrDefault(u => u.Email.ToLower() == model.Email.ToLower());
                 
                 if (customerUser != null)
                 {
@@ -240,13 +245,13 @@ namespace Project_65133141.Controllers
                             return Redirect(returnUrl);
                         }
                         
-                        // Customer always redirect to home page
-                        var redirectUrl = Url.Action("Index", "Home");
+                        // Customer redirect to User area
+                        var redirectUrl = Url.Action("Index", "Home", new { area = "User_65133141" });
                         if (isAjaxRequest)
                         {
                             return Json(new { success = true, redirectUrl = redirectUrl });
                         }
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("Index", "Home", new { area = "User_65133141" });
                     }
                 }
 
@@ -659,6 +664,192 @@ namespace Project_65133141.Controllers
                 return RedirectToAction("ForgotPassword");
             }
 
+        }
+
+        /// <summary>
+        /// Gửi mã OTP để đặt lại mật khẩu
+        /// </summary>
+        [HttpPost]
+        public JsonResult SendPasswordResetOtp()
+        {
+            try
+            {
+                var reader = new System.IO.StreamReader(Request.InputStream);
+                reader.BaseStream.Position = 0;
+                var json = reader.ReadToEnd();
+                
+                var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+                dynamic data = serializer.Deserialize<dynamic>(json);
+                
+                string email = data["email"]?.ToString()?.Trim()?.ToLower();
+                
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Json(new { success = false, message = "Vui lòng nhập email" });
+                }
+                
+                // Tìm user trong cả 2 bảng
+                var customerUser = db.Users.FirstOrDefault(u => u.Email.ToLower() == email);
+                var employeeUser = db.nhan_vien.FirstOrDefault(u => u.Email.ToLower() == email);
+                
+                if (customerUser == null && employeeUser == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy email trong hệ thống" });
+                }
+                
+                // Tạo mã OTP 6 chữ số
+                string otp = GenerateOtp();
+                
+                // Lưu OTP vào session với thời gian hết hạn
+                Session["PasswordResetOtp"] = otp;
+                Session["PasswordResetEmail"] = email;
+                Session["PasswordResetExpiry"] = DateTime.Now.AddMinutes(10); // 10 phút
+                
+                // Gửi email
+                string userName = customerUser?.HoTen ?? employeeUser?.HoTen ?? "Quý khách";
+                bool emailSent = SendOtpEmail(email, otp, userName);
+                
+                if (emailSent)
+                {
+                    return Json(new { success = true, message = "Mã xác nhận đã được gửi đến email của bạn" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể gửi email. Vui lòng thử lại sau." });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("SendPasswordResetOtp error: " + ex.Message);
+                return Json(new { success = false, message = "Lỗi Server: " + ex.Message });
+            }
+        }
+        
+        /// <summary>
+        /// Đặt lại mật khẩu với mã OTP
+        /// </summary>
+        [HttpPost]
+        public JsonResult ResetPasswordWithOtp()
+        {
+            try
+            {
+                var reader = new System.IO.StreamReader(Request.InputStream);
+                reader.BaseStream.Position = 0;
+                var json = reader.ReadToEnd();
+                
+                var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+                dynamic data = serializer.Deserialize<dynamic>(json);
+                
+                string email = data["email"]?.ToString()?.Trim()?.ToLower();
+                string otp = data["otp"]?.ToString()?.Trim();
+                string newPassword = data["newPassword"]?.ToString();
+                
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(otp) || string.IsNullOrEmpty(newPassword))
+                {
+                    return Json(new { success = false, message = "Vui lòng nhập đầy đủ thông tin" });
+                }
+                
+                // Kiểm tra OTP trong session
+                var storedOtp = Session["PasswordResetOtp"]?.ToString();
+                var storedEmail = Session["PasswordResetEmail"]?.ToString();
+                var expiry = Session["PasswordResetExpiry"] as DateTime?;
+                
+                if (storedOtp == null || storedEmail == null || expiry == null)
+                {
+                    return Json(new { success = false, message = "Phiên đặt lại mật khẩu đã hết hạn. Vui lòng thử lại." });
+                }
+                
+                if (DateTime.Now > expiry)
+                {
+                    Session.Remove("PasswordResetOtp");
+                    Session.Remove("PasswordResetEmail");
+                    Session.Remove("PasswordResetExpiry");
+                    return Json(new { success = false, message = "Mã xác nhận đã hết hạn. Vui lòng yêu cầu mã mới." });
+                }
+                
+                if (storedEmail.ToLower() != email.ToLower() || storedOtp != otp)
+                {
+                    return Json(new { success = false, message = "Mã xác nhận không đúng" });
+                }
+                
+                // Đặt lại mật khẩu
+                var customerUser = db.Users.FirstOrDefault(u => u.Email.ToLower() == email);
+                var employeeUser = db.nhan_vien.FirstOrDefault(u => u.Email.ToLower() == email);
+                
+                if (customerUser != null)
+                {
+                    customerUser.Password = HashPassword(newPassword);
+                }
+                else if (employeeUser != null)
+                {
+                    employeeUser.MatKhau = HashPassword(newPassword);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không tìm thấy tài khoản" });
+                }
+                
+                db.SaveChanges();
+                
+                // Xóa session OTP
+                Session.Remove("PasswordResetOtp");
+                Session.Remove("PasswordResetEmail");
+                Session.Remove("PasswordResetExpiry");
+                
+                return Json(new { success = true, message = "Mật khẩu đã được đặt lại thành công" });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("ResetPasswordWithOtp error: " + ex.Message);
+                return Json(new { success = false, message = "Lỗi Server: " + ex.Message });
+            }
+        }
+        
+        /// <summary>
+        /// Tạo mã OTP 6 chữ số
+        /// </summary>
+        private string GenerateOtp()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
+        
+        /// <summary>
+        /// Gửi email chứa mã OTP
+        /// </summary>
+        private bool SendOtpEmail(string email, string otp, string userName)
+        {
+            try
+            {
+                var emailService = new Services.EmailService();
+                string subject = "Mã xác nhận đặt lại mật khẩu - SAKURA KAZOKU";
+                string body = $@"
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                        <div style='text-align: center; margin-bottom: 30px;'>
+                            <h1 style='color: #dc2626;'>SAKURA KAZOKU</h1>
+                        </div>
+                        <p>Xin chào <strong>{userName}</strong>,</p>
+                        <p>Bạn đã yêu cầu đặt lại mật khẩu. Mã xác nhận của bạn là:</p>
+                        <div style='text-align: center; margin: 30px 0;'>
+                            <div style='display: inline-block; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; font-size: 32px; font-weight: bold; padding: 15px 40px; border-radius: 10px; letter-spacing: 8px;'>
+                                {otp}
+                            </div>
+                        </div>
+                        <p style='color: #666;'>Mã này sẽ hết hạn sau <strong>10 phút</strong>.</p>
+                        <p style='color: #999; font-size: 12px;'>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+                        <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
+                        <p style='color: #999; font-size: 12px; text-align: center;'>
+                            © 2025 SAKURA KAZOKU - Nhà hàng Nhật Bản
+                        </p>
+                    </div>";
+                
+                return emailService.SendEmail(email, subject, body);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("SendOtpEmail error: " + ex.Message);
+                return false;
+            }
         }
 
         // Helper method to hash password using SHA256

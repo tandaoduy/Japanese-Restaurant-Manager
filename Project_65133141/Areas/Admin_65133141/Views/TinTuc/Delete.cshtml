@@ -1,0 +1,35 @@
+@model Project_65133141.Models.TinTuc
+@{
+    ViewBag.Title = "Xóa tin tức";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Xóa tin tức</h2>
+
+    <div class="bg-white rounded-xl shadow-sm border border-red-200 p-6 max-w-2xl">
+        <p class="text-red-600 font-semibold mb-3">Bạn có chắc chắn muốn xóa tin tức sau?</p>
+
+        <dl class="mt-2 mb-4">
+            <dt class="font-semibold text-gray-700">Tiêu đề</dt>
+            <dd class="mb-2 text-gray-900">@Model.TieuDe</dd>
+
+            <dt class="font-semibold text-gray-700">Mô tả ngắn</dt>
+            <dd class="mb-2 text-gray-700">@(string.IsNullOrWhiteSpace(Model.MoTaNgan) ? "Chưa có mô tả" : Model.MoTaNgan)</dd>
+
+            <dt class="font-semibold text-gray-700">Ngày đăng</dt>
+            <dd class="mb-2 text-gray-700">@(Model.NgayDang?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</dd>
+        </dl>
+
+        @using (Html.BeginForm("Delete", "TinTuc", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.TinTucID)
+
+            <div class="flex gap-3 mt-4">
+                <button type="submit" class="action-btn action-btn-delete">Xóa</button>
+                @Html.ActionLink("Hủy", "Index", null, new { @class = "btn-secondary" })
+            </div>
+        }
+    </div>
+</div>

@@ -108,6 +108,15 @@ namespace Project_65133141.Controllers
             var allCategories = db.DanhMucs.ToList();
             ViewBag.AllCategories = allCategories;
             
+            // Get featured news for home page display
+            var featuredNews = db.TinTucs
+                .Where(t => t.IsHienThi == true)
+                .OrderByDescending(t => t.IsNoiBat)
+                .ThenByDescending(t => t.NgayDang)
+                .Take(6)
+                .ToList();
+            ViewBag.FeaturedNews = featuredNews;
+            
             return View();
         }
 
@@ -155,6 +164,54 @@ namespace Project_65133141.Controllers
             };
 
             return View(model);
+        }
+
+        /// <summary>
+        /// Xử lý gửi đánh giá từ footer
+        /// </summary>
+        [HttpPost]
+        public JsonResult SubmitRating()
+        {
+            try
+            {
+                // Read JSON from request body
+                var reader = new System.IO.StreamReader(Request.InputStream);
+                reader.BaseStream.Position = 0;
+                var json = reader.ReadToEnd();
+                
+                var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+                dynamic data = serializer.Deserialize<dynamic>(json);
+                
+                int rating = Convert.ToInt32(data["rating"]);
+                string comment = data["comment"]?.ToString() ?? "";
+                
+                if (rating < 1 || rating > 5)
+                {
+                    return Json(new { success = false, message = "Đánh giá không hợp lệ" });
+                }
+                
+                // Get user info
+                var userId = Session["UserId"] as int?;
+                
+                // Save to DanhGia table
+                var danhGia = new DanhGia
+                {
+                    SoSao = rating,
+                    NoiDung = comment,
+                    NgayDanhGia = DateTime.Now,
+                    UserID = userId ?? 0 // 0 for anonymous users
+                };
+                
+                db.DanhGias.Add(danhGia);
+                db.SaveChanges();
+                
+                return Json(new { success = true, message = "Cảm ơn bạn đã đánh giá!" });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("SubmitRating error: " + ex.Message);
+                return Json(new { success = false, message = "Có lỗi xảy ra, vui lòng thử lại" });
+            }
         }
     }
 }

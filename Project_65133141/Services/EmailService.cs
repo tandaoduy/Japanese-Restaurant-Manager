@@ -115,6 +115,64 @@ namespace Project_65133141.Services
         }
 
         /// <summary>
+        /// Gửi email chung với subject và body tùy chỉnh
+        /// </summary>
+        public bool SendEmail(string toEmail, string subject, string body)
+        {
+            try
+            {
+                // Validate email
+                if (string.IsNullOrEmpty(toEmail) || !toEmail.Contains("@"))
+                {
+                    System.Diagnostics.Debug.WriteLine("[EmailService] Invalid recipient email: " + (toEmail ?? "null"));
+                    return false;
+                }
+
+                // Validate SMTP password
+                if (string.IsNullOrEmpty(_smtpPassword))
+                {
+                    System.Diagnostics.Debug.WriteLine("[EmailService] WARNING: SMTP password not configured.");
+                    return false;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[EmailService] Sending email to: {toEmail}");
+
+                using (var message = new MailMessage())
+                {
+                    message.From = new MailAddress(_fromEmail, _fromName);
+                    message.To.Add(new MailAddress(toEmail));
+                    message.Subject = subject;
+                    message.Body = body;
+                    message.IsBodyHtml = true;
+                    message.Priority = MailPriority.High;
+
+                    using (var smtpClient = new SmtpClient(_smtpServer, _smtpPort))
+                    {
+                        smtpClient.EnableSsl = true;
+                        smtpClient.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
+                        smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                        smtpClient.Timeout = 30000;
+
+                        smtpClient.Send(message);
+                        System.Diagnostics.Debug.WriteLine("[EmailService] Email sent successfully!");
+                    }
+                }
+
+                return true;
+            }
+            catch (SmtpException smtpEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"[EmailService] SMTP Error: {smtpEx.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[EmailService] Error sending email: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Generate HTML email template giống vé xem phim
         /// </summary>
         private string GenerateBookingTicketEmail(DatBan datBan, bool isConfirmed)

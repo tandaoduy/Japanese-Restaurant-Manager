@@ -9,9 +9,55 @@
     var searchString = ViewBag.SearchString as string ?? "";
 }
 
+<!-- Menu Hero Section -->
+<section class="relative h-[50vh] md:h-[60vh] overflow-hidden -mt-36">
+    <style>
+        .menu-hero-overlay {
+            background: linear-gradient(135deg, rgba(139, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%);
+        }
+        .menu-hero-content {
+            animation: menuFadeIn 1s ease-out;
+        }
+        @@keyframes menuFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .menu-hero-title {
+            font-family: 'Playfair Display', serif;
+            text-shadow: 2px 4px 12px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+    
+    <img src="@Url.Content("~/Images/thucdon.jpg")" 
+         alt="Thực đơn SAKURA KAZOKU" 
+         class="absolute inset-0 w-full h-full object-cover">
+    
+    <div class="menu-hero-overlay absolute inset-0"></div>
+    
+    <div class="absolute inset-0 flex items-center pt-36">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="menu-hero-content text-white max-w-3xl">
+                <p class="text-amber-400 font-semibold text-lg mb-3 tracking-widest uppercase">SAKURA KAZOKU</p>
+                <h1 class="menu-hero-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4">
+                    Thực đơn
+                </h1>
+                <p class="text-xl md:text-2xl font-light text-gray-200 leading-relaxed">
+                    Khám phá hương vị ẩm thực Nhật Bản đích thực với những món ăn được chế biến từ nguyên liệu tươi ngon nhất
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <div class="container mx-auto px-4 py-8">
     <div class="mb-8 text-center">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">Thực đơn nhà hàng</h1>
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Thực đơn nhà hàng</h2>
         <p class="text-gray-600">Khám phá các món ăn đặc trưng của chúng tôi</p>
     </div>
 

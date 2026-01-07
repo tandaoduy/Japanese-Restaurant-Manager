@@ -299,7 +299,6 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
 
                 // Kiểm tra ràng buộc khóa ngoại (Dependencies check)
                 bool hasDependencies =  monAn.ChiTietDonHangs.Any() || 
-                                        monAn.DanhGias.Any() ||
                                         monAn.ChiTietDatHangOnlines.Any();
 
                 if (hasDependencies)
