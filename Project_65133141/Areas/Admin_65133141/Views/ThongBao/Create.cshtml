@@ -1,0 +1,159 @@
+@model Project_65133141.Models.ThongBao
+@{
+    ViewBag.Title = "Tạo thông báo mới";
+    Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* Red Theme Form Styles - Matching TinTuc */
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #fee2e2;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #7f1d1d;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-input {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        background-color: #fcfcfc;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #dc2626;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+    
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-cancel {
+        background: white;
+        color: #4b5563;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: 1px solid #d1d5db;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .btn-cancel:hover {
+        background: #f3f4f6;
+        text-decoration: none;
+        color: #1f2937;
+    }
+</style>
+
+<div class="container mx-auto px-4 py-6">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+        <a href="@Url.Action("Index")" class="hover:text-red-600">Thông báo</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <span class="text-gray-900 font-medium">Tạo mới</span>
+    </nav>
+
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Tạo thông báo mới</h1>
+
+        <div class="form-card p-6">
+            @using (Html.BeginForm("Create", "ThongBao", FormMethod.Post, new { @class = "space-y-6" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <!-- Tiêu đề -->
+                <div class="form-group">
+                    <label class="form-label">Tiêu đề <span class="text-red-500">*</span></label>
+                    @Html.TextBoxFor(m => m.TieuDe, new { @class = "form-input", placeholder = "Nhập tiêu đề thông báo..." })
+                    @Html.ValidationMessageFor(m => m.TieuDe, "", new { @class = "text-red-500 text-sm mt-1" })
+                </div>
+
+                <!-- Nội dung -->
+                <div class="form-group">
+                    <label class="form-label">Nội dung</label>
+                    @Html.TextAreaFor(m => m.NoiDung, new { @class = "form-input form-textarea", placeholder = "Nhập nội dung chi tiết..." })
+                </div>
+
+                <!-- Loại thông báo -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">Loại thông báo</label>
+                        @Html.DropDownListFor(m => m.LoaiThongBao, new SelectList(new[] {
+                            new { Value = "thongbao", Text = "Thông báo chung" },
+                            new { Value = "khuyenmai", Text = "Khuyến mãi" },
+                            new { Value = "canh-bao", Text = "Cảnh báo" },
+                            new { Value = "he-thong", Text = "Hệ thống" }
+                        }, "Value", "Text"), new { @class = "form-input" })
+                    </div>
+                    <div>
+                        <label class="form-label">Đối tượng nhận</label>
+                        @Html.DropDownListFor(m => m.LoaiNguoiNhan, new SelectList(new[] {
+                            new { Value = "all", Text = "Tất cả" },
+                            new { Value = "khachhang", Text = "Khách hàng" },
+                            new { Value = "nhanvien", Text = "Nhân viên" }
+                        }, "Value", "Text"), new { @class = "form-input" })
+                    </div>
+                </div>
+
+                <!-- Liên kết -->
+                <div class="form-group">
+                    <label class="form-label">Liên kết (tùy chọn)</label>
+                    @Html.TextBoxFor(m => m.LienKet, new { @class = "form-input", placeholder = "https://..." })
+                    <p class="text-gray-400 text-xs mt-1">Người dùng có thể nhấn vào thông báo để truy cập liên kết này</p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                    <a href="@Url.Action("Index")" class="btn-cancel">Hủy</a>
+                    <button type="submit" class="btn-submit">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        Gửi thông báo
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

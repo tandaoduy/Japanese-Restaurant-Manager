@@ -164,10 +164,12 @@
     <Compile Include="Areas\User_65133141\User_65133141AreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CaptchaController.cs" />
+    <Compile Include="Areas\Admin_65133141\Controllers\DanhGiaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MenuController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\SeedDataController.cs" />
+    <Compile Include="Areas\Admin_65133141\Controllers\ThongBaoController.cs" />
     <Compile Include="Controllers\TinTucController.cs" />
     <Compile Include="Filters\AreaErrorHandlerAttribute.cs" />
     <Compile Include="Filters\RoleAuthorizeAttribute.cs" />
@@ -380,6 +382,13 @@
     <Content Include="Areas\User_65133141\Views\DatBan\Create.cshtml" />
     <Content Include="Areas\User_65133141\Views\DatBan\MyReservations.cshtml" />
     <Content Include="Areas\User_65133141\Views\Home\Contact.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\TinTuc\Create.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\TinTuc\Delete.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\TinTuc\Details.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\TinTuc\Edit.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\ThongBao\Create.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\ThongBao\Edit.cshtml" />
+    <Content Include="Areas\Admin_65133141\Views\ThongBao\Index.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />

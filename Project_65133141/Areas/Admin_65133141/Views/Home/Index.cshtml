@@ -4,362 +4,276 @@
 }
 
 <style>
-    /* Modern Sakura Admin Theme */
-    :root {
-        --sakura-primary: #ec4899; /* Pink-500 */
-        --sakura-secondary: #f43f5e; /* Rose-500 */
-        --sakura-accent: #fb7185; /* Rose-400 */
-        --sakura-bg-start: #fdf2f8; /* Pink-50 */
-        --sakura-bg-end: #fff1f2; /* Rose-50 */
-        --glass-bg: rgba(255, 255, 255, 0.7);
-        --glass-border: rgba(255, 255, 255, 0.5);
-    }
-
-    .sakura-container {
-        min-height: 100vh;
-        background: linear-gradient(135deg, var(--sakura-bg-start) 0%, #ffe4e6 50%, var(--sakura-bg-end) 100%);
-        background-size: 200% 200%;
-        animation: gradientFlow 15s ease infinite;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Admin Red Theme - Consistent with Header */
+    .luxury-hero {
+        background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 50%, #450a0a 100%); /* Red-950 to Red-900 */
         position: relative;
-        overflow-x: hidden;
+        overflow: hidden;
     }
-
-    @@keyframes gradientFlow {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
-    /* Falling Petals Effect */
-    .sakura-petals {
+    
+    .luxury-hero::before {
+        content: '';
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 0;
-        overflow: hidden;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23991b1b' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
     }
 
-    .petal {
-        position: absolute;
-        background: rgba(255, 183, 197, 0.6);
-        border-radius: 150% 0 150% 0;
-        animation: falling 10s linear infinite;
-    }
-
-    @@keyframes falling {
-        0% { transform: translate(0, -10%) rotate(0deg); opacity: 0; }
-        10% { opacity: 1; }
-        90% { opacity: 1; }
-        100% { transform: translate(100px, 100vh) rotate(360deg); opacity: 0; }
-    }
-
-    /* Glassmorphism Cards */
-    .sakura-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--glass-border);
-        border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(236, 72, 153, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .sakura-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(236, 72, 153, 0.15);
-    }
-
-    /* Headers */
-    .sakura-title {
-        background: linear-gradient(to right, #db2777, #e11d48);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800;
-        letter-spacing: -0.5px;
-    }
-
-    /* Stats Cards */
-    .stat-value {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: #be185d;
-        line-height: 1;
-        margin: 0.5rem 0;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        color: #9d174d;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .stat-icon-wrapper {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, #fce7f3, #ffe4e6);
-        color: #db2777;
-        box-shadow: 0 4px 6px -1px rgba(219, 39, 119, 0.1);
-    }
-
-    /* Management Links */
-    .manage-link {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid transparent;
-        transition: all 0.2s;
-        color: #831843;
-        font-weight: 600;
-    }
-
-    .manage-link:hover {
-        background: rgba(255, 255, 255, 0.9);
-        border-color: #fbcfe8;
-        color: #be185d;
-        transform: translateX(5px);
-    }
-    
-    .manage-icon {
-        margin-right: 12px;
-        padding: 8px;
-        background: #fdf2f8;
-        border-radius: 8px;
-        color: #db2777;
-    }
-
-    /* Quick Actions Grid */
-    .action-btn {
+    .admin-card {
+        background: white;
+        border: 1px solid #fee2e2; /* Red-100 */
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-        background: white;
-        border-radius: 16px;
-        border: 2px solid transparent;
-        transition: all 0.3s;
-        gap: 0.75rem;
         text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
     }
 
-    .action-btn:hover {
-        border-color: #fca5a5;
-        background: #fff1f2;
-        transform: translateY(-2px);
+    .admin-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(153, 27, 27, 0.1), 0 0 0 1px rgba(220, 38, 38, 0.2);
+        border-color: #fca5a5; /* Red-300 */
     }
 
-    .action-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #fecdd3, #fda4af);
+    .admin-card .icon-wrapper {
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); /* Red-50 to Red-100 */
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
-        color: #be123c;
-        margin-bottom: 0.5rem;
+        margin-bottom: 1.25rem;
+        color: #b91c1c; /* Red-700 */
+        transition: all 0.3s ease;
+        border: 1px solid #fecaca; /* Red-200 */
+    }
+
+    .admin-card:hover .icon-wrapper {
+        background: #dc2626; /* Red-600 */
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
+        border-color: #dc2626;
+    }
+
+    .text-accent { color: #dc2626; } /* Red-600 */
+    
+    .glass-dark {
+        background: rgba(69, 10, 10, 0.85); /* Red-950 alpha */
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    /* Cherry Blossom Animation - Adjusted to white/pink for contrast on dark red */
+    .cherry-blossom {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(circle, #fecdd3 40%, transparent 70%);
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        opacity: 0.4;
+        animation: fall linear infinite;
+    }
+
+    @@keyframes fall {
+        0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+        10% { opacity: 0.4; }
+        90% { opacity: 0.4; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    
+    .manage-btn {
+        margin-top: auto;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        background-color: transparent;
+        color: #b91c1c; /* Red-700 */
+        border: 1px solid #b91c1c;
+        transition: all 0.3s;
+    }
+
+    .admin-card:hover .manage-btn {
+        background-color: #dc2626; /* Red-600 */
+        border-color: #dc2626;
+        color: white;
+    }
+
+    .section-separator {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-line {
+        height: 1px;
+        flex: 1;
+        background: linear-gradient(90deg, transparent, #ef4444, transparent);
+        opacity: 0.3;
+    }
+    
+    .section-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #991b1b; /* Red-800 */
+    }
+    
+    .quick-btn {
+        background-color: white;
+        transition: all 0.3s;
+        border: 1px solid #fee2e2;
+    }
+    
+    .quick-btn:hover {
+        background-color: #fef2f2;
+        border-color: #fca5a5;
+        transform: translateY(-2px);
+    }
+    
+    .quick-icon-bg {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        transition: all 0.3s;
+    }
+    
+    .quick-btn:hover .quick-icon-bg {
+        background-color: #dc2626;
+        color: white;
     }
 </style>
 
-<div class="sakura-container p-6 relative">
-    <!-- Animated Background Elements -->
-    <div class="sakura-petals" id="petals"></div>
+<div class="min-h-screen" style="background: linear-gradient(180deg, #fff1f2 0%, #fff 100%);">
+    
+    <!-- Hero Section -->
+    <div class="luxury-hero pb-32 pt-16 relative">
+        <!-- Cherry Blossoms -->
+        <div class="cherry-blossom" style="left: 10%; animation-duration: 8s; animation-delay: 0s;"></div>
+        <div class="cherry-blossom" style="left: 25%; animation-duration: 10s; animation-delay: 2s;"></div>
+        <div class="cherry-blossom" style="left: 85%; animation-duration: 7s; animation-delay: 0.5s;"></div>
 
-    <div class="container mx-auto relative z-10">
-        
-        <!-- Welcome Section -->
-        <div class="flex flex-col md:flex-row justify-between items-end mb-10 pb-6 border-b border-pink-200">
-            <div>
-                <span class="text-pink-600 font-bold uppercase tracking-wider text-sm mb-2 block">Dashboard Overview</span>
-                <h1 class="text-4xl md:text-5xl sakura-title mb-2">Xin chào, Quản trị viên! 🌸</h1>
-                <p class="text-gray-600">Chúc bạn một ngày làm việc hiệu quả tại Sakura Kazoku.</p>
-            </div>
-            <div class="text-right mt-4 md:mt-0">
-                <div class="text-3xl font-bold text-gray-800" id="clock"></div>
-                <div class="text-pink-500 font-medium" id="date"></div>
-            </div>
-        </div>
-
-        <!-- 1. Key Metrics Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <!-- Customers -->
-            <div class="sakura-card p-6">
-                <div class="flex justify-between items-start">
-                    <div class="stat-icon-wrapper">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    </div>
-                    <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">+@(ViewBag.NewCustomers ?? 0) mới</span>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-200 text-xs font-bold tracking-[0.3em] uppercase mb-3">Administrator Control</p>
+                    <h1 class="text-5xl font-bold text-white mb-4" style="font-family: 'Inter', sans-serif;">
+                        @{
+                            var currentHour = DateTime.Now.Hour;
+                            var greeting = currentHour < 12 ? "Chào buổi sáng" : currentHour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
+                        }
+                        @greeting, <span class="text-red-400">Quản trị viên</span>!
+                    </h1>
+                    <p class="text-red-100/80 text-lg">Hệ thống hoạt động ổn định. Chọn một chức năng để bắt đầu.</p>
                 </div>
-                <div class="stat-value">@(ViewBag.TotalCustomers ?? 0)</div>
-                <div class="stat-label">Khách Hàng</div>
-            </div>
-
-            <!-- Employees -->
-            <div class="sakura-card p-6">
-                <div class="flex justify-between items-start">
-                    <div class="stat-icon-wrapper">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <div class="hidden lg:block">
+                    <div class="glass-dark rounded-xl p-6 text-right w-64 shadow-2xl">
+                         <div class="text-red-300 text-xs font-bold tracking-widest uppercase mb-1">@DateTime.Now.ToString("dddd")</div>
+                         <div class="text-white text-4xl font-bold tracking-tight mb-1">@DateTime.Now.ToString("HH:mm")</div>
+                         <div class="text-red-200/60 text-sm">@DateTime.Now.ToString("dd/MM/yyyy")</div>
                     </div>
                 </div>
-                <div class="stat-value">@(ViewBag.TotalEmployees ?? 0)</div>
-                <div class="stat-label">Nhân Viên</div>
-            </div>
-
-            <!-- Menu Items -->
-            <div class="sakura-card p-6">
-                <div class="flex justify-between items-start">
-                    <div class="stat-icon-wrapper">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                    </div>
-                    <span class="bg-pink-100 text-pink-700 text-xs font-bold px-2 py-1 rounded-full">+@(ViewBag.NewDishesCount ?? 0) món mới</span>
-                </div>
-                <div class="stat-value">@(ViewBag.TotalActiveDishes ?? 0)</div>
-                <div class="stat-label">Món Ăn</div>
-            </div>
-
-            <!-- Reservations -->
-            <div class="sakura-card p-6">
-                <div class="flex justify-between items-start">
-                    <div class="stat-icon-wrapper">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">@(ViewBag.PendingReservations ?? 0) chờ duyệt</span>
-                </div>
-                <div class="stat-value">@(ViewBag.TodayReservations ?? 0)</div>
-                <div class="stat-label">Đặt Bàn Hôm Nay</div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- 2. Management Navigation -->
-            <div class="lg:col-span-2 space-y-6">
-                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-lg bg-pink-500 text-white flex items-center justify-center text-sm">QM</span>
-                    Quản Lý Hệ Thống
-                </h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="sakura-card p-6">
-                        <h4 class="font-bold text-gray-800 mb-4 border-b border-pink-100 pb-2">Nhân sự & Khách hàng</h4>
-                        <div class="space-y-3">
-                            <a href="@Url.Action("Index", "Customer", new { area = "Admin_65133141" })" class="manage-link">
-                                <div class="manage-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div>
-                                <span>Khách hàng</span>
-                                <svg class="w-4 h-4 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </a>
-                            <a href="@Url.Action("Index", "Employee", new { area = "Admin_65133141" })" class="manage-link">
-                                <div class="manage-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
-                                <span>Nhân viên</span>
-                                <svg class="w-4 h-4 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </a>
-                             <a href="@Url.Action("Index", "Account", new { area = "Admin_65133141" })" class="manage-link">
-                                <div class="manage-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg></div>
-                                <span>Tài khoản & Phân quyền</span>
-                                <svg class="w-4 h-4 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="sakura-card p-6">
-                        <h4 class="font-bold text-gray-800 mb-4 border-b border-pink-100 pb-2">Vận hành & Kinh doanh</h4>
-                        <div class="space-y-3">
-                            <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141" })" class="manage-link">
-                                <div class="manage-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg></div>
-                                <span>Thực đơn & Món ăn</span>
-                                <svg class="w-4 h-4 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </a>
-                            <a href="@Url.Action("Index", "DatBan", new { area = "Admin_65133141" })" class="manage-link">
-                                <div class="manage-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
-                                <span>Đặt bàn</span>
-                                <svg class="w-4 h-4 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </a>
-                             <a href="@Url.Action("Index", "DonHang", new { area = "Admin_65133141" })" class="manage-link">
-                                <div class="manage-icon"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
-                                <span>Đơn hàng & Doanh thu</span>
-                                <svg class="w-4 h-4 ml-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Quick Actions & Status -->
-            <div class="space-y-6">
-                 <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center text-sm">⚡</span>
-                    Thao Tác Nhanh
-                </h3>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <a href="@Url.Action("Index", "BanAn", new { area = "Admin_65133141" })" class="action-btn">
-                        <div class="action-icon">🪑</div>
-                        <span class="font-bold text-gray-800 text-sm">Sơ Đồ Bàn</span>
-                    </a>
-                    <a href="@Url.Action("Index", "BaoCao", new { area = "Admin_65133141" })" class="action-btn">
-                        <div class="action-icon">📊</div>
-                        <span class="font-bold text-gray-800 text-sm">Thống kê</span>
-                    </a>
-                    <a href="@Url.Action("Create", "Product", new { area = "Admin_65133141" })" class="action-btn">
-                        <div class="action-icon">🍳</div>
-                        <span class="font-bold text-gray-800 text-sm">Thêm Món</span>
-                    </a>
-                    <a href="@Url.Action("Index", "DatBan", new { area = "Admin_65133141" })" class="action-btn">
-                        <div class="action-icon">📅</div>
-                        <span class="font-bold text-gray-800 text-sm">Lịch Đặt</span>
-                    </a>
-                </div>
-
-
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Clock
-        const updateTime = () => {
-            const now = new Date();
-            document.getElementById('clock').textContent = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('date').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' });
-        };
-        setInterval(updateTime, 1000);
-        updateTime();
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-12 relative z-20">
+        
+        <!-- Section: System Management -->
+        <div class="section-separator">
+            <div class="section-line"></div>
+            <div class="section-title">Danh Mục Quản Lý</div>
+            <div class="section-line"></div>
+        </div>
 
-        // Create Petals
-        const petalsContainer = document.getElementById('petals');
-        const createPetal = () => {
-            const petal = document.createElement('div');
-            petal.classList.add('petal');
-            petal.style.left = Math.random() * 100 + 'vw';
-            petal.style.animationDuration = Math.random() * 3 + 5 + 's';
-            petal.style.width = Math.random() * 10 + 10 + 'px';
-            petal.style.height = petal.style.width;
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
             
-            petalsContainer.appendChild(petal);
+            <!-- 1. Customers -->
+            <a href="@Url.Action("Index", "Customer", new { area = "Admin_65133141" })" class="admin-card rounded-2xl p-8 group no-underline">
+                <div class="icon-wrapper">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Khách Hàng</h3>
+                <p class="text-gray-500 text-sm mb-6 leading-relaxed">Quản lý hồ sơ, lịch sử đặt bàn và thông tin thành viên.</p>
+                <span class="manage-btn">Truy cập</span>
+            </a>
 
-            setTimeout(() => {
-                petal.remove();
-            }, 8000);
-        };
+            <!-- 2. Employees -->
+            <a href="@Url.Action("Index", "Employee", new { area = "Admin_65133141" })" class="admin-card rounded-2xl p-8 group no-underline">
+                <div class="icon-wrapper">
+                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Nhân Sự</h3>
+                <p class="text-gray-500 text-sm mb-6 leading-relaxed">Quản lý thông tin nhân viên, tài khoản và phân quyền.</p>
+                <span class="manage-btn">Truy cập</span>
+            </a>
 
-        setInterval(createPetal, 300);
-    });
-</script>
+            <!-- 3. Menu -->
+            <a href="@Url.Action("Index", "Product", new { area = "Admin_65133141" })" class="admin-card rounded-2xl p-8 group no-underline">
+                <div class="icon-wrapper">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Thực Đơn</h3>
+                <p class="text-gray-500 text-sm mb-6 leading-relaxed">Cập nhật món ăn, điều chỉnh giá và danh mục.</p>
+                <span class="manage-btn">Truy cập</span>
+            </a>
+
+            <!-- 4. Bookings -->
+            <a href="@Url.Action("Index", "DatBan", new { area = "Admin_65133141" })" class="admin-card rounded-2xl p-8 group no-underline">
+                <div class="icon-wrapper">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Đặt Bàn</h3>
+                <p class="text-gray-500 text-sm mb-6 leading-relaxed">Theo dõi và phê duyệt các yêu cầu đặt bàn mới.</p>
+                <span class="manage-btn">Truy cập</span>
+            </a>
+
+            <!-- 5. Orders -->
+            <a href="@Url.Action("Index", "DonHang", new { area = "Admin_65133141" })" class="admin-card rounded-2xl p-8 group no-underline">
+                <div class="icon-wrapper">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Đơn Hàng</h3>
+                <p class="text-gray-500 text-sm mb-6 leading-relaxed">Xem lịch sử đơn hàng và thống kê doanh thu.</p>
+                <span class="manage-btn">Truy cập</span>
+            </a>
+            
+        </div>
+        
+        <!-- Section: Quick Actions -->
+        <div class="section-separator">
+             <div class="section-line"></div>
+             <div class="section-title">Thao Tác Nhanh</div>
+             <div class="section-line"></div>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+             <a href="@Url.Action("Index", "BanAn", new { area = "Admin_65133141" })" class="quick-btn p-4 rounded-xl shadow-sm flex items-center justify-center gap-3 no-underline group">
+                 <span class="w-8 h-8 rounded-full quick-icon-bg flex items-center justify-center">🪑</span>
+                 <span class="font-bold text-gray-700">Sơ Đồ Bàn</span>
+             </a>
+             <a href="@Url.Action("Index", "BaoCao", new { area = "Admin_65133141" })" class="quick-btn p-4 rounded-xl shadow-sm flex items-center justify-center gap-3 no-underline group">
+                 <span class="w-8 h-8 rounded-full quick-icon-bg flex items-center justify-center">📊</span>
+                 <span class="font-bold text-gray-700">Báo Cáo</span>
+             </a>
+             <a href="@Url.Action("Index", "DanhGia", new { area = "Admin_65133141" })" class="quick-btn p-4 rounded-xl shadow-sm flex items-center justify-center gap-3 no-underline group">
+                 <span class="w-8 h-8 rounded-full quick-icon-bg flex items-center justify-center">⭐</span>
+                 <span class="font-bold text-gray-700">Đánh Giá</span>
+             </a>
+             <a href="@Url.Action("Index", "ThongBao", new { area = "Admin_65133141" })" class="quick-btn p-4 rounded-xl shadow-sm flex items-center justify-center gap-3 no-underline group">
+                 <span class="w-8 h-8 rounded-full quick-icon-bg flex items-center justify-center">🔔</span>
+                 <span class="font-bold text-gray-700">Thông Báo</span>
+             </a>
+        </div>
+
+    </div>
+</div>

@@ -199,11 +199,9 @@ CREATE TABLE HoaDon (
     FOREIGN KEY (NhanVienThuNganID) REFERENCES NhanVien(NhanVienID)
 );
 GO
-
 -- =============================================
 -- 5. NHÓM KINH DOANH ONLINE (DELIVERY)
 -- =============================================
-
 CREATE TABLE DatHangOnline (
     DonOnlineID BIGINT IDENTITY(1,1) PRIMARY KEY,
     KhachHangID BIGINT NULL,
@@ -221,7 +219,6 @@ CREATE TABLE DatHangOnline (
     FOREIGN KEY (KhachHangID) REFERENCES Users(UserID)
 );
 GO
-
 CREATE TABLE ChiTietDatHangOnline (
     ChiTietID BIGINT IDENTITY(1,1) PRIMARY KEY,
     DonOnlineID BIGINT NOT NULL,
@@ -234,6 +231,7 @@ CREATE TABLE ChiTietDatHangOnline (
     FOREIGN KEY (MonAnID) REFERENCES MonAn(MonAnID)
 );
 GO
+
 
 CREATE TABLE ThanhToan (
     ThanhToanID BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -280,25 +278,7 @@ INSERT INTO VaiTro (TenVaiTro, MoTa) VALUES
 (N'Nhân viên', N'Nhân viên nhà hàng'),
 (N'Khách hàng', N'Khách hàng');
 
-
--- Danh mục
-INSERT INTO DanhMuc (TenDanhMuc) VALUES (N'SHUSHI'), (N'CƠM/MÌ'), (N'MÓN KHÁC'), (N'ĐỒ UỐNG'),(N'TRÁNG MIỆNG') ;
-
--- Bàn ăn
-INSERT INTO BanAn (TenBan, SucChua, ViTri) VALUES 
-(N'Bàn 1', 4, N'Sảnh chính'),
-(N'Phòng Tatami VIP', 10, N'Tầng 2');
-
-PRINT N'Cài đặt cơ sở dữ liệu QuanLyNhaHangNhat_65133141 thành công với thông tin cá nhân bổ sung!';
-GO
-
-ALTER TABLE DonHang
-ADD SoDienThoai NVARCHAR(15) NULL;
-
-
-SELECT VaiTroID, TenVaiTro
-FROM VaiTro;
-
+--admin
 INSERT INTO NhanVien(HoTen, Email, SDT, MatKhau, VaiTroID, TaiKhoan, NgayVaoLam, TrangThai, DiaChi)
 VALUES (
     N'Quản trị viên hệ thống',                                  -- HoTen
@@ -316,6 +296,8 @@ VALUES (
 PRINT N'Cài đặt cơ sở dữ liệu QuanLyNhaHangNhat_65133141 thành công với thông tin cá nhân bổ sung!';
 GO
 
+-- Danh mục
+INSERT INTO DanhMuc (TenDanhMuc) VALUES (N'SHUSHI'), (N'CƠM/MÌ'), (N'MÓN KHÁC'), (N'ĐỒ UỐNG'),(N'TRÁNG MIỆNG') ;
 
 INSERT INTO DanhMuc (TenDanhMuc, MoTa)
 SELECT N'Sashimi', N'Cá sống Nhật Bản'
@@ -325,6 +307,36 @@ INSERT INTO DanhMuc (TenDanhMuc, MoTa)
 SELECT N'Teishoku', N'Set ăn Nhật Bản'
 WHERE NOT EXISTS (SELECT 1 FROM DanhMuc WHERE TenDanhMuc = N'Teishoku');
 GO
+
+-- Bàn ăn
+INSERT INTO BanAn (TenBan, SucChua, ViTri) VALUES 
+(N'Bàn 1', 4, N'Sảnh chính'),
+(N'Phòng Tatami VIP', 10, N'Tầng 2');
+
+PRINT N'Cài đặt cơ sở dữ liệu QuanLyNhaHangNhat_65133141 thành công với thông tin cá nhân bổ sung!';
+GO
+
+--Thông báo
+INSERT INTO ThongBao (NguoiNhanID, LoaiNguoiNhan, TieuDe, NoiDung, LienKet, LoaiThongBao, DaDoc, NgayTao)
+VALUES 
+-- 1. Thông báo chào mừng thành viên mới
+(1, N'KhachHang', N'Chào mừng bạn đến với Nhà hàng!', N'Cảm ơn bạn đã đăng ký thành viên. Tặng bạn mã giảm giá WELCOME10 giảm 10% cho lần đặt bàn đầu tiên.', N'/KhuyenMai/ChiTiet/WELCOME10', N'HeThong', 0, GETDATE()),
+
+-- 2. Thông báo xác nhận đặt bàn (Loại thông báo: DonHang)
+(1, N'KhachHang', N'Xác nhận đặt bàn thành công #db123', N'Bàn của bạn đã được xác nhận vào lúc 19:00 ngày hôm nay. Vui lòng đến đúng giờ nhé!', N'/DatBan/ChiTiet/123', N'DonHang', 0, DATEADD(MINUTE, -30, GETDATE())),
+
+-- 3. Thông báo khuyến mãi (Loại thông báo: KhuyenMai)
+(2, N'KhachHang', N'Ưu đãi "Thứ 6 Vui Vẻ" - Giảm 20%', N'Duy nhất thứ 6 tuần này, giảm ngay 20% cho tất cả các set Sashimi. Đặt bàn ngay để không bỏ lỡ!', N'/KhuyenMai/ChiTiet/KM-T6', N'KhuyenMai', 0, DATEADD(HOUR, -2, GETDATE())),
+
+-- 4. Thông báo món mới (Loại thông báo: TinTuc)
+(3, N'KhachHang', N'Ra mắt Thực đơn Mùa Xuân', N'Khám phá hương vị tươi mới với bộ sưu tập món ăn Mùa Xuân vừa ra mắt. Xem chi tiết tại đây.', N'/ThucDon/MuaXuan', N'TinTuc', 1, DATEADD(DAY, -1, GETDATE())),
+
+-- 5. Thông báo chăm sóc khách hàng (Loại thông báo: CSKH)
+(2, N'KhachHang', N'Chúc mừng sinh nhật Quý khách!', N'Nhà hàng xin gửi tặng bạn một phần bánh ngọt tráng miệng cho bữa tiệc sinh nhật trong tháng này.', N'/TaiKhoan/Voucher', N'CSKH', 0, DATEADD(DAY, -5, GETDATE()));
+GO
+
+ALTER TABLE DonHang
+ADD SoDienThoai NVARCHAR(15) NULL;
 
 CREATE OR ALTER TRIGGER TRG_DonHang_LaySDT_User
 ON DonHang
@@ -356,3 +368,7 @@ ALTER TABLE ChiTietDonHang ALTER COLUMN MonAnID BIGINT NULL;
 --          Cột TenBanSnapshot sẽ lưu lại tên bàn tại thời điểm đặt.
 ALTER TABLE DatBan ADD TenBanSnapshot NVARCHAR(100) NULL;
 
+SELECT VaiTroID, TenVaiTro
+FROM VaiTro;
+SELECT *FROM Users;
+SELECT *FROM ThongBao;

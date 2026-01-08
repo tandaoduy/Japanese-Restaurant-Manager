@@ -91,7 +91,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                     return View(model);
                 }
 
-                model.Slug = GenerateSlug(model.TieuDe);
+                model.Slug = GenerateUniqueSlug(model.TieuDe);
                 model.NgayDang = DateTime.Now;
 
                 var nhanVienId = Session["NhanVienID"];
@@ -117,6 +117,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
 
                 db.TinTucs.Add(model);
                 db.SaveChanges();
+                TempData["SuccessMessage"] = "Đã tạo tin tức \"" + model.TieuDe + "\" thành công!";
                 return RedirectToAction("Index");
             }
 
@@ -166,7 +167,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
             tinTuc.TieuDe = model.TieuDe;
             tinTuc.MoTaNgan = model.MoTaNgan;
             tinTuc.NoiDung = model.NoiDung;
-            tinTuc.Slug = GenerateSlug(model.TieuDe);
+            tinTuc.Slug = GenerateUniqueSlug(model.TieuDe, model.TinTucID);
             tinTuc.IsHienThi = model.IsHienThi ?? true;
             tinTuc.IsNoiBat = model.IsNoiBat ?? false;
 
@@ -183,6 +184,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
             }
 
             db.SaveChanges();
+            TempData["SuccessMessage"] = "Đã cập nhật tin tức \"" + tinTuc.TieuDe + "\" thành công!";
             return RedirectToAction("Index");
         }
 
@@ -211,18 +213,63 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
             var tinTuc = db.TinTucs.Find(TinTucID);
             if (tinTuc == null)
             {
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = "Không tìm thấy tin tức cần xóa." });
+                }
                 return HttpNotFound();
             }
 
+            var tieuDe = tinTuc.TieuDe;
             db.TinTucs.Remove(tinTuc);
             db.SaveChanges();
+            
+            if (Request.IsAjaxRequest())
+            {
+                return Json(new { success = true, message = "Đã xóa tin tức \"" + tieuDe + "\" thành công!" });
+            }
+            
             return RedirectToAction("Index");
         }
 
         /// <summary>
-        /// Tạo slug từ tiêu đề
+        /// Tạo slug duy nhất từ tiêu đề (kiểm tra trùng lặp trong DB)
         /// </summary>
-        private string GenerateSlug(string text)
+        private string GenerateUniqueSlug(string text, long? excludeId = null)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "";
+            
+            // Tạo slug cơ bản
+            string baseSlug = CreateSlugFromText(text);
+            string slug = baseSlug;
+            int counter = 1;
+            
+            // Kiểm tra xem slug đã tồn tại chưa
+            while (SlugExists(slug, excludeId))
+            {
+                slug = baseSlug + "-" + counter;
+                counter++;
+            }
+            
+            return slug;
+        }
+        
+        /// <summary>
+        /// Kiểm tra slug đã tồn tại trong DB chưa
+        /// </summary>
+        private bool SlugExists(string slug, long? excludeId = null)
+        {
+            if (excludeId.HasValue)
+            {
+                return db.TinTucs.Any(t => t.Slug == slug && t.TinTucID != excludeId.Value);
+            }
+            return db.TinTucs.Any(t => t.Slug == slug);
+        }
+        
+        /// <summary>
+        /// Tạo slug từ text (không kiểm tra trùng lặp)
+        /// </summary>
+        private string CreateSlugFromText(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return "";
             

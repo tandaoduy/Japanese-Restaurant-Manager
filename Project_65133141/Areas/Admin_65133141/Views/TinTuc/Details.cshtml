@@ -4,8 +4,89 @@
     Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
 }
 
-<div class="p-6">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">Chi tiết tin tức</h2>
+<style>
+    .details-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #fee2e2;
+        overflow: hidden;
+    }
+    
+    .news-image-lg {
+        width: 100%;
+        height: 100%;
+        min-height: 400px;
+        object-fit: cover;
+        background-color: #f3f4f6;
+    }
+    
+    .badge-pill {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+    
+    .badge-active { background-color: #d1fae5; color: #065f46; } /* Green-50, Green-800 */
+    .badge-hidden { background-color: #fee2e2; color: #991b1b; } /* Red-50, Red-800 */
+    .badge-featured { background-color: #fef3c7; color: #92400e; } /* Amber-50, Amber-800 */
+    
+    .btn-action-group {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f3f4f6;
+    }
+    
+    .btn-edit {
+        background: #f59e0b;
+        color: white;
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s;
+        text-decoration: none;
+        border: none;
+    }
+    .btn-edit:hover {
+        background: #d97706;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-back {
+        background: white;
+        color: #4b5563;
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .btn-back:hover {
+        background: #f3f4f6;
+        color: #1f2937;
+        text-decoration: none;
+    }
+</style>
+
+<div class="p-6 max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Chi Tiết Tin Tức</h1>
+            <p class="text-gray-500 mt-1">Xem trước nội dung bài viết</p>
+        </div>
+        <a href="@Url.Action("Index", "TinTuc", new { area = "Admin_65133141" })" class="text-gray-500 hover:text-red-600 flex items-center gap-1 text-decoration-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Quay lại danh sách
+        </a>
+    </div>
 
     @if (Model != null)
     {
@@ -13,50 +94,68 @@
             ? Url.Content("~/Images/TinTuc/" + Model.HinhAnh)
             : Url.Content("~/Images/slide09.jpg");
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row gap-6">
-            <div class="md:w-1/3">
-                <img src="@imagePath" alt="@Model.TieuDe" class="w-full h-56 object-cover rounded-lg border border-gray-200" onerror="this.src='@Url.Content("~/Images/slide09.jpg")'" />
-            </div>
-            <div class="md:w-2/3 space-y-3">
-                <h3 class="text-xl font-semibold text-gray-900">@Model.TieuDe</h3>
-                <p class="text-sm text-gray-500">@("Ngày đăng: " + (Model.NgayDang?.ToString("dd/MM/yyyy HH:mm") ?? "N/A"))</p>
-
-                <div>
-                    <span class="font-semibold text-gray-700">Mô tả ngắn:</span>
-                    <p class="text-gray-700 mt-1">@(string.IsNullOrWhiteSpace(Model.MoTaNgan) ? "Chưa có mô tả" : Model.MoTaNgan)</p>
-                </div>
-
-                <div>
-                    <span class="font-semibold text-gray-700">Nội dung:</span>
-                    <div class="prose max-w-none mt-1 text-gray-800">
-                        @Html.Raw((Model.NoiDung ?? string.Empty).Replace("\n", "<br />"))
-                    </div>
-                </div>
-
-                <div class="flex gap-2 mt-2">
+        <div class="details-card flex flex-col md:flex-row">
+            <!-- Left: Image -->
+            <div class="w-full md:w-2/5 relative">
+                <img src="@imagePath" alt="@Model.TieuDe" class="news-image-lg" onerror="this.src='@Url.Content("~/Images/slide09.jpg")'" />
+                <div class="absolute top-4 left-4 flex flex-col gap-2">
                     @if (Model.IsHienThi == true)
                     {
-                        <span class="badge-active">Hiển thị</span>
+                        <span class="badge-pill badge-active">Đang hiển thị</span>
                     }
                     else
                     {
-                        <span class="badge-hidden">Ẩn</span>
+                        <span class="badge-pill badge-hidden">Đang ẩn</span>
                     }
-
+                    
                     @if (Model.IsNoiBat == true)
                     {
-                        <span class="badge-featured">⭐ Nổi bật</span>
+                        <span class="badge-pill badge-featured">Nổi bật</span>
                     }
+                </div>
+            </div>
+            
+            <!-- Right: Content -->
+            <div class="w-full md:w-3/5 p-8 flex flex-col">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 leading-tight mb-2">@Model.TieuDe</h2>
+                    <div class="flex items-center gap-3 text-sm text-gray-500">
+                        <span class="flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            @(Model.NgayDang?.ToString("dd/MM/yyyy HH:mm"))
+                        </span>
+                        <span>•</span>
+                        <span>Người đăng: Admin</span>
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg border-l-4 border-red-500">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Mô tả ngắn</h4>
+                    <p class="text-gray-700 italic">
+                        @(string.IsNullOrWhiteSpace(Model.MoTaNgan) ? "Chưa có mô tả ngắn" : Model.MoTaNgan)
+                    </p>
+                </div>
+
+                <div class="prose max-w-none text-gray-800 flex-grow">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nội dung chi tiết</h4>
+                    @Html.Raw((Model.NoiDung ?? "").Replace("\n", "<br/>"))
+                </div>
+
+                <div class="btn-action-group">
+                    @Html.ActionLink("Quay lại", "Index", null, new { @class = "btn-back" })
+                    <a href="@Url.Action("Edit", "TinTuc", new { area = "Admin_65133141", id = Model.TinTucID })" class="btn-edit flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        Chỉnh sửa bài viết
+                    </a>
                 </div>
             </div>
         </div>
     }
-
-    <div class="mt-6 flex gap-3">
-        @Html.ActionLink("Quay lại danh sách", "Index", null, new { @class = "btn-secondary" })
-        @if (Model != null)
-        {
-            @Html.ActionLink("Sửa tin này", "Edit", new { id = Model.TinTucID }, new { @class = "btn-success" })
-        }
-    </div>
+    else
+    {
+        <div class="text-center py-12">
+            <p class="text-gray-500">Không tìm thấy thông tin bài viết.</p>
+            <a href="@Url.Action("Index", "TinTuc", new { area = "Admin_65133141" })" class="btn-back mt-4 inline-block">Quay lại danh sách</a>
+        </div>
+    }
 </div>

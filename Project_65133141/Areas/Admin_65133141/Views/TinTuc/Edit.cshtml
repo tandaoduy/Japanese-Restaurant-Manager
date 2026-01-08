@@ -4,65 +4,212 @@
     Layout = "~/Areas/Admin_65133141/Views/Shared/_Layout.cshtml";
 }
 
-<div class="p-6">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">Chỉnh sửa tin tức</h2>
+<style>
+    /* Red Theme Form Styles - Shared */
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #fee2e2;
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #7f1d1d; /* Deep Red */
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-input {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        background-color: #fcfcfc;
+    }
+    
+    /* Ensure form groups take full width */
+    .form-group {
+        width: 100%;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #dc2626;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #dc2626, #b91c1c); /* Red for Edit */
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-cancel {
+        background: white;
+        color: #4b5563;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .btn-cancel:hover {
+        background: #f3f4f6;
+        text-decoration: none;
+        color: #1f2937;
+    }
+
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f9fafb;
+    }
+
+    input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        accent-color: #dc2626;
+        cursor: pointer;
+    }
+</style>
+
+<div class="container mx-auto p-4 sm:p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Cập nhật tin tức</h1>
+            <p class="text-gray-500 mt-1">Chỉnh sửa nội dung bài viết đang có</p>
+        </div>
+        <a href="@Url.Action("Index", "TinTuc", new { area = "Admin_65133141" })" class="text-gray-500 hover:text-red-600 flex items-center gap-1 text-decoration-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Quay lại
+        </a>
+    </div>
 
     @using (Html.BeginForm("Edit", "TinTuc", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(m => m.TinTucID)
-        @Html.ValidationSummary(true, "", new { @class = "text-red-500 mb-3" })
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4 max-w-3xl">
+        <div class="form-card">
+
+
+            <!-- Title -->
             <div class="form-group">
-                @Html.LabelFor(m => m.TieuDe, new { @class = "form-label" })
-                @Html.TextBoxFor(m => m.TieuDe, new { @class = "form-input" })
-                @Html.ValidationMessageFor(m => m.TieuDe, "", new { @class = "text-red-500 text-sm" })
+                @Html.LabelFor(m => m.TieuDe, "Tiêu đề bài viết", new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.TieuDe, new { @class = "form-input", placeholder = "Nhập tiêu đề tin tức..." })
+                @Html.ValidationMessageFor(m => m.TieuDe, "", new { @class = "text-red-500 text-sm mt-1" })
             </div>
 
+            <!-- Short Desc -->
             <div class="form-group">
-                @Html.LabelFor(m => m.MoTaNgan, new { @class = "form-label" })
-                @Html.TextAreaFor(m => m.MoTaNgan, 3, 0, new { @class = "form-input form-textarea" })
+                @Html.LabelFor(m => m.MoTaNgan, "Mô tả ngắn", new { @class = "form-label" })
+                @Html.TextAreaFor(m => m.MoTaNgan, new { @class = "form-input form-textarea", placeholder = "Tóm tắt nội dung bài viết...", rows = 3 })
             </div>
 
+            <!-- Content -->
             <div class="form-group">
-                @Html.LabelFor(m => m.NoiDung, new { @class = "form-label" })
-                @Html.TextAreaFor(m => m.NoiDung, 8, 0, new { @class = "form-input form-textarea" })
+                @Html.LabelFor(m => m.NoiDung, "Nội dung chi tiết", new { @class = "form-label" })
+                @Html.TextAreaFor(m => m.NoiDung, new { @class = "form-input form-textarea", placeholder = "Nhập nội dung đầy đủ...", rows = 10 })
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Hình ảnh hiện tại</label>
-                @{
-                    var imagePath = !string.IsNullOrWhiteSpace(Model.HinhAnh)
-                        ? Url.Content("~/Images/TinTuc/" + Model.HinhAnh)
-                        : Url.Content("~/Images/slide09.jpg");
-                }
-                <img src="@imagePath" alt="@Model.TieuDe" class="w-full h-40 object-cover rounded-lg border border-gray-200 mb-2" onerror="this.src='@Url.Content("~/Images/slide09.jpg")'" />
-                <label class="form-label">Chọn ảnh mới (nếu muốn thay)</label>
-                <input type="file" name="imageFile" accept="image/*" class="form-input" />
-            </div>
+                <label class="form-label">Hình ảnh bài viết</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-amber-400 transition-colors bg-gray-50">
+                    <input type="file" name="imageFile" accept="image/*" class="hidden" id="uploadInput" onchange="previewImage(this)" />
+                    <label for="uploadInput" class="cursor-pointer block">
+                        <span class="block mb-3">
+                            @{
+                                var imagePath = !string.IsNullOrWhiteSpace(Model.HinhAnh) ? Url.Content("~/Images/TinTuc/" + Model.HinhAnh) : "";
+                                var showImage = !string.IsNullOrWhiteSpace(Model.HinhAnh);
+                            }
+                             <img id="imagePreview" src="@imagePath" alt="Preview" class="@(showImage ? "" : "hidden") max-h-48 mx-auto rounded shadow-sm" />
+                             <svg id="uploadIcon" class="@(showImage ? "hidden" : "") mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="text-amber-600 font-medium">Click để thay đổi ảnh</span>
+                        <span class="block text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</span>
+                    </label>
+                </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="form-group">
-                    <label class="form-label">Hiển thị</label>
-                    <div class="flex items-center gap-2">
-                        @Html.CheckBox("IsHienThi", Model.IsHienThi ?? true)
-                        <span class="text-sm text-gray-600">Cho phép hiển thị trên website</span>
+            <!-- Toggles -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="checkbox-wrapper">
+                    @Html.CheckBox("IsHienThi", Model.IsHienThi ?? true)
+                    <div>
+                        <span class="block font-medium text-gray-800">Hiển thị</span>
+                        <span class="text-xs text-gray-500">Trạng thái công khai</span>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Nổi bật</label>
-                    <div class="flex items-center gap-2">
-                        @Html.CheckBox("IsNoiBat", Model.IsNoiBat ?? false)
-                        <span class="text-sm text-gray-600">Đánh dấu là tin nổi bật</span>
+                <div class="checkbox-wrapper">
+                    @Html.CheckBox("IsNoiBat", Model.IsNoiBat ?? false)
+                    <div>
+                        <span class="block font-medium text-gray-800">Tin nổi bật</span>
+                        <span class="text-xs text-gray-500">Ghim lên đầu trang</span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex gap-3 mt-4">
-                <button type="submit" class="btn-success">Lưu thay đổi</button>
-                @Html.ActionLink("Hủy", "Index", null, new { @class = "btn-secondary" })
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-4 border-t border-gray-100 pt-6">
+                @Html.ActionLink("Hủy bỏ", "Index", null, new { @class = "btn-cancel" })
+                <button type="submit" class="btn-submit">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Lưu thay đổi
+                </button>
             </div>
         </div>
     }
 </div>
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var preview = document.getElementById('imagePreview');
+                var icon = document.getElementById('uploadIcon');
+                
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                icon.classList.add('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

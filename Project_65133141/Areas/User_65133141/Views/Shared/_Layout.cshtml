@@ -917,7 +917,14 @@
                            linkTextLower.includes('gioi thieu');
                 }
 
-                // 4. Home page - MUST be last to avoid false positives
+                // 4. TinTuc (News) page
+                if (currentPath.includes('/tintuc')) {
+                    return linkPath.includes('/tintuc') ||
+                           linkTextLower.includes('tin tức') ||
+                           linkTextLower.includes('tin tuc');
+                }
+
+                // 5. Home page - MUST be last to avoid false positives
                 if (currentPath === '/' ||
                     currentPath === '/home' ||
                     currentPath === '/home/index' ||
