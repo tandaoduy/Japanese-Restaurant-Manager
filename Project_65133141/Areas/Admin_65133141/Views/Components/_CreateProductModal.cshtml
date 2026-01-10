@@ -43,7 +43,7 @@
                                 <option value="">-- Chọn danh mục --</option>
                                 @if (categories != null) {
                                     foreach (var cat in categories) {
-                                        <option value="@cat.DanhMucID">@cat.TenDanhMuc</option>
+                                        <option value="@cat.DanhMucID">@cat.TenDanhMuc.ToUpper()</option>
                                     }
                                 }
                             </select>
@@ -59,7 +59,8 @@
                             Giá gốc (VNĐ) <span class="auth-required">*</span>
                         </label>
                         <div class="auth-input-wrapper">
-                            <input type="number" name="Gia" id="productGia" class="auth-form-control" placeholder="Nhập giá gốc" min="0" step="1000" />
+                            <input type="number" name="Gia" id="productGia" class="auth-form-control" placeholder="Nhập giá gốc" min="0" step="1000" 
+                                   onkeydown="return !(['-', '+', 'e', 'E', '.'].includes(event.key))" />
                         </div>
                         <span class="auth-error-message" id="error-Gia"></span>
                     </div>
@@ -69,7 +70,8 @@
                             Giá giảm (VNĐ)
                         </label>
                         <div class="auth-input-wrapper">
-                            <input type="number" name="GiaGiam" id="productGiaGiam" class="auth-form-control" placeholder="Để trống nếu không giảm" min="0" step="1000" />
+                            <input type="number" name="GiaGiam" id="productGiaGiam" class="auth-form-control" placeholder="Để trống nếu không giảm" min="0" step="1000" 
+                                   onkeydown="return !(['-', '+', 'e', 'E', '.'].includes(event.key))" />
                         </div>
                         <span class="auth-error-message" id="error-GiaGiam"></span>
                     </div>
@@ -82,7 +84,8 @@
                             Đơn vị tính
                         </label>
                         <div class="auth-input-wrapper">
-                            <input type="text" name="DonViTinh" id="productDonViTinh" class="auth-form-control" placeholder="Mặc định: Phần" />
+                            <input type="text" name="DonViTinh" id="productDonViTinh" class="auth-form-control" placeholder="Mặc định: Phần" 
+                                   oninput="this.value = this.value.replace(/[^a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]/g, '')" />
                         </div>
                     </div>
 

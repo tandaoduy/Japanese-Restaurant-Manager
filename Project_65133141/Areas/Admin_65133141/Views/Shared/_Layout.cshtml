@@ -611,6 +611,8 @@
                     @{
                         var userName = Session["UserName"] as string ?? User.Identity.Name ?? "Admin";
                         var firstLetter = !string.IsNullOrEmpty(userName) ? userName.Substring(0, 1).ToUpper() : "A";
+                        var hour = DateTime.Now.Hour;
+                        var greeting = hour < 12 ? "Chào buổi sáng!" : (hour < 18 ? "Chào buổi chiều!" : "Chào buổi tối!");
                     }
                     
                     <div class="relative" id="admin-user-menu text-left">
@@ -619,7 +621,7 @@
                                 @firstLetter
                             </div>
                             <div class="hidden md:block text-left">
-                                <p class="text-xs text-blue-200 leading-none mb-1">Xin chào!</p>
+                                <p class="text-xs text-blue-200 leading-none mb-1">@greeting</p>
                                 <div class="flex items-center">
                                     <p class="text-sm font-bold text-white leading-none">@userName</p>
                                     <svg class="w-4 h-4 text-blue-200 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -942,6 +944,43 @@
         </div>
     </div>
 
+    @* Logout Confirmation Modal *@
+    <div id="logoutConfirmModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300" style="animation: modalSlideIn 0.3s ease-out forwards;">
+            <div class="p-6">
+                <!-- Icon -->
+                <div class="flex items-center justify-center mb-5">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="text-xl font-bold text-gray-900 mb-3 text-center">Xác nhận đăng xuất</h3>
+                
+                <!-- Message -->
+                <p class="text-gray-600 mb-6 text-center leading-relaxed">
+                    Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
+                </p>
+                
+                <!-- Buttons -->
+                <div class="flex gap-3">
+                    <button onclick="closeLogoutModal()" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-300 transition-colors font-semibold">
+                        Hủy
+                    </button>
+                    <button onclick="confirmLogout()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2.5 rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        Đăng xuất
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @* Session Expired Modal *@
     <div id="sessionExpiredModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-95" style="animation: modalSlideIn 0.3s ease-out forwards;">
@@ -998,7 +1037,7 @@
             var warningShown = false;
             var sessionExpired = false;
             var checkInterval = 60000; // Check every 60 seconds (for 60 minutes timeout)
-            var warningTime = 1800; // Show warning 30 minutes before expiry (half of 60 minutes)
+            var warningTime = 60; // Show warning 1 minute before expiry
 
             function checkSession() {
                 if (sessionExpired) return;
@@ -1119,9 +1158,24 @@
             };
 
             window.logoutSession = function() {
-                if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-                    window.location.href = '@Url.Action("Logout", "Account", new { area = "" })';
+                // Show logout confirmation modal
+                var modal = document.getElementById('logoutConfirmModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
                 }
+            };
+
+            window.closeLogoutModal = function() {
+                var modal = document.getElementById('logoutConfirmModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            };
+
+            window.confirmLogout = function() {
+                window.location.href = '@Url.Action("Logout", "Account", new { area = "" })';
             };
 
             // Show session expired modal

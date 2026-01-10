@@ -335,6 +335,42 @@ VALUES
 (2, N'KhachHang', N'Chúc mừng sinh nhật Quý khách!', N'Nhà hàng xin gửi tặng bạn một phần bánh ngọt tráng miệng cho bữa tiệc sinh nhật trong tháng này.', N'/TaiKhoan/Voucher', N'CSKH', 0, DATEADD(DAY, -5, GETDATE()));
 GO
 
+--danh gia
+-- Thêm dữ liệu mẫu cho bảng DanhGia
+INSERT INTO DanhGia (UserID, SoSao, NoiDung, NgayDanhGia)
+VALUES 
+(1, 5, N'Món Sashimi rất tươi, trình bày đẹp mắt như một tác phẩm nghệ thuật. Sẽ quay lại!', '2026-01-02 18:30:00'),
+(2, 4, N'Không gian quán ấm cúng, đậm chất Nhật Bản. Tuy nhiên phục vụ hơi chậm một chút vào giờ cao điểm.', '2026-01-03 19:15:00'),
+(3, 5, N'Sushi cá hồi béo ngậy, tan trong miệng. Rất đáng đồng tiền bát gạo.', '2026-01-03 20:00:00'),
+(5, 5, N'Nhân viên nhiệt tình, dễ thương. Mình đi sinh nhật được tặng bánh rất ngon.', '2026-01-04 12:30:00'),
+(6, 3, N'Món ăn ngon nhưng giá hơi cao so với mặt bằng chung.', '2026-01-04 13:45:00'),
+(7, 5, N'Tuyệt vời! Đã ăn ở nhiều nơi nhưng bò Wagyu ở đây là đỉnh nhất.', '2026-01-05 18:00:00'),
+(8, 4, N'Thích nhất là không gian riêng tư, nhạc nhẹ nhàng rất thư giãn.', '2026-01-05 19:30:00'),
+(9, 5, N'10 điểm cho chất lượng. Sẽ giới thiệu cho bạn bè.', '2026-01-05 20:45:00'),
+(10, 2, N'Hôm nay quán quá đông, mình phải đợi bàn hơi lâu dù đã đặt trước.', '2026-01-06 11:30:00'),
+(11, 5, N'Mọi thứ đều hoàn hảo từ món khai vị đến tráng miệng.', '2026-01-06 12:15:00'),
+(12, 4, N'Set cơm trưa rất đầy đặn và ngon miệng.', '2026-01-06 13:00:00'),
+(13, 5, N'Rượu Sake rất ngon, hợp với đồ nhắm.', '2026-01-07 19:00:00'),
+(14, 5, N'Nhà hàng view đẹp, thích hợp để hẹn hò.', '2026-01-07 20:30:00'),
+(1, 3, N'Tempura hơi nhiều dầu một chút, cần khắc phục.', '2026-01-08 11:45:00'),
+(2, 5, N'Ông chủ rất hiếu khách. Cảm giác như đang ăn ở Osaka.', '2026-01-08 12:30:00'),
+(3, 4, N'Menu đa dạng, nhiều lựa chọn cho cả người ăn chay.', '2026-01-08 13:15:00'),
+(5, 5, N'Đã trở thành quán ruột của gia đình mình vào cuối tuần.', '2026-01-08 18:45:00'),
+(6, 5, N'Chất lượng phục vụ 5 sao chuẩn Nhật.', '2026-01-08 19:30:00'),
+(7, 4, N'Mỳ Udon nước dùng thanh ngọt, sợi mỳ dai vừa đủ.', '2026-01-08 20:00:00'),
+(8, 5, N'Không gian check-in sống ảo cực đẹp.', '2026-01-08 21:00:00'),
+--(Nội dung ngắn gọn hoặc UserID đại diện cho việc ẩn danh)
+(9, 5, N'Dịch vụ tốt.', '2026-01-01 10:00:00'),
+(10, 4, N'Hài lòng.', '2026-01-01 11:00:00'),
+(11, 5, N'Rất ngon.', '2026-01-02 12:00:00'),
+(12, 3, N'Tạm ổn.', '2026-01-02 13:00:00'),
+(13, 5, N'Xuất sắc.', '2026-01-03 14:00:00'),
+(14, 5, N'Tuyệt.', '2026-01-03 15:00:00'),
+(1, 4, N'Ok.', '2026-01-04 16:00:00'),
+(2, 5, N'Good service.', '2026-01-05 17:00:00'),
+(3, 5, N'Yummy.', '2026-01-06 18:00:00'),
+(5, 4, N'Nice place.', '2026-01-07 19:00:00');
+GO
 ALTER TABLE DonHang
 ADD SoDienThoai NVARCHAR(15) NULL;
 

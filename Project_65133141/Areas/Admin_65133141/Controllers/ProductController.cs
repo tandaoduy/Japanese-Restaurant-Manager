@@ -46,17 +46,38 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 query = query.Where(m => m.DanhMucID == categoryId.Value);
             }
 
-            // Đếm tổng số món ăn (trước khi phân trang)
-            int totalItems = query.Count();
+            // Lấy tất cả dữ liệu ra RAM
+            var allResult = query.ToList();
+            
+            // Lấy danh sách danh mục để tra cứu (do không có properties navigation)
+            var catLookup = db.DanhMucs.ToDictionary(k => k.DanhMucID, v => (v.TenDanhMuc ?? "").ToUpperInvariant());
+
+            // Sắp xếp theo thứ tự ưu tiên của Danh Mục
+            allResult = allResult.OrderBy(p => {
+                string name = "";
+                if (catLookup.ContainsKey(p.DanhMucID)) // Assuming DanhMucID is not nullable or handled
+                {
+                    name = catLookup[p.DanhMucID];
+                }
+                
+                if (name.Contains("SASHIMI")) return 1;
+                if (name.Contains("SUSHI") || name.Contains("SHUSHI")) return 2;
+                if (name.Contains("CƠM") || name.Contains("MÌ")) return 3;
+                if (name.Contains("TEISHOKU")) return 4;
+                if (name.Contains("UỐNG") || name.Contains("NƯỚC")) return 5;
+                if (name.Contains("TRÁNG MIỆNG")) return 7;
+                return 6; // Món khác
+            }).ThenBy(m => m.TenMon).ToList();
+
+            // Phân trang trên danh sách đã sắp xếp
+            int totalItems = allResult.Count;
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
             // Đảm bảo page hợp lệ
             if (page < 1) page = 1;
             if (page > totalPages && totalPages > 0) page = totalPages;
 
-            // Lấy dữ liệu cho trang hiện tại
-            var products = query
-                .OrderBy(m => m.TenMon)
+            var products = allResult
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();

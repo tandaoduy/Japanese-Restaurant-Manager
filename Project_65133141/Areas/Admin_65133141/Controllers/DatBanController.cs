@@ -77,6 +77,63 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         }
 
         /// <summary>
+        /// Tính trạng thái bàn, nhưng bỏ qua một đặt bàn cụ thể (dùng khi chỉnh sửa đặt bàn)
+        /// </summary>
+        private string GetTableStatusFromDatBanExcluding(long banID, long? excludeDatBanId)
+        {
+            var now = DateTime.Now;
+            
+            // Lấy tất cả đặt bàn của bàn này (trừ những cái đã hoàn thành, hủy, hoặc đang chỉnh sửa)
+            var activeReservations = db.DatBans
+                .Where(d => d.BanID == banID && 
+                           d.TrangThai != "Hoàn thành" && 
+                           d.TrangThai != "Đã hủy" &&
+                           (!excludeDatBanId.HasValue || d.DatBanID != excludeDatBanId.Value))
+                .OrderByDescending(d => d.ThoiGianDen)
+                .ToList();
+
+            // Không có bản ghi nào → Trống
+            if (!activeReservations.Any())
+            {
+                return "Trống";
+            }
+
+            // Kiểm tra xem có đặt bàn nào với trạng thái "Đang sử dụng" hoặc "Đang phục vụ" không
+            var inUseReservation = activeReservations.FirstOrDefault(d =>
+                d.TrangThai == "Đang sử dụng" || d.TrangThai == "Đang phục vụ");
+
+            if (inUseReservation != null)
+            {
+                return "Đang phục vụ";
+            }
+
+            // Kiểm tra xem có đặt bàn nào đang trong thời gian ăn không (thời gian ăn ước tính 2 giờ)
+            var inTimeReservation = activeReservations.FirstOrDefault(d =>
+            {
+                var thoiGianDen = d.ThoiGianDen;
+                var thoiGianKetThuc = thoiGianDen.AddHours(2);
+                return now >= thoiGianDen && now <= thoiGianKetThuc && 
+                       (d.TrangThai == "Đã xác nhận" || d.TrangThai == "Đang phục vụ");
+            });
+
+            if (inTimeReservation != null)
+            {
+                return "Đang phục vụ";
+            }
+
+            // Kiểm tra xem có đặt bàn nào với trạng thái "Đã đặt" hoặc "Đã xác nhận" không
+            var reservedReservation = activeReservations.FirstOrDefault(d =>
+                d.TrangThai == "Đã đặt" || d.TrangThai == "Đã xác nhận");
+
+            if (reservedReservation != null)
+            {
+                return "Đã đặt";
+            }
+
+            return "Trống";
+        }
+
+        /// <summary>
         /// Cập nhật trạng thái bàn trong bảng BanAn dựa trên DatBan
         /// </summary>
         private void UpdateTableStatusFromDatBan(long banID)
@@ -275,6 +332,38 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 try
                 {
                     db.SaveChanges();
+
+                    // --- FORCE SEND EMAIL ---
+                    if (datBan.TrangThai == "Đã xác nhận" && datBan.UserID.HasValue)
+                    {
+                        try
+                        {
+                            var user = db.Users.Find(datBan.UserID.Value);
+                            if (user != null && !string.IsNullOrEmpty(user.Email) && user.Email.Contains("@"))
+                            {
+                                // Load table info for email
+                                if (datBan.BanID.HasValue && datBan.BanAn == null)
+                                {
+                                    datBan.BanAn = db.BanAns.Find(datBan.BanID.Value);
+                                }
+
+                                var emailService = new EmailService();
+                                var customerName = string.IsNullOrEmpty(datBan.HoTenKhach) ? user.HoTen : datBan.HoTenKhach;
+                                emailService.SendBookingConfirmationEmail(
+                                    datBan,
+                                    user.Email,
+                                    customerName,
+                                    isConfirmed: true
+                                );
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Email error: " + ex.Message);
+                        }
+                    }
+                    // -------------------------
+
                     TempData["SuccessMessage"] = "Cập nhật đặt bàn thành công!";
                     return RedirectToAction("Index");
                 }
@@ -398,9 +487,13 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 string customerEmail = null;
                 string customerName = datBan.HoTenKhach;
                 
+                System.Diagnostics.Debug.WriteLine($"[Confirm] DatBanID: {id}, UserID: {datBan.UserID}");
+                
                 if (datBan.UserID.HasValue)
                 {
                     var user = db.Users.Find(datBan.UserID.Value);
+                    System.Diagnostics.Debug.WriteLine($"[Confirm] Found User: {user != null}, Email: {user?.Email}");
+                    
                     if (user != null && !string.IsNullOrEmpty(user.Email))
                     {
                         customerEmail = user.Email;
@@ -411,8 +504,30 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                     }
                 }
                 
-                // Only send email if we have a valid email address
-                // If no email, skip sending but still confirm the booking
+                System.Diagnostics.Debug.WriteLine($"[Confirm] Customer Email: {customerEmail}, Name: {customerName}");
+
+                // Validation: Check if table is occupied by others
+                if (datBan.BanID.HasValue)
+                {
+                    var banID = datBan.BanID.Value;
+                    var conflict = db.DatBans.Any(d => 
+                        d.BanID == banID && 
+                        d.DatBanID != datBan.DatBanID &&
+                        d.TrangThai != "Hoàn thành" && d.TrangThai != "Đã hủy" && // Only check active bookings
+                        (d.TrangThai == "Đã đặt" || d.TrangThai == "Đã xác nhận" || d.TrangThai == "Đang phục vụ" || d.TrangThai == "Đang sử dụng"));
+                    
+                    if (conflict)
+                    {
+                        var ban = db.BanAns.Find(banID);
+                        var status = ban?.TrangThai ?? "Đã đặt";
+                        if (Request.IsAjaxRequest()) 
+                        {
+                            return Json(new { success = false, message = $"Bàn {ban?.TenBan} đang ở trạng thái '{status}', không thể xác nhận!" });
+                        }
+                        TempData["ErrorMessage"] = $"Bàn {ban?.TenBan} đang ở trạng thái '{status}', không thể xác nhận!";
+                        return RedirectToAction("Index");
+                    }
+                }
 
                 // Cập nhật trạng thái thành "Đã xác nhận"
                 datBan.TrangThai = "Đã xác nhận";
@@ -425,37 +540,61 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                     db.SaveChanges();
                 }
 
-                // Send confirmation email if we have customer email
+                // --- FORCE SEND EMAIL (Confirm) ---
+                bool emailSent = false;
+                string emailStatus = "";
+                
                 if (!string.IsNullOrEmpty(customerEmail) && customerEmail.Contains("@"))
                 {
                     try
                     {
+                        // Enable Debug Logging
+                        System.Diagnostics.Debug.WriteLine($"[Confirm] Attempting to send email to: {customerEmail}");
+                        
+                        // Ensure Table is loaded for email template
+                        if (datBan.BanID.HasValue && datBan.BanAn == null)
+                        {
+                            datBan.BanAn = db.BanAns.Find(datBan.BanID.Value);
+                        }
+
                         var emailService = new EmailService();
-                        var emailSent = emailService.SendBookingConfirmationEmail(
+                        emailSent = emailService.SendBookingConfirmationEmail(
                             datBan, 
                             customerEmail, 
                             customerName, 
                             isConfirmed: true
                         );
                         
-                        if (!emailSent)
+                        if (emailSent)
                         {
-                            System.Diagnostics.Debug.WriteLine("Failed to send booking confirmation email");
+                            emailStatus = $" Email xác nhận đã được gửi đến {customerEmail}.";
+                        }
+                        else
+                        {
+                            emailStatus = " (Email không gửi được - kiểm tra cấu hình SMTP)";
                         }
                     }
                     catch (Exception emailEx)
                     {
-                        // Log error but don't fail the confirmation
-                        System.Diagnostics.Debug.WriteLine($"Error sending email: {emailEx.Message}");
+                        emailStatus = " (Lỗi gửi email: " + emailEx.Message + ")";
+                        System.Diagnostics.Debug.WriteLine($"[Confirm] Error sending email: {emailEx.Message}");
                     }
                 }
+                else
+                {
+                    // Log why we didn't send
+                    System.Diagnostics.Debug.WriteLine("[Confirm] No email to send to.");
+                }
+                // ---------------------------------
+
+                string successMessage = "Xác nhận đặt bàn thành công!" + emailStatus;
 
                 if (Request.IsAjaxRequest())
                 {
-                    return Json(new { success = true, message = "Xác nhận đặt bàn thành công! Email xác nhận đã được gửi đến khách hàng." });
+                    return Json(new { success = true, message = successMessage, emailSent = emailSent });
                 }
 
-                TempData["SuccessMessage"] = "Xác nhận đặt bàn thành công! Email xác nhận đã được gửi đến khách hàng.";
+                TempData["SuccessMessage"] = successMessage;
             }
             catch (Exception ex)
             {
@@ -518,6 +657,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
         }
 
         // GET: Admin_65133141/DatBan/GetAvailableTables
+
         public JsonResult GetAvailableTables(long? currentDatBanId = null)
         {
             try
@@ -525,21 +665,17 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 var allTables = db.BanAns.OrderBy(b => b.ViTri).ThenBy(b => b.TenBan).ToList();
                 var availableTables = new List<object>();
                 
+                // Hiển thị tất cả bàn bình thường, không lọc, không thêm status
                 foreach (var table in allTables)
                 {
-                    var actualStatus = GetTableStatusFromDatBan(table.BanID);
-                    // Cho phép chọn bàn trống hoặc bàn đang được chỉnh sửa
-                    if (actualStatus == "Trống" || (currentDatBanId.HasValue && 
-                        db.DatBans.Any(d => d.DatBanID == currentDatBanId.Value && d.BanID == table.BanID)))
+                    availableTables.Add(new
                     {
-                        availableTables.Add(new
-                        {
-                            BanID = table.BanID,
-                            DisplayText = table.TenBan + 
-                                         (string.IsNullOrEmpty(table.ViTri) ? "" : " (" + table.ViTri + ")") +
-                                         (table.SucChua.HasValue ? " - " + table.SucChua + " người" : "")
-                        });
-                    }
+                        BanID = table.BanID,
+                        DisplayText = table.TenBan + 
+                                     (string.IsNullOrEmpty(table.ViTri) ? "" : " (" + table.ViTri + ")") +
+                                     (table.SucChua.HasValue ? " - " + table.SucChua + " người" : ""),
+                        SucChua = table.SucChua ?? 0
+                    });
                 }
 
                 return Json(new { success = true, tables = availableTables }, JsonRequestBehavior.AllowGet);
@@ -581,6 +717,22 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 // Lưu BanID cũ để cập nhật trạng thái bàn cũ
                 var oldBanID = datBan.BanID;
 
+                // Validation: Kiểm tra bàn có đang bị chiếm bởi đặt bàn khác không
+                if (model.BanID.HasValue)
+                {
+                    // Lấy trạng thái thực tế của bàn, bỏ qua đặt bàn hiện tại
+                    var targetTableStatus = GetTableStatusFromDatBanExcluding(model.BanID.Value, model.DatBanID);
+                    
+                    if (targetTableStatus == "Đang phục vụ" || targetTableStatus == "Đã đặt")
+                    {
+                        var ban = db.BanAns.Find(model.BanID);
+                        return Json(new { 
+                            success = false, 
+                            message = $"Bàn '{ban?.TenBan ?? "đã chọn"}' đang ở trạng thái [{targetTableStatus}]. Vui lòng chọn bàn khác!" 
+                        });
+                    }
+                }
+
                 // Update fields
                 datBan.HoTenKhach = model.HoTenKhach;
                 datBan.SDTKhach = model.SDTKhach;
@@ -605,7 +757,45 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
 
                 db.SaveChanges();
 
-                return Json(new { success = true, message = "Cập nhật đặt bàn thành công!" });
+                // --- FORCE SEND EMAIL (Ajax) ---
+                bool emailSent = false;
+                string emailStatus = " (Chưa gửi)";
+                
+                if (datBan.TrangThai == "Đã xác nhận" && datBan.UserID.HasValue)
+                {
+                    try
+                    {
+                        var user = db.Users.Find(datBan.UserID.Value);
+                        if (user != null && !string.IsNullOrEmpty(user.Email) && user.Email.Contains("@"))
+                        {
+                            // Explicitly load BanAn to ensure we have Table Name
+                            if (datBan.BanID.HasValue)
+                            {
+                                datBan.BanAn = db.BanAns.Find(datBan.BanID.Value);
+                            }
+
+                            var emailService = new EmailService();
+                            var customerName = string.IsNullOrEmpty(datBan.HoTenKhach) ? user.HoTen : datBan.HoTenKhach;
+                            emailSent = emailService.SendBookingConfirmationEmail(
+                                datBan,
+                                user.Email,
+                                customerName,
+                                isConfirmed: true
+                            );
+
+                            emailStatus = emailSent ? " (Đã gửi email)" : " (Không gửi được email)";
+                            System.Diagnostics.Debug.WriteLine($"[Ajax Info] Email sent: {emailSent} to {user.Email}");
+                        }
+                    }
+                    catch (Exception emailEx)
+                    {
+                        emailStatus = " (Lỗi email: " + emailEx.Message + ")";
+                        System.Diagnostics.Debug.WriteLine($"[Ajax Error] Email failed: {emailEx.Message}");
+                    }
+                }
+                // ------------------------------
+
+                return Json(new { success = true, message = "Cập nhật đặt bàn thành công!" + emailStatus, emailSent = emailSent });
             }
             catch (System.Data.Entity.Validation.DbEntityValidationException ex)
             {

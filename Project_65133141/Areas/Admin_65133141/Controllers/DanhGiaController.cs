@@ -48,6 +48,12 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 .Take(pageSize)
                 .ToList();
 
+            // Manually populate User info since navigation property is not in EDMX
+            foreach (var item in danhGias)
+            {
+                item.User = db.Users.Find(item.UserID);
+            }
+
             // Calculate average rating
             var allRatings = db.DanhGias.ToList();
             double avgRating = allRatings.Any() ? allRatings.Average(d => d.SoSao) : 0;

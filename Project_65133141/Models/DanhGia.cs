@@ -19,5 +19,7 @@ namespace Project_65133141.Models
         public int SoSao { get; set; }
         public string NoiDung { get; set; }
         public Nullable<System.DateTime> NgayDanhGia { get; set; }
+    
+        public virtual User User { get; set; }
     }
 }

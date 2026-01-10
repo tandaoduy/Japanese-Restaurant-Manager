@@ -836,6 +836,42 @@
             document.body.insertAdjacentHTML('beforeend', modalHtml);
             document.body.style.overflow = 'hidden';
         }
+
+        // Custom Notification Modal
+        window.showNotificationModal = function(title, message, type = 'info') {
+            var existing = document.getElementById('notificationModal');
+            if (existing) existing.remove();
+
+            var iconHtml = type === 'error' ? 
+                '<svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' :
+                '<svg class="w-10 h-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            
+            var headerColor = type === 'error' ? 'bg-gradient-to-r from-red-600 to-red-700' : 'bg-gradient-to-r from-yellow-500 to-orange-500';
+            var headerText = type === 'error' ? 'Lỗi' : title;
+
+            var html = `
+                <div id="notificationModal" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: rgba(0,0,0,0.5);">
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden transform transition-all animate-bounce-in">
+                        <div class="${headerColor} px-6 py-4 flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-white">${headerText}</h3>
+                            <button onclick="document.getElementById('notificationModal').remove()" class="text-white/80 hover:text-white transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <div class="p-6 text-center">
+                            <div class="w-20 h-20 ${type === 'error' ? 'bg-red-100' : 'bg-yellow-100'} rounded-full flex items-center justify-center mx-auto mb-4 scale-100 hover:scale-110 transition-transform">
+                                ${iconHtml}
+                            </div>
+                            <p class="text-gray-700 text-lg mb-6 font-medium">${message}</p>
+                            <button onclick="document.getElementById('notificationModal').remove()" class="px-8 py-2.5 bg-gray-900 text-white rounded-lg font-medium hover:bg-black transition shadow-md hover:shadow-lg transform active:scale-95">
+                                Đã hiểu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
         
         function closeLoginRequiredModal() {
             var modal = document.getElementById('loginRequiredModal');
@@ -1697,9 +1733,9 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
-                        @if (Session["UserId"] != null && Session["FullName"] != null)
+                        @if (Session["UserId"] != null && Session["UserName"] != null)
                         {
-                            <span>Đánh giá với tên: <strong class="text-white">@Session["FullName"]</strong></span>
+                            <span>Đánh giá với tên: <strong class="text-white">@Session["UserName"]</strong></span>
                         }
                         else
                         {
@@ -1716,9 +1752,17 @@
                         </svg>
                     </button>
                     
-                    <!-- Success Message -->
-                    <div id="rating-success" class="hidden p-3 bg-green-900/50 border border-green-700 rounded-lg text-green-400 text-sm text-center">
-                        ✓ Cảm ơn bạn đã đánh giá!
+                    <!-- Success Toast Notification -->
+                    <div id="rating-success" class="hidden fixed top-20 right-5 z-50 bg-white/90 backdrop-blur-md px-6 py-4 rounded-xl shadow-2xl border-l-4 border-green-500 transform transition-all duration-300 flex items-center gap-4">
+                        <div class="p-2 bg-green-100 rounded-full text-green-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Đánh giá thành công!</h4>
+                            <p class="text-xs text-gray-600">Cảm ơn bạn đã chia sẻ ý kiến.</p>
+                        </div>
                     </div>
                 </div>
                 
@@ -1764,11 +1808,18 @@
                             });
                         }
                         
+                        function showSuccessToast() {
+                            successMsg.classList.remove('hidden');
+                            setTimeout(() => {
+                                successMsg.classList.add('hidden');
+                            }, 3000);
+                        }
+                        
                         // Submit rating
                         submitBtn.addEventListener('click', async () => {
                             const rating = parseInt(ratingInput.value);
                             if (rating < 1 || rating > 5) {
-                                alert('Vui lòng chọn số sao đánh giá!');
+                                showNotificationModal('Nhắc nhở', 'Vui lòng chọn số sao để đánh giá dịch vụ!', 'warning');
                                 return;
                             }
                             
@@ -1786,17 +1837,22 @@
                                 });
                                 
                                 if (response.ok) {
-                                    successMsg.classList.remove('hidden');
-                                    submitBtn.classList.add('hidden');
-                                    commentBox.disabled = true;
-                                    stars.forEach(s => s.disabled = true);
+                                    showSuccessToast();
+                                    submitBtn.innerHTML = '<span>Gửi đánh giá</span>';
+                                    submitBtn.disabled = false;
+                                    // Reset form
+                                    commentBox.value = '';
+                                    ratingInput.value = '0';
+                                    highlightStars(0, true);
+                                    ratingText.textContent = 'Chạm để đánh giá';
                                 } else {
                                     throw new Error('Failed');
                                 }
                             } catch (e) {
-                                // Still show success for demo
-                                successMsg.classList.remove('hidden');
-                                submitBtn.classList.add('hidden');
+                                // For demo or error fallback
+                                showSuccessToast();
+                                submitBtn.innerHTML = '<span>Gửi đánh giá</span>';
+                                submitBtn.disabled = false;
                             }
                         });
                     })();

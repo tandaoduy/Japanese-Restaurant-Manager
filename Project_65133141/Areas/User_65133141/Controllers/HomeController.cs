@@ -29,6 +29,15 @@ namespace Project_65133141.Areas.User_65133141.Controllers
             var categories = db.DanhMucs.ToDictionary(d => d.DanhMucID, d => d.TenDanhMuc);
             ViewBag.Categories = categories;
 
+            // Get featured news for home page display (matching root controller)
+            var featuredNews = db.TinTucs
+                .Where(t => t.IsHienThi == true)
+                .OrderByDescending(t => t.IsNoiBat)
+                .ThenByDescending(t => t.NgayDang)
+                .Take(6)
+                .ToList();
+            ViewBag.FeaturedNews = featuredNews;
+
             return View();
         }
 

@@ -175,7 +175,7 @@
 
     function loadAvailableTables(currentDatBanId) {
         // Load available tables for dropdown
-        fetch('@Url.Action("GetAvailableTables", "DatBan", new { area = "Admin_65133141" })?currentDatBanId=' + currentDatBanId)
+        fetch('@Url.Action("GetAvailableTables", "DatBan", new { area = "Admin_65133141" })?currentDatBanId=' + currentDatBanId + '&t=' + new Date().getTime())
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Server error: ' + response.status);
@@ -198,11 +198,14 @@
                         const option = document.createElement('option');
                         option.value = table.BanID;
                         option.textContent = table.DisplayText;
+                        option.dataset.capacity = table.SucChua;
                         select.appendChild(option);
                     });
                     if (currentValue) {
                         select.value = currentValue;
                     }
+                    // Filter tables based on guests
+                    setTimeout(filterTablesBasedOnGuests, 100);
                 }
             })
             .catch(error => {
@@ -373,6 +376,56 @@
                 });
             });
         }
+        
+        // Listen for guest count changes
+        const guestInput = document.getElementById('editSoNguoi');
+        if (guestInput) {
+            guestInput.addEventListener('input', filterTablesBasedOnGuests);
+        }
     });
+
+    function filterTablesBasedOnGuests() {
+        const guestInput = document.getElementById('editSoNguoi');
+        const select = document.getElementById('editBanID');
+        if (!guestInput || !select) return;
+
+        const guests = parseInt(guestInput.value) || 0;
+        const options = Array.from(select.options);
+        
+        let hasSelection = false;
+        const currentSelected = select.value;
+        let firstValid = null;
+
+        options.forEach(opt => {
+            if (!opt.value) return; // Skip placeholder
+            
+            const cap = parseInt(opt.dataset.capacity) || 0;
+            // Hide if capacity is explicitly less than guests (if guests > 0)
+            if (guests > 0 && cap < guests) {
+                opt.hidden = true;
+                opt.disabled = true; // Also disable so it can't be selected by arrow keys easily
+                // opt.style.display = 'none'; // Some browsers need this
+            } else {
+                opt.hidden = false;
+                opt.disabled = false;
+                // opt.style.display = '';
+                if (!firstValid) firstValid = opt.value;
+            }
+            
+            if (opt.value == currentSelected && !opt.disabled && !opt.hidden) hasSelection = true;
+        });
+
+        // Auto-select valid table if current selection becomes invalid
+        // Or if nothing selected yet
+        if ((!hasSelection || !currentSelected) && firstValid) {
+            select.value = firstValid;
+        } else if (!hasSelection && currentSelected) {
+            // Current selection is invalid. Should we clean it?
+            // User might want to keep it? User request says "add table larger".
+            // If current is invalid, we probably should switch to valid.
+            if (firstValid) select.value = firstValid;
+            else select.value = "";
+        }
+    }
 </script>
 

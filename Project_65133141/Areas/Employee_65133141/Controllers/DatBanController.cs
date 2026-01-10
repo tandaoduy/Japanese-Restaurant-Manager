@@ -77,6 +77,63 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
         }
 
         /// <summary>
+        /// Tính trạng thái bàn, nhưng bỏ qua một đặt bàn cụ thể (dùng khi chỉnh sửa đặt bàn)
+        /// </summary>
+        private string GetTableStatusFromDatBanExcluding(long banID, long? excludeDatBanId)
+        {
+            var now = DateTime.Now;
+            
+            // Lấy tất cả đặt bàn của bàn này (trừ những cái đã hoàn thành, hủy, hoặc đang chỉnh sửa)
+            var activeReservations = db.DatBans
+                .Where(d => d.BanID == banID && 
+                           d.TrangThai != "Hoàn thành" && 
+                           d.TrangThai != "Đã hủy" &&
+                           (!excludeDatBanId.HasValue || d.DatBanID != excludeDatBanId.Value))
+                .OrderByDescending(d => d.ThoiGianDen)
+                .ToList();
+
+            // Không có bản ghi nào → Trống
+            if (!activeReservations.Any())
+            {
+                return "Trống";
+            }
+
+            // Kiểm tra xem có đặt bàn nào với trạng thái "Đang sử dụng" hoặc "Đang phục vụ" không
+            var inUseReservation = activeReservations.FirstOrDefault(d =>
+                d.TrangThai == "Đang sử dụng" || d.TrangThai == "Đang phục vụ");
+
+            if (inUseReservation != null)
+            {
+                return "Đang phục vụ";
+            }
+
+            // Kiểm tra xem có đặt bàn nào đang trong thời gian ăn không (thời gian ăn ước tính 2 giờ)
+            var inTimeReservation = activeReservations.FirstOrDefault(d =>
+            {
+                var thoiGianDen = d.ThoiGianDen;
+                var thoiGianKetThuc = thoiGianDen.AddHours(2);
+                return now >= thoiGianDen && now <= thoiGianKetThuc && 
+                       (d.TrangThai == "Đã xác nhận" || d.TrangThai == "Đang phục vụ");
+            });
+
+            if (inTimeReservation != null)
+            {
+                return "Đang phục vụ";
+            }
+
+            // Kiểm tra xem có đặt bàn nào với trạng thái "Đã đặt" hoặc "Đã xác nhận" không
+            var reservedReservation = activeReservations.FirstOrDefault(d =>
+                d.TrangThai == "Đã đặt" || d.TrangThai == "Đã xác nhận");
+
+            if (reservedReservation != null)
+            {
+                return "Đã đặt";
+            }
+
+            return "Trống";
+        }
+
+        /// <summary>
         /// Cập nhật trạng thái bàn trong bảng BanAn dựa trên DatBan
         /// </summary>
         private void UpdateTableStatusFromDatBan(long banID)
@@ -101,6 +158,19 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
 
             try
             {
+                // Validation: Check if table is busy
+                if (datBan.BanID.HasValue)
+                {
+                    // Check logic status
+                    var status = GetTableStatusFromDatBanExcluding(datBan.BanID.Value, null);
+                    if (status == "Đang phục vụ" || status == "Đã đặt") 
+                    {
+                          var ban = db.BanAns.Find(datBan.BanID.Value);
+                          TempData["ErrorMessage"] = $"Bàn {ban?.TenBan} đang ở trạng thái '{status}', không thể đặt!";
+                          return RedirectToAction("Index");
+                    }
+                }
+
                 // DatBan model stores customer info directly (no KhachHangID)
                 datBan.HoTenKhach = customerName;
                 datBan.SDTKhach = customerPhone;
@@ -134,17 +204,20 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
         {
             try
             {
-                // Simply return all tables with status "Trống" (Empty)
-                var availableTables = db.BanAns
-                    .Where(b => b.TrangThai == "Trống")
-                    .OrderBy(b => b.TenBan)
-                    .Select(b => new { 
-                        BanID = b.BanID, 
-                        TenBan = b.TenBan,
-                        ViTri = b.ViTri ?? "N/A",
-                        SucChua = b.SucChua ?? 0
-                    })
-                    .ToList();
+                var allTables = db.BanAns.OrderBy(b => b.TenBan).ToList();
+                var availableTables = new List<object>();
+
+                // Show ALL tables unconditionally
+                foreach (var table in allTables)
+                {
+                    availableTables.Add(new { 
+                        BanID = table.BanID, 
+                        TenBan = table.TenBan,
+                        ViTri = table.ViTri ?? "N/A",
+                        SucChua = table.SucChua ?? 0,
+                        Capacity = table.SucChua ?? 0
+                    });
+                }
 
                 return Json(availableTables, JsonRequestBehavior.AllowGet);
             }
@@ -357,16 +430,15 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
 
             // Add "No Table" option or similar if allowed? usually required.
             // Logic similar to Edit GET
+            // Show ALL tables unconditionally
             foreach (var table in allTables)
             {
-                var actualStatus = GetTableStatusFromDatBan(table.BanID);
-                if (actualStatus == "Trống" || table.BanID == datBan.BanID)
-                {
-                    availableTables.Add(new { 
-                        Value = table.BanID, 
-                        Text = table.TenBan + " ( " + table.SucChua + " ghế )" 
-                    });
-                }
+                bool isCurrent = table.BanID == datBan.BanID;
+                availableTables.Add(new { 
+                    Value = table.BanID, 
+                    Text = table.TenBan + " ( " + table.SucChua + " ghế )",
+                    Capacity = table.SucChua ?? 0
+                });
             }
 
             return Json(new
@@ -407,6 +479,27 @@ namespace Project_65133141.Areas.Employee_65133141.Controllers
 
                 // Lưu BanID cũ để cập nhật trạng thái bàn cũ
                 var oldBanID = datBan.BanID;
+
+                // Validation: Check if table is occupied by others
+                // Validation: Check if table is occupied by others
+                if (model.BanID.HasValue)
+                {
+                    var status = GetTableStatusFromDatBanExcluding(model.BanID.Value, model.DatBanID);
+                    
+                    if (status == "Đang phục vụ" || status == "Đã đặt")
+                    {
+                         var ban = db.BanAns.Find(model.BanID);
+                         if (Request.IsAjaxRequest())
+                         {
+                              return Json(new { success = false, message = $"Bàn {ban?.TenBan} đang ở trạng thái '{status}', vui lòng chọn bàn khác!" });
+                         }
+                         TempData["ErrorMessage"] = $"Bàn {ban?.TenBan} đang ở trạng thái '{status}', vui lòng chọn bàn khác!";
+                         return RedirectToAction("Index");
+                    }
+                }
+                
+                // Old logic kept commented out or removed for clarity
+
 
                 // Update fields
                 datBan.HoTenKhach = model.HoTenKhach;

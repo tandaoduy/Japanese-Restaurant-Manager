@@ -482,12 +482,9 @@ namespace Project_65133141.Services
                 <div style='color: #333; font-size: 14px; line-height: 1.6;'>{HttpUtility.HtmlEncode(datBan.GhiChu)}</div>
             </div>")}
 
-            <div class='qr-section'>
-                <div style='font-weight: bold; margin-bottom: 10px; color: #333;'>Mã QR đặt bàn</div>
-                <div class='qr-placeholder'>
-                    Mã: {bookingId}<br/>
-                    Quét mã này tại nhà hàng
-                </div>
+            <div style='text-align: center; margin-top: 20px; padding: 15px; background: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;'>
+                <div style='font-weight: bold; color: #166534; margin-bottom: 8px;'>Mã đặt bàn: {bookingId}</div>
+                <div style='font-size: 13px; color: #166534;'>Vui lòng cung cấp mã này khi đến nhà hàng</div>
             </div>
         </div>
 

@@ -19,6 +19,14 @@ namespace Project_65133141.Controllers
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             // Only check if user is authenticated
+            // Skip check for Shared/Public APIs like SubmitRating, Contact, About if they are shared
+            string actionName = filterContext.ActionDescriptor.ActionName;
+            if (actionName == "SubmitRating") 
+            {
+                base.OnActionExecuting(filterContext);
+                return;
+            }
+
             if (User.Identity.IsAuthenticated)
             {
                 // Check if user is coming from restricted areas (User/Admin/Employee) via Referrer
@@ -232,8 +240,52 @@ namespace Project_65133141.Controllers
                     return Json(new { success = false, message = "Đánh giá không hợp lệ" });
                 }
                 
-                // Get user info
-                var userId = Session["UserId"] as int?;
+                // Get user info - UserID can be long or int depending on session storage
+                long userIdValue = 0;
+                if (Session["UserId"] != null)
+                {
+                    // Try to get as long first, then int
+                    if (Session["UserId"] is long)
+                    {
+                        userIdValue = (long)Session["UserId"];
+                    }
+                    else if (Session["UserId"] is int)
+                    {
+                        userIdValue = (int)Session["UserId"];
+                    }
+                    else
+                    {
+                        long.TryParse(Session["UserId"].ToString(), out userIdValue);
+                    }
+                }
+
+                // If anonymous (userIdValue == 0), use or create a Guest user
+                if (userIdValue == 0)
+                {
+                    var guestEmail = "guest@system.com";
+                    var guestUser = db.Users.FirstOrDefault(u => u.Email == guestEmail);
+                    
+                    if (guestUser == null)
+                    {
+                        // Create guest user
+                        guestUser = new User
+                        {
+                            Username = "guest",
+                            Password = "NoLoginNeeded_" + Guid.NewGuid().ToString(),
+                            HoTen = "Ẩn danh",
+                            Email = guestEmail,
+                            SDT = "0000000000",
+                            DiaChi = "System",
+                            NgayTao = DateTime.Now,
+                            TrangThai = true,
+                            DiemTichLuy = 0,
+                            Avatar = "default.png"
+                        };
+                        db.Users.Add(guestUser);
+                        db.SaveChanges();
+                    }
+                    userIdValue = guestUser.UserID;
+                }
                 
                 // Save to DanhGia table
                 var danhGia = new DanhGia
@@ -241,7 +293,7 @@ namespace Project_65133141.Controllers
                     SoSao = rating,
                     NoiDung = comment,
                     NgayDanhGia = DateTime.Now,
-                    UserID = userId ?? 0 // 0 for anonymous users
+                    UserID = userIdValue
                 };
                 
                 db.DanhGias.Add(danhGia);

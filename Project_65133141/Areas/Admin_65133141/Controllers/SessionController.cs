@@ -69,7 +69,7 @@ namespace Project_65133141.Areas.Admin_65133141.Controllers
                 }
 
                 var timeRemaining = expiryTime.Value.Subtract(DateTime.Now).TotalSeconds; // Use seconds for 60 minutes timeout
-                var isExpiringSoon = timeRemaining <= 1800 && timeRemaining > 0; // 30 minutes warning (half of 60 minutes)
+                var isExpiringSoon = timeRemaining <= 60 && timeRemaining > 0; // 1 minute warning before expiry
                 var isExpired = timeRemaining <= 0;
 
                 return Json(new

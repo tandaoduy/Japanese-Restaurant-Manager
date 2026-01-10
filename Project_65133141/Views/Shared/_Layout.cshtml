@@ -1672,9 +1672,9 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
-                        @if (Session["UserId"] != null && Session["FullName"] != null)
+                        @if (Session["UserId"] != null && Session["UserName"] != null)
                         {
-                            <span>Đánh giá với tên: <strong class="text-white">@Session["FullName"]</strong></span>
+                            <span>Đánh giá với tên: <strong class="text-white">@Session["UserName"]</strong></span>
                         }
                         else
                         {
@@ -1691,9 +1691,17 @@
                         </svg>
                     </button>
                     
-                    <!-- Success Message -->
-                    <div id="rating-success" class="hidden p-3 bg-green-900/50 border border-green-700 rounded-lg text-green-400 text-sm text-center">
-                        ✓ Cảm ơn bạn đã đánh giá!
+                    <!-- Success Toast Notification -->
+                    <div id="rating-success" class="hidden fixed top-20 right-5 z-50 bg-white/90 backdrop-blur-md px-6 py-4 rounded-xl shadow-2xl border-l-4 border-green-500 transform transition-all duration-300 flex items-center gap-4 animate-bounce-in">
+                        <div class="p-2 bg-green-100 rounded-full text-green-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Đánh giá thành công!</h4>
+                            <p class="text-xs text-gray-600">Cảm ơn bạn đã chia sẻ ý kiến.</p>
+                        </div>
                     </div>
                 </div>
                 
@@ -1739,6 +1747,13 @@
                             });
                         }
                         
+                        function showSuccessToast() {
+                            successMsg.classList.remove('hidden');
+                            setTimeout(() => {
+                                successMsg.classList.add('hidden');
+                            }, 3000);
+                        }
+                        
                         // Submit rating
                         submitBtn.addEventListener('click', async () => {
                             const rating = parseInt(ratingInput.value);
@@ -1761,17 +1776,22 @@
                                 });
                                 
                                 if (response.ok) {
-                                    successMsg.classList.remove('hidden');
-                                    submitBtn.classList.add('hidden');
-                                    commentBox.disabled = true;
-                                    stars.forEach(s => s.disabled = true);
+                                    showSuccessToast();
+                                    submitBtn.innerHTML = '<span>Gửi đánh giá</span>';
+                                    submitBtn.disabled = false;
+                                    // Reset form
+                                    commentBox.value = '';
+                                    ratingInput.value = '0';
+                                    highlightStars(0, true);
+                                    ratingText.textContent = 'Chạm để đánh giá';
                                 } else {
                                     throw new Error('Failed');
                                 }
                             } catch (e) {
-                                // Still show success for demo
-                                successMsg.classList.remove('hidden');
-                                submitBtn.classList.add('hidden');
+                                // For demo or error fallback
+                                showSuccessToast();
+                                submitBtn.innerHTML = '<span>Gửi đánh giá</span>';
+                                submitBtn.disabled = false;
                             }
                         });
                     })();

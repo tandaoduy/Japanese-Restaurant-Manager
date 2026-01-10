@@ -510,7 +510,7 @@
                            String(dateObj.getMinutes()).padStart(2, '0') + ':00';
 
         var url = '@Url.Action("GetAvailableTables", "DatBan", new { area = "Employee_65133141" })';
-        url += '?arrivalTime=' + encodeURIComponent(formattedDate);
+        url += '?arrivalTime=' + encodeURIComponent(formattedDate) + '&t=' + new Date().getTime();
 
         fetch(url)
             .then(res => {
@@ -529,8 +529,10 @@
                         var option = document.createElement('option');
                         option.value = t.BanID;
                         option.text = `${t.TenBan} (${t.SucChua} ghế) - ${t.ViTri || 'N/A'}`;
+                        option.dataset.capacity = t.SucChua;
                         select.appendChild(option);
                     });
+                    setTimeout(function() { filterTables('createSoNguoi', 'createBanID'); }, 100);
                 } else {
                     select.innerHTML = '<option value="">-- Không có dữ liệu --</option>';
                 }
@@ -550,7 +552,50 @@
                 loadAvailableTablesForCreate(this.value);
             });
         }
+        
+        // Filter tables listeners
+        var createPeople = document.getElementById('createSoNguoi');
+        if(createPeople) {
+             createPeople.addEventListener('input', function() { filterTables('createSoNguoi', 'createBanID'); });
+        }
+        var editPeople = document.getElementById('editSoNguoi');
+        if(editPeople) {
+             editPeople.addEventListener('input', function() { filterTables('editSoNguoi', 'editBanID'); });
+        }
     });
+
+    function filterTables(inputId, selectId) {
+        var input = document.getElementById(inputId);
+        var select = document.getElementById(selectId);
+        if(!input || !select) return;
+
+        var guests = parseInt(input.value) || 0;
+        var options = Array.from(select.options);
+        var hasSelection = false;
+        var currentSelected = select.value;
+        var firstValid = null;
+
+        options.forEach(function(opt) {
+            if (!opt.value) return; 
+            var cap = parseInt(opt.dataset.capacity) || 0;
+            if (guests > 0 && cap < guests) {
+                opt.hidden = true;
+                opt.disabled = true;
+            } else {
+                opt.hidden = false;
+                opt.disabled = false;
+                if (!firstValid) firstValid = opt.value;
+            }
+            if (opt.value == currentSelected && !opt.disabled) hasSelection = true;
+        });
+
+        if ((!hasSelection || !currentSelected) && firstValid) {
+            select.value = firstValid;
+        } else if (!hasSelection && currentSelected) {
+            if (firstValid) select.value = firstValid;
+            else select.value = "";
+        }
+    }
 
     // Handle Create Form Submit
     document.getElementById('createDatBanForm').addEventListener('submit', function(e) {
@@ -715,7 +760,7 @@
         document.body.style.overflow = 'hidden';
 
         // Fetch Data AND Tables using GetReservation endpoint
-        fetch('@Url.Action("GetReservation", "DatBan", new { area = "Employee_65133141" })/' + id)
+        fetch('@Url.Action("GetReservation", "DatBan", new { area = "Employee_65133141" })/' + id + '?t=' + new Date().getTime())
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -740,9 +785,11 @@
                             var option = document.createElement('option');
                             option.value = t.Value;
                             option.text = t.Text;
+                            option.dataset.capacity = t.Capacity;
                             if (t.Value === d.BanID) option.selected = true;
                             select.appendChild(option);
                         });
+                        setTimeout(function() { filterTables('editSoNguoi', 'editBanID'); }, 100);
                     }
                 } else {
                     showAlert('error', data.message);

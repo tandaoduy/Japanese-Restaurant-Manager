@@ -128,43 +128,13 @@ namespace Project_65133141.Areas.User_65133141.Controllers
                     db.SaveChanges();
                     
                     // DatBanID is automatically assigned after SaveChanges
+                    // NOTE: Email will NOT be sent here - it will be sent when Admin/Employee confirms the reservation
 
-                    // Send confirmation email
-                    bool emailSent = false;
-                    try
-                    {
-                        var emailService = new EmailService();
-                        emailSent = emailService.SendBookingConfirmationEmail(
-                            model, 
-                            userEmail, 
-                            model.HoTenKhach, 
-                            isConfirmed: false
-                        );
-                        
-                        if (!emailSent)
-                        {
-                            System.Diagnostics.Debug.WriteLine("[DatBanController] Email was not sent. Check EmailService logs for details.");
-                        }
-                    }
-                    catch (Exception emailEx)
-                    {
-                        // Log error but don't fail the booking
-                        System.Diagnostics.Debug.WriteLine($"[DatBanController] Error sending email: {emailEx.Message}");
-                    }
-
-                    // Return appropriate message based on email status
-                    string successMessage;
-                    if (emailSent)
-                    {
-                        successMessage = "Đặt bàn thành công! Email xác nhận đã được gửi đến hộp thư của bạn. Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận và sắp xếp bàn phù hợp.";
-                    }
-                    else
-                    {
-                        successMessage = "Đặt bàn thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận và sắp xếp bàn phù hợp.";
-                    }
+                    // Success message - no email mention since email is sent on confirmation
+                    string successMessage = "Đặt bàn thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận và sắp xếp bàn phù hợp.";
 
                     // Always return JSON for AJAX handling - show alert and stay on page
-                    return Json(new { success = true, message = successMessage, emailSent = emailSent });
+                    return Json(new { success = true, message = successMessage });
                 }
                 catch (System.Data.Entity.Validation.DbEntityValidationException dbEx)
                 {
