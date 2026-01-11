@@ -1315,7 +1315,7 @@
                         </span>
                     </div>`;
                     data.products.forEach(p => {
-                        const imgSrc = p.image ? '/Images/MonAn/' + p.image : '/Images/slide01.jpg';
+                        const imgSrc = p.image ? '/Images/Products/' + p.image : '/Images/slide01.jpg';
                         const price = p.price ? new Intl.NumberFormat('vi-VN').format(p.price) + 'đ' : '';
                         html += `<a href="${p.url}" class="search-result-item flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors border-b border-gray-100" data-index="${currentResults.length}">
                             <img src="${imgSrc}" alt="${p.name}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" onerror="this.src='/Images/slide01.jpg'">
